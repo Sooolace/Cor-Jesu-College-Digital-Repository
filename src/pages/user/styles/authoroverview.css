@@ -1,0 +1,9 @@
+/* authoroverview.css */
+
+.author-underline {
+    width: 100%; /* Full width */
+    height: 2px; /* Thickness of the underline */
+    background-color: #a33307; /* Color of the underline (Bootstrap primary color) */
+    margin: 10px auto; /* Centered with a margin */
+  }
+  

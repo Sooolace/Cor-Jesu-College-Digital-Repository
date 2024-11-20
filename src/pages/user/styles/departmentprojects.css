@@ -1,0 +1,170 @@
+/* General layout */
+.section {
+    margin-bottom: 40px;
+}
+
+/* Heading */
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: left; /* Align to the left */
+    font-size: 1.6rem; /* Adjust the size */
+    font-weight: normal; /* Normal weight for the title */
+    position: relative;
+}
+
+.department-title {
+    text-underline-position: under; /* Underline below the text */
+}
+
+/* Container centered content */
+.centered-content {
+  width: 100%;
+  max-width: 1200px;  /* Max width to limit the size on large screens */
+  margin: 0 auto;     /* Center the content */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Loading and error messages */
+.loading-message, .error-message {
+  text-align: center;
+  font-size: 1.2em;
+  color: #d9534f; /* Red for errors */
+  padding: 20px;
+}
+
+/* No projects found message */
+.no-projects-message {
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Projects list styling */
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+/* Project card */
+.project-card {
+  padding: 20px;
+  background-color: #fff;
+  border-bottom: 2px solid #333; /* Black border below each card */
+  transition: transform 0.3s ease;
+  margin: 0 auto;  /* Center the individual cards */
+  width: 100%;     /* Make sure cards take full width of their container */
+}
+
+.project-card:hover {
+  transform: translateY(-5px);  /* Elevate the card */
+}
+
+/* Project title */
+.project-title {
+  font-size: 1.4rem;  /* Adjusted font size */
+  font-weight: normal; /* Removed bold style */
+  color: #1a73e8; /* Google blue */
+  margin-bottom: 10px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.project-title:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+/* Project meta info */
+.project-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 1rem;
+  color: #555;
+}
+
+.project-authors, .project-date {
+  display: flex;
+  align-items: center;
+}
+
+.project-authors i, .project-date i {
+  margin-right: 8px;
+  color: black; /* Icons color changed to black */
+}
+
+/* Icons */
+.fas {
+  font-size: 1.2rem;
+}
+
+/* Pagination styling */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  gap: 20px;
+}
+
+.pagination-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.pagination-button:hover {
+  background-color: #0056b3;
+}
+
+.pagination-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.page-number {
+  font-size: 16px;
+  color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .centered-content {
+    padding: 15px;
+  }
+
+  .project-card {
+    padding: 15px;
+  }
+
+  .project-title {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .centered-content {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .project-card {
+    padding: 10px;
+  }
+
+  .project-title {
+    font-size: 1.2rem;
+  }
+
+  /* Stack meta info for smaller screens */
+  .project-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

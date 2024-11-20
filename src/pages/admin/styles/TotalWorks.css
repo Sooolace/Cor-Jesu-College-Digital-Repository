@@ -1,0 +1,24 @@
+/* TotalWorks.css */
+.sortable-header {
+    cursor: pointer;
+    text-decoration: underline;
+    color: rgb(207, 32, 29);
+  }
+  
+  .sortable-header:hover {
+    color: darkblue; /* Change color on hover for a better indication */
+  }
+  
+  /* TotalWorks.css */
+button{
+  background-color: #a33307 !important;
+  border-color: #a33307 !important;
+  color: #ffffff !important;
+}
+
+button:hover, .btn-primary:hover, .btn-secondary:hover {
+  background-color: #872a05 !important; /* Slightly darker shade for hover */
+  border-color: #872a05 !important;
+}
+
+

@@ -1,0 +1,219 @@
+/* Container for the entire search page */
+.search-page-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f0f2f5; /* Background color for the page */
+}
+
+/* Left sidebar (filter section) */
+.filter-sidebar {
+    width: 25%;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Right content (results section) */
+.results-content {
+    width: 75%; /* Adjusted width to fill the remaining space */
+    padding: 20px;
+    background-color: #fff;
+    overflow-y: auto;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Breadcrumb and Recent Submissions Container */
+.breadcrumb-recent-container {
+    display: flex; /* Use flexbox for side-by-side layout */
+    justify-content: space-between; /* Space between elements */
+    align-items: center; /* Center elements vertically */
+    margin-bottom: 20px; /* Space below this section */
+}
+
+/* Breadcrumb Styles */
+.breadcrumb {
+    display: flex;
+    list-style: none;
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+    font-size: 0.9em; /* Smaller font size for breadcrumb */
+}
+
+.breadcrumb-item {
+    margin-right: 5px; /* Space between breadcrumb items */
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: #a33307; /* Link color */
+}
+
+.breadcrumb-item span {
+    color: #6c757d; /* Color for the current page */
+}
+
+/* Recent Submissions Container */
+.recent-submissions-container {
+    border-bottom: 2px solid #ddd; /* Line below the container */
+}
+
+/* Results List Container */
+.results-list-container {
+    margin-top: 20px; /* Space above the results list */
+}
+
+/* Individual Research Card */
+.research-card {
+    border: 1px solid #ddd; /* Light border around the card */
+    padding: 15px; /* Padding inside the card */
+    background-color: #fff; /* White background for cards */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+    transition: box-shadow 0.3s; /* Transition for shadow effect */
+}
+
+.research-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Deeper shadow on hover */
+}
+
+/* Title Link */
+.title-link {
+    text-decoration: none; /* Remove underline */
+    color: #5a85f3; /* Title color */
+    font-size: 50px; /* Larger font size for title */
+    font-weight: bold; /* Bold title */
+}
+
+.title-link:hover {
+    color: #000000; /* Title color */
+
+}
+
+/* Category and Date Styles */
+.category {
+    font-size: 0.9em; /* Smaller font for category and date */
+    color: #6c757d; /* Light gray color for meta info */
+    margin: 5px 0; /* Space above and below */
+}
+
+/* Abstract Container */
+/* Abstract Container */
+.abstract-container {
+    height: 70px; /* Fixed height for all abstracts */
+    overflow: hidden; /* Hide overflow content */
+    text-overflow: ellipsis; /* Add ellipsis for overflow */
+    color: #333; /* Dark text for readability */
+    margin-top: 10px; /* Space above the abstract */
+}
+
+
+/* Message for no results found */
+.no-results-message {
+    text-align: center; /* Center the message */
+    color: #888; /* Light gray for no results message */
+    padding: 20px 0; /* Space above and below the message */
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.pagination-button,
+.apply-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 3px; /* Rounded border */
+    background-color: #a33307; /* Button color */
+    color: white; /* White text color */
+    cursor: pointer;
+    transition: background-color 0.3s; /* Transition effect */
+}
+
+.pagination-button:hover,
+.apply-button:hover {
+    background-color: #d8b908; /* Darker shade on hover */
+}
+
+.pagination-button.active {
+    background-color: #d8b908; /* Active page color */
+    border: none; /* Remove default border */
+}
+
+/* Existing styles for the filter */
+.subject-filter .dropdown-content {
+    padding: 10px;
+    max-height: 250px; /* Make subject filter scrollable */
+    overflow-y: auto; /* Allow vertical scrolling */
+    background-color: #fff; /* Ensure background is white */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for dropdown */
+}
+
+.subject-filter button {
+    width: 15%; /* Full width for better usability */
+    padding: 10px; /* Added padding for better touch targets */
+    background-color: #a33307; /* Button background */
+    border: 1px solid #ccc; /* Button border */
+    cursor: pointer; /* Pointer cursor for button */
+}
+
+/* Style for categories and subcategories */
+.subject-filter .category-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.subject-filter .subcategories {
+    margin-left: 20px; /* Indent for subcategories */
+}
+
+/* Apply Button container below the dropdown */
+.apply-button-container {
+    background-color: #fff; /* White background for contrast */
+    border-top: 1px solid #ddd; /* Optional: border separating the apply button */
+    text-align: center; /* Center the button */
+    padding: 10px 0; /* Padding for better touch targets */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for dropdown */
+}
+
+/* Apply Button styling */
+.apply-button {
+    width: 15%; /* Slightly less than full width for padding */
+    padding: 12px; /* Increased padding for better touch target */
+    border-radius: 8px; /* Rounded corners for a softer look */
+    background-color: #a33307; /* Change to a red color */
+    color: white; /* Text color for contrast */
+    border: none; /* Remove default border */
+    font-size: 16px; /* Increase font size for better readability */
+    transition: background-color 0.3s; /* Transition effect */
+}
+
+.apply-button:hover {
+    background-color: #c2481f; /* Darken on hover */
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .filter-sidebar {
+        width: 100%; /* Full width on smaller screens */
+        border-right: none; /* Remove border */
+        border-bottom: 1px solid #ddd; /* Add bottom border */
+    }
+
+    .results-content {
+        width: 100%; /* Full width on smaller screens */
+    }
+
+    .breadcrumb-recent-container {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: flex-start; /* Align items to the start */
+    }
+
+    .recent-submissions-container h3 {
+        margin-bottom: 10px; /* Space below the title */
+    }
+}

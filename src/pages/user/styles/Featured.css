@@ -1,0 +1,122 @@
+/* Featured Section */
+.featured-section {
+  padding: 40px 5px;
+  margin: 0 auto;  /* Center the entire section */
+  width: 100%;  /* Full width */
+  max-width: 1250px; /* Limits the width on large screens */
+  box-sizing: border-box; /* Ensures padding and border don't affect the width */
+}
+
+/* Section Title */
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 250;
+  color: #333;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative; /* To allow customization of underline position */
+  padding-bottom: 5px; /* Space between title and underline */
+}
+
+/* Adding the underline below the title */
+.section-title::after {
+  content: ""; /* Empty content for the pseudo-element */
+  position: absolute;
+  bottom: 0; /* Position the underline at the bottom of the title */
+  left: 0;
+  width: 100%; /* Full width of the title */
+  height: 3px; /* Thickness of the underline */
+  background-color: #ff6600; /* Color of the underline (can be changed) */
+}
+
+/* Flexbox Layout for Featured Documents */
+.featured-documents {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping for items */
+  gap: 20px; /* Adds space between items */
+  margin-top: 20px; /* Adds space between the title and documents */
+  width: 100%; /* Let it take full width */
+  box-sizing: border-box; /* Ensure padding does not affect width */
+  justify-content: space-between; /* Distribute items evenly across the row */
+}
+
+/* Individual Featured Document */
+.featured-document {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  width: calc(25% - 15px); /* 4 items per row (25% width with gap) */
+  max-width: 300px; /* Limit max width of each card */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  margin-bottom: 20px; /* Space between rows of documents */
+  box-sizing: border-box; /* Include padding and border in the width calculation */
+}
+
+/* Hover effect for featured document */
+.featured-document:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Title Link Styling */
+.document-title {
+  font-size: 1.75rem;
+  color: #a33307;
+  text-decoration: none;
+  font-weight: 250;
+  transition: color 0.3s ease-in-out;
+}
+
+.document-title:hover {
+  color: #ff6600;
+  text-decoration: underline;
+}
+
+/* Description */
+.document-description {
+  font-size: 1.1rem;
+  color: #555;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+
+/* For screens smaller than 1024px (tablets) */
+@media (max-width: 1024px) {
+  .featured-documents {
+    gap: 15px; /* Slightly less gap for tablets */
+  }
+
+  .featured-document {
+    width: calc(50% - 15px); /* Two items per row for tablets */
+  }
+}
+
+/* For screens smaller than 768px (smartphones) */
+@media (max-width: 768px) {
+  .featured-documents {
+    flex-direction: column; /* Stack the items vertically */
+    gap: 15px; /* Smaller gap between items */
+  }
+
+  .featured-document {
+    width: 100%; /* Full width for smaller screens */
+    max-width: 100%; /* Ensure the card doesn't stretch too far */
+    padding: 15px;
+  }
+}
+
+/* For even smaller screens (Optional) */
+@media (max-width: 480px) {
+  .featured-documents {
+    gap: 10px; /* Reduce the gap even further */
+  }
+
+  .featured-document {
+    width: 100%; /* Full width for very small screens */
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,125 @@
+/* General layout */
+
+.section {
+    margin-bottom: 40px;
+}
+
+/* Search bar styling */
+.search-bar {
+    margin-bottom: 30px;
+}
+
+/* Featured, Most Downloaded, Recent Submissions Sections */
+.featured-section, .most-downloaded-section, .recent-submissions-section {
+    margin-bottom: 5px;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Document grid */
+.document-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.document-card {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.document-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Statistics grid */
+.stats-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+/* Call to Action styling */
+.call-to-action {
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.call-to-action .btn-primary, .call-to-action .btn-secondary {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #218838;
+}
+.home-page {
+  display: flex;
+  justify-content: center;
+}
+
+.centered-content {
+  max-width: 1200px;       /* Limits the width on large screens */
+  width: 90%;               /* Adapts to smaller screens by reducing width */
+  padding: 20px;            /* Adds padding around content */
+  box-sizing: border-box;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .centered-content {
+    max-width: 95%;         /* Expands width a bit for medium screens */
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .centered-content {
+    width: 100%;            /* Uses full width for mobile */
+    padding: 10px;          /* Reduces padding for a tighter layout */
+  }
+
+  /* Optional: Stack content differently if you need */
+  .search-bar, .featured, .most-downloaded, .recent-submissions, .statistics, .call-to-action {
+    margin-bottom: 20px;    /* Adds space between sections for mobile readability */
+  }
+}

@@ -1,0 +1,124 @@
+/* Container for Most Viewed Section */
+.most-viewed-container {
+    padding: 20px;
+    width: 50%;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; /* Center it on the page */
+  }
+  
+  /* Title of the Most Viewed Section */
+  .most-viewed-container h3 {
+    font-size: 1.8rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  
+  /* Table Container */
+  .table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+  }
+  
+  /* Styling the Table */
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ensures all columns have a fixed width */
+  }
+  
+  /* Table Header */
+  .results-table th,
+  .results-table td {
+    padding: 12px;
+    text-align: left;
+    font-size: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Styling for Table Header */
+  .results-table th {
+    background-color: #f7f7f7;
+    font-weight: bold;
+  }
+  
+  /* Column-specific widths */
+  .results-table th:nth-child(1), /* First column (Title) */
+  .results-table td:nth-child(1) {
+    width: 70%; /* Takes 70% of the width */
+  }
+  
+  .results-table th:nth-child(2), /* Second column (Views) */
+  .results-table td:nth-child(2) {
+    width: 30%; /* Takes 30% of the width */
+    text-align: center;
+  }
+  
+  /* Styling for Icon in the table */
+  .results-table td .fa {
+    margin-right: 5px;
+    color: #007bff; /* Set a color for the eye icon */
+  }
+  
+  /* Hover Effect on Rows */
+  .results-table tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+  }
+  
+  /* Additional Styling for Views Column */
+  .results-table td:nth-child(2) {
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .most-viewed-container {
+      width: 90%; /* Take more width on smaller screens */
+    }
+  
+    .results-table th,
+    .results-table td {
+      font-size: 0.9rem; /* Adjust font size for small screens */
+    }
+  
+    .results-table th:nth-child(1), /* Title Column */
+    .results-table td:nth-child(1) {
+      width: 60%; /* Adjust Title column width for small screens */
+    }
+  
+    .results-table th:nth-child(2), /* Views Column */
+    .results-table td:nth-child(2) {
+      width: 40%; /* Adjust Views column width for small screens */
+    }
+  }
+  .pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .pagination-controls button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .pagination-controls button:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+  }
+  
+  .pagination-controls span {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+    
