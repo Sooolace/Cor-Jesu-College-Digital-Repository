@@ -1,21 +1,22 @@
-// Breadcrumb.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import breadcrumb from './styles/breadcrumb.css';
 
 const Breadcrumb = ({ items }) => {
   return (
-    <nav aria-label="breadcrumb">
-      <ol className="breadcrumb">
+    <nav className="breadcrumb-container">
+      <ul className="breadcrumb">
         {items.map((item, index) => (
-          <li key={index} className="breadcrumb-item">
+          <li key={index}>
             {item.link ? (
               <Link to={item.link}>{item.label}</Link>
             ) : (
               <span>{item.label}</span>
             )}
+            {index < items.length - 1 && <span> &gt; </span>}
           </li>
         ))}
-      </ol>
+      </ul>
     </nav>
   );
 };

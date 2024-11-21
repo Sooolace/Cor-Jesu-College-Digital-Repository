@@ -56,7 +56,7 @@ router.post('/', upload.single('file_path'), async (req, res) => {
     }
 });
 
-// GET - Fetch all projects or search projects
+// GET - Fetch all projects or search projects by title, author, or keyword
 router.get('/', async (req, res) => {
     const { query, option } = req.query; // Get query and option from request parameters
 
@@ -95,29 +95,33 @@ router.get('/', async (req, res) => {
                     ORDER BY p.publication_date DESC
                 `;
                 break;
-            case 'publisher':
-                // Example for publisher search; adjust based on your schema
+            case 'keywords':
+                // Search projects by keyword
                 searchQuery = `
-                    SELECT p.*, STRING_AGG(a.name, ', ') AS authors 
+                    SELECT p.*, STRING_AGG(a.name, ', ') AS authors, STRING_AGG(k.keyword, ', ') AS keywords
                     FROM projects p 
                     LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
                     LEFT JOIN authors a ON pa.author_id = a.author_id 
-                    WHERE p.publisher ILIKE $1 
+                    LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+                    LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+                    WHERE k.keyword ILIKE $1 
                     GROUP BY p.project_id 
                     ORDER BY p.publication_date DESC
                 `;
                 break;
-            // Add other search options as needed...
+
             default:
                 return res.status(400).json({ error: 'Invalid search option' });
         }
     } else {
         // If no query is provided, fetch all projects
         searchQuery = `
-            SELECT p.*, STRING_AGG(a.name, ', ') AS authors 
+            SELECT p.*, STRING_AGG(a.name, ', ') AS authors, STRING_AGG(k.keyword, ', ') AS keywords
             FROM projects p 
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
             LEFT JOIN authors a ON pa.author_id = a.author_id 
+            LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+            LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
             GROUP BY p.project_id 
             ORDER BY p.publication_date DESC
         `;
@@ -132,6 +136,7 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Failed to retrieve projects' });
     }
 });
+
 
 // GET - Fetch a single project by project_id
 router.get('/:project_id', async (req, res) => {

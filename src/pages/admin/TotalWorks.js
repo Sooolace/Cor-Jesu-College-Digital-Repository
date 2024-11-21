@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import Table from 'react-bootstrap/Table'; 
+import { useNavigate } from 'react-router-dom';
+import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
-import Pagination from 'react-bootstrap/Pagination'; 
-import Spinner from 'react-bootstrap/Spinner'; 
-import Form from 'react-bootstrap/Form'; 
+import Pagination from 'react-bootstrap/Pagination';
+import Spinner from 'react-bootstrap/Spinner';
+import Form from 'react-bootstrap/Form';
 import { MdEditSquare, MdDelete } from 'react-icons/md';
 import { CiViewList } from "react-icons/ci";
 import { FaArrowLeft } from 'react-icons/fa';
@@ -14,7 +14,7 @@ import ConfirmDeletionModal from '../admin/components/modals/ConfirmDeletionModa
 import SuccessModal from '../admin/components/modals/SuccessModal';
 
 function TotalWorks() {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,25 +24,30 @@ function TotalWorks() {
   const [filterTitle, setFilterTitle] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [sortOrder, setSortOrder] = useState('latest');
-  
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false); 
-  const [projectIdToDelete, setProjectIdToDelete] = useState(null); 
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [projectIdToDelete, setProjectIdToDelete] = useState(null);
 
   useEffect(() => {
-    fetchProjects(); 
+    fetchProjects();
   }, []);
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/projects'); 
+      const response = await fetch('/api/projects');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setProjects(data);
-      setFilteredProjects(data);
+      if (Array.isArray(data)) {
+        setProjects(data);
+        setFilteredProjects(data);
+      } else {
+        console.error('Fetched data is not an array:', data);
+        setError('Failed to load projects');
+      }
     } catch (error) {
       console.error('Error fetching projects:', error);
       setError('Failed to load projects');
@@ -64,7 +69,7 @@ function TotalWorks() {
       setProjects((prevProjects) => prevProjects.filter((project) => project.project_id !== projectIdToDelete));
       setFilteredProjects((prevProjects) => prevProjects.filter((project) => project.project_id !== projectIdToDelete));
       setShowDeleteModal(false);
-      setShowSuccessModal(true); 
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Error deleting project:', error);
       alert('Error deleting the project');
@@ -72,7 +77,7 @@ function TotalWorks() {
   };
 
   const handleFilter = () => {
-    let filtered = projects;
+    let filtered = [...projects]; // Ensure we're working with a fresh copy of projects
 
     if (filterYear) {
       filtered = filtered.filter(project => {
@@ -82,7 +87,7 @@ function TotalWorks() {
     }
 
     if (filterTitle) {
-      filtered = filtered.filter(project => 
+      filtered = filtered.filter(project =>
         project.title.toLowerCase().includes(filterTitle.toLowerCase())
       );
     }
@@ -96,13 +101,13 @@ function TotalWorks() {
     });
 
     setFilteredProjects(sortedFilteredProjects);
-    setCurrentPage(1); 
+    setCurrentPage(1); // Reset to first page after filtering
   };
 
   const toggleSortOrder = () => {
     const newSortOrder = sortOrder === 'latest' ? 'oldest' : 'latest';
     setSortOrder(newSortOrder);
-    
+
     const sortedFilteredProjects = [...filteredProjects].sort((a, b) => {
       if (newSortOrder === 'latest') {
         return new Date(b.publication_date) - new Date(a.publication_date);
@@ -116,7 +121,10 @@ function TotalWorks() {
 
   const indexOfLastProject = currentPage * itemsPerPage;
   const indexOfFirstProject = indexOfLastProject - itemsPerPage;
-  const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
+  const currentProjects = Array.isArray(filteredProjects)
+    ? filteredProjects.slice(indexOfFirstProject, indexOfLastProject)
+    : []; // Ensure filteredProjects is an array
+
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
 
   const handleNext = () => {
@@ -136,7 +144,7 @@ function TotalWorks() {
   return (
     <div className="total-works-container container mt-4">
       <div>
-       <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
+        <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
           <FaArrowLeft className="me-2" /> Back
         </Button>
       </div>
@@ -145,16 +153,16 @@ function TotalWorks() {
       </div>
 
       <div className="d-flex justify-content-center mb-3">
-        <Form.Control 
+        <Form.Control
           type="text"
-          className="flex-grow-1 me-2" 
+          className="flex-grow-1 me-2"
           placeholder="Search by Title"
           value={filterTitle}
           onChange={(e) => setFilterTitle(e.target.value)}
         />
-        <Form.Select 
+        <Form.Select
           className="w-25 me-2"
-          value={filterYear} 
+          value={filterYear}
           onChange={(e) => setFilterYear(e.target.value)}
         >
           <option value="">Select Year</option>
@@ -184,9 +192,9 @@ function TotalWorks() {
               <tr>
                 <th style={{ width: '34%' }} >Title</th>
                 <th style={{ width: '20%' }}>Authors</th>
-                <th 
-                  style={{ width: '15%', cursor: 'pointer', textDecoration: 'underline', color: 'blue' }} 
-                  onClick={toggleSortOrder} 
+                <th
+                  style={{ width: '15%', cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
+                  onClick={toggleSortOrder}
                 >
                   Date Published {sortOrder === 'latest' ? '(Newest)' : '(Oldest)'}
                 </th>
@@ -200,8 +208,8 @@ function TotalWorks() {
                   <td>{project.authors || 'N/A'}</td>
                   <td>{new Date(project.publication_date).toLocaleDateString() || 'N/A'}</td>
                   <td>
-                    <span 
-                      onClick={() => goToDocumentOverview(project.project_id)} 
+                    <span
+                      onClick={() => goToDocumentOverview(project.project_id)}
                       style={{
                         cursor: 'pointer',
                         color: 'white',
@@ -217,8 +225,8 @@ function TotalWorks() {
                       <CiViewList size={25} title="View" />
                     </span>
 
-                    <span 
-                      onClick={() => goToEditAuthor(project.project_id)} 
+                    <span
+                      onClick={() => goToEditAuthor(project.project_id)}
                       style={{
                         cursor: 'pointer',
                         color: 'white',
@@ -234,11 +242,11 @@ function TotalWorks() {
                       <MdEditSquare size={25} title="Edit" />
                     </span>
 
-                    <span 
+                    <span
                       onClick={() => {
                         setProjectIdToDelete(project.project_id);
                         setShowDeleteModal(true);
-                      }} 
+                      }}
                       style={{
                         cursor: 'pointer',
                         color: 'white',
@@ -258,39 +266,29 @@ function TotalWorks() {
             </tbody>
           </Table>
 
-          <div className="d-flex justify-content-between align-items-center mt-3">
-            <Button 
-              className="btn-primary" 
-              onClick={handleNext} 
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-
-            <Pagination>
-              {Array.from({ length: totalPages }, (_, index) => (
-                <Pagination.Item 
-                  key={index + 1} 
-                  active={index + 1 === currentPage} 
-                  onClick={() => setCurrentPage(index + 1)}
-                >
-                  {index + 1}
-                </Pagination.Item>
-              ))}
-            </Pagination>
-          </div>
+          <Pagination className="d-flex justify-content-center">
+            <Pagination.Prev onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} />
+            {Array.from({ length: totalPages }, (_, index) => (
+              <Pagination.Item
+                key={index + 1}
+                active={index + 1 === currentPage}
+                onClick={() => setCurrentPage(index + 1)}
+              >
+                {index + 1}
+              </Pagination.Item>
+            ))}
+            <Pagination.Next onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} />
+          </Pagination>
         </>
       )}
-      <ConfirmDeletionModal 
-        show={showDeleteModal} 
-        onHide={() => setShowDeleteModal(false)} 
-        onDelete={deleteProject} 
-      />
 
-      <SuccessModal 
-        show={showSuccessModal} 
-        onHide={() => setShowSuccessModal(false)} 
+      {/* Modal Components */}
+      <ConfirmDeletionModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={deleteProject}
       />
+      <SuccessModal show={showSuccessModal} onHide={() => setShowSuccessModal(false)} />
     </div>
   );
 }

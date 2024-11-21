@@ -23,7 +23,7 @@ function Navbar() {
 
                     {/* Academics Dropdown */}
                     <div className="dropdown" onMouseEnter={toggleDropdown} onMouseLeave={toggleDropdown}>
-                        <Link to="/Departments" className="dropdown-link">
+                        <Link to="#" className="dropdown-link">
                             Academics
                         </Link>
                         {isDropdownOpen && (
