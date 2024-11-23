@@ -5,6 +5,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import { FaArrowLeft } from 'react-icons/fa';  
+import Breadcrumb from '../../components/BreadCrumb';
+
 
 function KeywordOverview() {
   const { keywordId } = useParams();
@@ -49,6 +51,18 @@ function KeywordOverview() {
   }, [keywordId]);
 
   return (
+    <>
+
+      <div className="breadcrumb-container">
+        <Breadcrumb
+      items={[
+        { label: 'Home', link: '/' },
+        { label: 'Keywords', link: '/Keyword' },
+        { label: keyword?.keyword || 'Category', link: `/Departments/Keywords` },
+      ]}
+        />
+      </div>
+
     <div className="keyword-overview-container container mt-4">
       {loading && (
         <div className="text-center mt-4">
@@ -98,6 +112,7 @@ function KeywordOverview() {
         </>
       )}
     </div>
+    </>
   );
 }
 

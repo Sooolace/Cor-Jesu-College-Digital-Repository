@@ -13,12 +13,11 @@ function Departments() {
     const navigate = useNavigate();
 
     return (
+        <>
+        <div className="breadcrumb-container">
+        <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Departments', link: '/search' }]} />
+      </div>
         <div className="home-page">
-            {/* Breadcrumb at the very top */}
-            <div className="breadcrumb-container">
-                <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Departments', link: '/departments' }]} />
-            </div>
-
             {/* Main content */}
             <div className="centered-content departments-container">
                 <h3>Research Departments</h3>
@@ -62,6 +61,7 @@ function Departments() {
                 </div>
             </div>
         </div>
+        </>
     );
 }
 

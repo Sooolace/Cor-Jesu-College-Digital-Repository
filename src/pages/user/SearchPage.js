@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCalendar, faTags } from '@fortawesome/free-solid-svg-icons';
 import './styles/filter.css';
 
+
 function SearchPage() {
   const location = useLocation();
   const { query: initialQuery, option: initialOption } = location.state || { query: '', option: 'title' };
@@ -102,102 +103,106 @@ function SearchPage() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="search-page-container">
-      <div className="filter-sidebar">
-        <form className="fsearch-bar" onSubmit={handleSearchSubmit}>
-          <SearchBar
-            query={typedQuery}
-            onChange={handleSearchChange}
-            selectedOption={searchOption}
-            onOptionChange={handleOptionChange}
-            onSearch={handleSearchSubmit} // Ensure onSearch is for button click
-          />
-        </form>
-        <h4>Filter by Category</h4>
-        <SubjectFilter
-          selectedCategories={selectedCategories}
-          setSelectedCategories={setSelectedCategories}
-          onApply={() => fetchProjects(searchQuery, searchOption, 1)}
-        />
+    <>
+      <div className="breadcrumb-container">
+        <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Search', link: '/search' }]} />
       </div>
-
-      <div className="results-content">
-        <div className="breadcrumb-recent-container">
-            <h3>{searchQuery ? `Search Results for "${searchQuery}"` : ''}</h3>
-          <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Search', link: '/search' }]} />
+  
+      <div className="search-page-container">
+        <div className="filter-sidebar">
+          <form className="fsearch-bar" onSubmit={handleSearchSubmit}>
+            <SearchBar
+              query={typedQuery}
+              onChange={handleSearchChange}
+              selectedOption={searchOption}
+              onOptionChange={handleOptionChange}
+              onSearch={handleSearchSubmit} // Ensure onSearch is for button click
+            />
+          </form>
+          <SubjectFilter
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            onApply={() => fetchProjects(searchQuery, searchOption, 1)}
+          />
         </div>
-
-        <div className="results-list-container">
-          {searchQuery && currentItems.length > 0 ? (
-            currentItems.map((project) => (
-              <div key={project.project_id} className="research-card">
-                <Link to={`/DocumentOverview/${project.project_id}`} className="title-link">
-                  <h4>{project.title}</h4>
-                </Link>
-
-                {/* Authors Section */}
-                <p className="category">
-                  <FontAwesomeIcon icon={faUser} />{' '}
-                  {Array.isArray(project.authors) && project.authors.length > 0 ? (
-                    project.authors.map((author, index) => (
-                      <span key={author.author_id || index}>
-                        <Link to={`/AuthorOverview/${author.author_id}`} className="author-link">
-                          {author.name}
-                        </Link>
-                        {index < project.authors.length - 1 && ', '}
-                      </span>
-                    ))
-                  ) : (
-                    'No authors listed'
-                  )}
-                </p>
-
-                {/* Date and Keywords Section */}
-                <p className="category">
-                  <FontAwesomeIcon icon={faCalendar} /> {new Date(project.created_at).toLocaleDateString()} &bull;
-                  {/* Keywords */}
-                  <FontAwesomeIcon icon={faTags} />{' '}
-                  {Array.isArray(project.keywords) && project.keywords.length > 0 ? (
-                    project.keywords.map((keyword, index) => (
-                      <span key={keyword.keyword_id || index}>
-                        <Link to={`/KeywordOverview/${keyword.keyword_id}`} className="keyword-link">
-                          {keyword.keyword} {/* Using 'keyword' field for the name */}
-                        </Link>
-                        {index < project.keywords.length - 1 && ', '}
-                      </span>
-                    ))
-                  ) : (
-                    'No keywords listed'
-                  )}
-                </p>
-
-                {/* Abstract */}
-                <div className="abstract-container">
-                  {project.abstract || 'No abstract available.'}
+  
+        <div className="results-content">
+          <h3>{searchQuery ? `Search Results for "${searchQuery}"` : ''}</h3>
+  
+          <div className="results-list-container">
+            {searchQuery && currentItems.length > 0 ? (
+              currentItems.map((project) => (
+                <div key={project.project_id} className="research-card">
+                  <Link to={`/DocumentOverview/${project.project_id}`} className="title-link">
+                    <h4>{project.title}</h4>
+                  </Link>
+  
+                  {/* Authors Section */}
+                  <p className="category">
+                    <FontAwesomeIcon icon={faUser} />{' '}
+                    {Array.isArray(project.authors) && project.authors.length > 0 ? (
+                      project.authors.map((author, index) => (
+                        <span key={author.author_id || index}>
+                          <Link to={`/AuthorOverview/${author.author_id}`} className="author-link">
+                            {author.name}
+                          </Link>
+                          {index < project.authors.length - 1 && ', '}
+                        </span>
+                      ))
+                    ) : (
+                      'No authors listed'
+                    )}
+                  </p>
+  
+                  {/* Date and Keywords Section */}
+                  <p className="category">
+                    <FontAwesomeIcon icon={faCalendar} /> {new Date(project.created_at).toLocaleDateString()} &bull;
+                    {/* Keywords */}
+                    <FontAwesomeIcon icon={faTags} />{' '}
+                    {Array.isArray(project.keywords) && project.keywords.length > 0 ? (
+                      project.keywords.map((keyword, index) => (
+                        <span key={keyword.keyword_id || index}>
+                          <Link to={`/KeywordOverview/${keyword.keyword_id}`} className="keyword-link">
+                            {keyword.keyword} {/* Using 'keyword' field for the name */}
+                          </Link>
+                          {index < project.keywords.length - 1 && ', '}
+                        </span>
+                      ))
+                    ) : (
+                      'No keywords listed'
+                    )}
+                  </p>
+  
+                  {/* Abstract */}
+                  <div className="abstract-container">
+                    {project.abstract || 'No abstract available.'}
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="no-results-message">No search results to display</div>
+              ))
+            ) : (
+              <div className="no-results-message">No search results to display</div>
+            )}
+          </div>
+  
+          {searchQuery && currentItems.length > 0 && (
+            <div className="pagination">
+              {Array.from({ length: Math.ceil(filteredData.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => paginate(page)}
+                  className={`pagination-button ${page === currentPage ? 'active' : ''}`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
           )}
         </div>
-
-        {searchQuery && currentItems.length > 0 && (
-          <div className="pagination">
-            {Array.from({ length: Math.ceil(filteredData.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => paginate(page)}
-                className={`pagination-button ${page === currentPage ? 'active' : ''}`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
-    </div>
+    </>
   );
+  
+  
 }
 
 export default SearchPage;

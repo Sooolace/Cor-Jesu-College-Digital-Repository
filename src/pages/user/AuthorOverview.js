@@ -7,6 +7,8 @@ import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import { FaArrowLeft } from 'react-icons/fa';  
 import './styles/authoroverview.css';
+import Breadcrumb from '../../components/BreadCrumb';
+
 
 function AuthorOverview() {
   const { authorId } = useParams();
@@ -51,6 +53,16 @@ function AuthorOverview() {
   }, [authorId]);
 
   return (
+    <>
+    <div className="breadcrumb-container">
+    <Breadcrumb
+      items={[
+        { label: 'Home', link: '/' },
+        { label: 'Authors', link: '/authors' },
+        { label: author?.name || 'Category', link: `/Departments/Authors` },
+      ]}
+    />
+  </div>
     <div className="author-overview-container container mt-4">
       {loading && (
         <div className="text-center mt-4">
@@ -100,6 +112,7 @@ function AuthorOverview() {
         </>
       )}
     </div>
+    </>
   );
 }
 

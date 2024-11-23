@@ -2,7 +2,6 @@
 header {
   display: flex;
   justify-content: center;  /* Center the content horizontally */
-  padding: 10px 0;           /* Adds some padding for better alignment */
   background-color: #a33307;
   color: #fff;
   box-sizing: border-box;

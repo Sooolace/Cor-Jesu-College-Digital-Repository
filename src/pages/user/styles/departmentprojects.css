@@ -54,15 +54,12 @@ h2 {
 .project-card {
   padding: 20px;
   background-color: #fff;
-  border-bottom: 2px solid #333; /* Black border below each card */
+  border-bottom: 1px solid #a7a7a7; /* Black border below each card */
   transition: transform 0.3s ease;
   margin: 0 auto;  /* Center the individual cards */
   width: 100%;     /* Make sure cards take full width of their container */
 }
 
-.project-card:hover {
-  transform: translateY(-5px);  /* Elevate the card */
-}
 
 /* Project title */
 .project-title {

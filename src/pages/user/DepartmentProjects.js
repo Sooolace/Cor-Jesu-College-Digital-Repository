@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import '../user/styles/departmentprojects.css';  // Import the CSS
 import Button from 'react-bootstrap/Button';
 import { FaArrowLeft } from 'react-icons/fa';
+import Breadcrumb from '../../components/BreadCrumb';
 
 function DepartmentProjects() {
   const { departmentName } = useParams();  // Get the department abbreviation from the URL
@@ -23,6 +24,7 @@ function DepartmentProjects() {
     'cjc': 'Graduate School',
   };
 
+  // Get the full department name based on the abbreviation
   const fullDepartmentName = departmentNameMapping[departmentName] || 'Unknown Department';  // Default in case the department abbreviation is not found
 
   useEffect(() => {
@@ -61,50 +63,62 @@ function DepartmentProjects() {
   if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="centered-content">
-            <div>
-       <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
-          <FaArrowLeft className="me-2" /> Back
-        </Button>
+    <>
+      <div className="breadcrumb-container">
+        <Breadcrumb 
+          items={[
+            { label: 'Home', link: '/' },
+            { label: 'Departments', link: '/Departments' },
+            { label: fullDepartmentName, link: `/Departments/${departmentName}` } // Dynamic department label
+          ]}
+        />
       </div>
-      <h2 className="department-title">{fullDepartmentName}</h2>
-      {projects.length === 0 ? (
-        <p className="no-projects-message">No projects found for this department.</p>
-      ) : (
-        <div className="projects-list">
-          {currentProjects.map((project) => (
-            <div key={project.project_id} className="project-card">
-              <h3 className="project-title" onClick={() => goToProjectDetail(project.project_id)}>
-                {project.title}
-              </h3>
-              <div className="project-meta">
-                <p className="project-authors"><i className="fas fa-users"></i> {project.authors || 'No authors listed'}</p>
-                <p className="project-date"><i className="fas fa-calendar-alt"></i> {new Date(project.publication_date).toLocaleDateString()}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
-      {/* Pagination */}
-      <div className="pagination">
-        <button
-          onClick={() => paginate(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="pagination-button"
-        >
-          Previous
-        </button>
-        <span className="page-number">Page {currentPage}</span>
-        <button
-          onClick={() => paginate(currentPage + 1)}
-          disabled={currentPage * projectsPerPage >= projects.length}
-          className="pagination-button"
-        >
-          Next
-        </button>
+      <div className="centered-content">
+        <div>
+          <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
+            <FaArrowLeft className="me-2" /> Back
+          </Button>
+        </div>
+        <h2 className="department-title">{fullDepartmentName}</h2>
+        {projects.length === 0 ? (
+          <p className="no-projects-message">No projects found for this department.</p>
+        ) : (
+          <div className="projects-list">
+            {currentProjects.map((project) => (
+              <div key={project.project_id} className="project-card">
+                <h3 className="project-title" onClick={() => goToProjectDetail(project.project_id)}>
+                  {project.title}
+                </h3>
+                <div className="project-meta">
+                  <p className="project-authors"><i className="fas fa-users"></i> {project.authors || 'No authors listed'}</p>
+                  <p className="project-date"><i className="fas fa-calendar-alt"></i> {new Date(project.publication_date).toLocaleDateString()}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        <div className="pagination">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="pagination-button"
+          >
+            Previous
+          </button>
+          <span className="page-number">Page {currentPage}</span>
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage * projectsPerPage >= projects.length}
+            className="pagination-button"
+          >
+            Next
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
