@@ -72,16 +72,14 @@ function KeywordOverview() {
         </div>
       )}
       {error && <Alert variant="danger">{error}</Alert>}
-      <Button variant="btn" onClick={() => navigate(-1)} className="back-button mb-3">
-        <FaArrowLeft className="me-2" /> Back
-      </Button>
+
       {keyword && (
         <>
           <h2 className="text-center">{keyword.keyword}</h2>
+          <div className="author-underline"></div>
           <div className="keyword-underline"></div>
 
           <div className="table-with-back-button">
-            <h4 className="mt-4">Projects:</h4>
             {projects.length > 0 ? (
               <Table striped bordered hover responsive className="mt-3">
                 <thead>

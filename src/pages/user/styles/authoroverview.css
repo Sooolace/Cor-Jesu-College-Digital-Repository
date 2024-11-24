@@ -5,5 +5,18 @@
     height: 2px; /* Thickness of the underline */
     background-color: #a33307; /* Color of the underline (Bootstrap primary color) */
     margin: 10px auto; /* Centered with a margin */
+    margin-bottom: 30px;
   }
-  
+  /* Add this to your authoroverview.css */
+
+table th, table td {
+  word-wrap: break-word; /* Allows the text to break into the next line if too long */
+}
+
+table td.truncate {
+  max-width: 500px; /* Set a max-width for the description column */
+  height: 50px;
+  overflow: hidden; /* Hide overflowed content */
+  text-overflow: ellipsis; /* Add ellipsis when the text overflows */
+  white-space: nowrap; /* Prevent wrapping the text into multiple lines */
+}

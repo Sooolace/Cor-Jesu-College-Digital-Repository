@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCalendar, faTags } from '@fortawesome/free-solid-svg-icons';
 import './styles/filter.css';
 
-
 function SearchPage() {
   const location = useLocation();
   const { query: initialQuery, option: initialOption } = location.state || { query: '', option: 'title' };
@@ -23,186 +22,199 @@ function SearchPage() {
 
   const debounceTimer = useRef(null);
 
-  // Fetch authors
-  const fetchAuthors = async (projectId) => {
-    try {
-      const response = await axios.get(`/api/project_authors/${projectId}`);
-      return response.data || [];
-    } catch (error) {
-      console.error('Error fetching authors:', error);
-      return [];
+ // Fetch authors
+ const fetchAuthors = async (projectId) => {
+  try {
+    const response = await axios.get(`/api/project_authors/${projectId}`);
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching authors:', error);
+    return [];
+  }
+};
+
+// Fetch project keywords
+const fetchKeywords = async (projectId) => {
+  try {
+    const response = await axios.get(`/api/project_keywords/${projectId}`);
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching keywords:', error);
+    return [];
+  }
+};
+
+// Fetch projects
+const fetchProjects = async (query = '', option = 'title', page = 1) => {
+  try {
+    if (!query) {
+      setFilteredData([]); // If no query, clear filtered data and exit
+      return;
     }
-  };
 
-  // Fetch project keywords
-  const fetchKeywords = async (projectId) => {
-    try {
-      const response = await axios.get(`/api/project_keywords/${projectId}`);
-      return response.data || [];
-    } catch (error) {
-      console.error('Error fetching keywords:', error);
-      return [];
-    }
-  };
+    let params = { query, option, page, itemsPerPage };
 
-  // Fetch projects
-  const fetchProjects = async (query = '', option = 'title', page = 1) => {
-    try {
-      if (!query) {
-        setFilteredData([]); // If no query, clear filtered data and exit
-        return;
-      }
+    const response = await axios.get('/api/projects', { params });
+    const projects = response.data || [];
 
-      let params = { query, option, page, itemsPerPage };
+    const projectsWithDetails = await Promise.all(
+      projects.map(async (project) => {
+        const authors = await fetchAuthors(project.project_id);
+        const keywords = await fetchKeywords(project.project_id);
+        return { ...project, authors, keywords }; // Adding authors and keywords to the project
+      })
+    );
 
-      const response = await axios.get('/api/projects', { params });
-      const projects = response.data || [];
+    setFilteredData(projectsWithDetails);
+    setCurrentPage(page);  // Keep the current page
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+  }
+};
 
-      const projectsWithDetails = await Promise.all(
-        projects.map(async (project) => {
-          const authors = await fetchAuthors(project.project_id);
-          const keywords = await fetchKeywords(project.project_id);
-          return { ...project, authors, keywords }; // Adding authors and keywords to the project
-        })
-      );
+useEffect(() => {
+  // Trigger fetchProjects when searchQuery or searchOption changes
+  fetchProjects(searchQuery, searchOption, currentPage);
+}, [searchQuery, searchOption]);
 
-      setFilteredData(projectsWithDetails);
-      setCurrentPage(page);  // Keep the current page
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    }
-  };
+const handleSearchChange = (query) => {
+  clearTimeout(debounceTimer.current);
+  setTypedQuery(query); // Set typed query immediately
+};
 
-  useEffect(() => {
-    // Trigger fetchProjects when searchQuery or searchOption changes
-    fetchProjects(searchQuery, searchOption, currentPage);
-  }, [searchQuery, searchOption]);
+const handleOptionChange = (option) => {
+  setSearchOption(option);
+  setCurrentPage(1);  // Reset to first page when option changes
+  fetchProjects(searchQuery, option, 1); // Refetch with new option, but page reset
+};
 
-  const handleSearchChange = (query) => {
-    clearTimeout(debounceTimer.current);
-    setTypedQuery(query); // Set typed query immediately
-  };
+const handleSearchSubmit = (event) => {
+  event.preventDefault();
+  setSearchQuery(typedQuery); // Update searchQuery when the button is clicked
+  setCurrentPage(1); // Reset to page 1 on new search
+  fetchProjects(typedQuery, searchOption, 1); // Trigger search manually
+};
 
-  const handleOptionChange = (option) => {
-    setSearchOption(option);
-    setCurrentPage(1);  // Reset to first page when option changes
-    fetchProjects(searchQuery, option, 1); // Refetch with new option, but page reset
-  };
+const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    setSearchQuery(typedQuery); // Update searchQuery when the button is clicked
-    setCurrentPage(1); // Reset to page 1 on new search
-    fetchProjects(typedQuery, searchOption, 1); // Trigger search manually
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <>
       <div className="breadcrumb-container">
         <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Search', link: '/search' }]} />
       </div>
-  
-      <div className="search-page-container">
-        <div className="filter-sidebar">
-          <form className="fsearch-bar" onSubmit={handleSearchSubmit}>
-            <SearchBar
-              query={typedQuery}
-              onChange={handleSearchChange}
-              selectedOption={searchOption}
-              onOptionChange={handleOptionChange}
-              onSearch={handleSearchSubmit} // Ensure onSearch is for button click
-            />
-          </form>
-          <SubjectFilter
-            selectedCategories={selectedCategories}
-            setSelectedCategories={setSelectedCategories}
-            onApply={() => fetchProjects(searchQuery, searchOption, 1)}
-          />
-        </div>
-  
-        <div className="results-content">
-          <h3>{searchQuery ? `Search Results for "${searchQuery}"` : ''}</h3>
-  
-          <div className="results-list-container">
-            {searchQuery && currentItems.length > 0 ? (
-              currentItems.map((project) => (
-                <div key={project.project_id} className="research-card">
-                  <Link to={`/DocumentOverview/${project.project_id}`} className="title-link">
-                    <h4>{project.title}</h4>
-                  </Link>
-  
-                  {/* Authors Section */}
-                  <p className="category">
-                    <FontAwesomeIcon icon={faUser} />{' '}
-                    {Array.isArray(project.authors) && project.authors.length > 0 ? (
-                      project.authors.map((author, index) => (
-                        <span key={author.author_id || index}>
-                          <Link to={`/AuthorOverview/${author.author_id}`} className="author-link">
-                            {author.name}
-                          </Link>
-                          {index < project.authors.length - 1 && ', '}
-                        </span>
-                      ))
-                    ) : (
-                      'No authors listed'
-                    )}
-                  </p>
-  
-                  {/* Date and Keywords Section */}
-                  <p className="category">
-                    <FontAwesomeIcon icon={faCalendar} /> {new Date(project.created_at).toLocaleDateString()} &bull;
-                    {/* Keywords */}
-                    <FontAwesomeIcon icon={faTags} />{' '}
-                    {Array.isArray(project.keywords) && project.keywords.length > 0 ? (
-                      project.keywords.map((keyword, index) => (
-                        <span key={keyword.keyword_id || index}>
-                          <Link to={`/KeywordOverview/${keyword.keyword_id}`} className="keyword-link">
-                            {keyword.keyword} {/* Using 'keyword' field for the name */}
-                          </Link>
-                          {index < project.keywords.length - 1 && ', '}
-                        </span>
-                      ))
-                    ) : (
-                      'No keywords listed'
-                    )}
-                  </p>
-  
-                  {/* Abstract */}
-                  <div className="abstract-container">
-                    {project.abstract || 'No abstract available.'}
-                  </div>
+
+<div className="search-page-container">
+  <div className="centered-content">
+    <div className="search-results-wrapper">
+      {/* Search and Filter Section */}
+<div className="search-container">
+  <div className="search1-container">
+    <form className="fsearch-bar" onSubmit={handleSearchSubmit}>
+      <SearchBar
+        query={typedQuery}
+        onChange={handleSearchChange}
+        selectedOption={searchOption}
+        onOptionChange={handleOptionChange}
+        onSearch={handleSearchSubmit}
+      />
+    </form>
+  </div>
+
+  <div className="filter-container">
+    <SubjectFilter
+      selectedCategories={selectedCategories}
+      setSelectedCategories={setSelectedCategories}
+      onApply={() => fetchProjects(searchQuery, searchOption, 1)}
+    />
+  </div>
+</div>
+
+
+
+
+      {/* Results Section */}
+      <div className="results-container">
+        <h3>{searchQuery ? `Search Results for "${searchQuery}"` : ''}</h3>
+        <div className="author-underline"></div>
+
+        <div className="results-list-container">
+          {searchQuery && currentItems.length > 0 ? (
+            currentItems.map((project) => (
+              <div key={project.project_id} className="research-card">
+                <Link to={`/DocumentOverview/${project.project_id}`} className="title-link">
+                  <h4>{project.title}</h4>
+                </Link>
+
+                {/* Authors Section */}
+                <p className="category">
+                  <FontAwesomeIcon icon={faUser} />{' '}
+                  {Array.isArray(project.authors) && project.authors.length > 0 ? (
+                    project.authors.map((author, index) => (
+                      <span key={author.author_id || index}>
+                        <Link to={`/AuthorOverview/${author.author_id}`} className="author-link">
+                          {author.name}
+                        </Link>
+                        {index < project.authors.length - 1 && ', '}
+                      </span>
+                    ))
+                  ) : (
+                    'No authors listed'
+                  )}
+                </p>
+
+                {/* Date and Keywords Section */}
+                <p className="category">
+                  <FontAwesomeIcon icon={faCalendar} /> {new Date(project.created_at).toLocaleDateString()} &bull;
+                  <FontAwesomeIcon icon={faTags} />{' '}
+                  {Array.isArray(project.keywords) && project.keywords.length > 0 ? (
+                    project.keywords.map((keyword, index) => (
+                      <span key={keyword.keyword_id || index}>
+                        <Link to={`/KeywordOverview/${keyword.keyword_id}`} className="keyword-link">
+                          {keyword.keyword}
+                        </Link>
+                        {index < project.keywords.length - 1 && ', '}
+                      </span>
+                    ))
+                  ) : (
+                    'No keywords listed'
+                  )}
+                </p>
+
+                {/* Abstract */}
+                <div className="abstract-container">
+                  {project.abstract || 'No abstract available.'}
                 </div>
-              ))
-            ) : (
-              <div className="no-results-message">No search results to display</div>
-            )}
-          </div>
-  
-          {searchQuery && currentItems.length > 0 && (
-            <div className="pagination">
-              {Array.from({ length: Math.ceil(filteredData.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => paginate(page)}
-                  className={`pagination-button ${page === currentPage ? 'active' : ''}`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
+              </div>
+            ))
+          ) : (
+            <div className="no-results-message">No search results to display</div>
           )}
         </div>
+
+        {searchQuery && currentItems.length > 0 && (
+          <div className="pagination">
+            {Array.from({ length: Math.ceil(filteredData.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => paginate(page)}
+                className={`pagination-button ${page === currentPage ? 'active' : ''}`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+    </div>
+  </div>
+</div>
+
     </>
   );
-  
-  
 }
 
 export default SearchPage;

@@ -125,19 +125,12 @@ function DocumentOverview() {
       
       <div className="d-table-container">
         <div className="table-with-back-button">
-          <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
-            <FaArrowLeft className="me-2" /> Back
-          </Button>
+
           <h1 className="text-left mt-4" style={{ fontSize: '24px', fontWeight: 'bold' }}>
             {project.title}
           </h1>
+          <div className="author-underline"></div>
           <table className="d-table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>Field</th>
-                <th>Details</th>
-              </tr>
-            </thead>
             <tbody>
               <tr>
                 <td><strong>Authors</strong></td>

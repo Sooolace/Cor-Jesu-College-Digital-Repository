@@ -1,99 +1,18 @@
-/* Search bar styling */
-.search-bar {
-  border-radius: 5px; /* Updated radius */
-  padding: 0.5rem; /* Ensure padding is consistent */
-  font-size: 1rem;
-}
 
-/* Search container styling */
-.search-container {
+
+.search1-container {
+  width: 100%;              /* Ensures the search bar takes up full width of the container */
   display: flex;
-  justify-content: center; /* Centers the items horizontally */
-  gap: 1rem;               /* Adds space between elements */
+  justify-content: center;  /* Centers the search bar horizontally */
+  border-radius: 8px;       /* Optional: Adds rounded corners */
   margin-top: 10px;
-  margin-bottom: 20px;
+  margin-right: 40px;
+
 }
-
-/* Dropdown styling */
-.search-options {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border-radius: 5px; /* Updated radius for dropdown */
-}
-
-.search-options:hover,
-.search-options:focus { /* Change border color on hover and focus */
-  border-color: #a33307; /* Change border color to red on hover or focus */
-  outline: none; /* Remove default outline */
-}
-
-/* Search bar styling */
-.searchBar {
-  width: 300px; /* Fixed width for the search bar */
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 2px solid #020202; /* Initial border color */
-  border-radius: 4px; /* Rounded corners */
-  transition: border-color 0.3s; /* Smooth transition for the border color */
-}
-
-.searchBar:hover,
-.searchBar:focus { /* Change border color on hover and focus */
-  border-color: #a33307; /* Change border color to red on hover or focus */
-  outline: none; /* Remove default outline */
-}
-
-.btn-search {
-  padding: 0.5rem 1rem; /* Add padding for the button */
-  font-size: 1rem;
-  border-radius: 5px; /* Updated radius for button */
-  background-color: #a33307; /* Optional: Add background color */
-  cursor: pointer; /* Change cursor to pointer */
-  transition: background-color 0.3s; /* Optional: Add transition for hover effect */
-}
-
-.btn-search:hover {
-  background-color: #d8b908; /* Optional: Change background on hover */
-}
-
-/* Media Queries for Responsive Design */
-
-/* For devices smaller than 768px */
-@media (max-width: 768px) {
-  .search-container {
-    flex-direction: column; /* Stack the items vertically on smaller screens */
-    align-items: center; /* Center the items */
-  }
-
-  .searchBar {
-    width: 100%; /* Make the search bar take full width on small screens */
-    max-width: 350px; /* Add a max width to avoid it becoming too wide */
-  }
-
-  .search-options {
-    width: 100%; /* Make the dropdown full width */
-    max-width: 350px; /* Limit the width of the dropdown */
-  }
-
-  .btn-search {
-    width: 100%; /* Make the button full width */
-    max-width: 350px; /* Limit the width of the button */
-  }
-}
-
-/* For devices smaller than 480px (extra small screens) */
-@media (max-width: 480px) {
-  .searchBar {
-    width: 100%; /* Full width on very small screens */
-    font-size: 0.9rem; /* Adjust font size for smaller screens */
-  }
-
-  .btn-search {
-    font-size: 0.9rem; /* Adjust button font size */
-    padding: 0.4rem 0.8rem; /* Adjust button padding for smaller screens */
-  }
-
-  .search-options {
-    font-size: 0.9rem; /* Adjust font size for dropdown */
-  }
+/* Filter container styling */
+.filter-container {
+  justify-content: center;  /* Centers the items horizontally */
+  margin-top: -10px;         /* Adds space above the filter container */
+  margin-bottom: 20px; 
+  background-color:  /* Adds space below the filter container */
 }

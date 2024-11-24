@@ -9,6 +9,8 @@ import AddNewAuthor from './components/addNewAuthor';
 import EditAuthor from './EditAuthor';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../admin/styles/TotalAuthors.css';
+import Breadcrumb from '../../components/BreadCrumb';
+
 
 function TotalAuthors() {
   const [authors, setAuthors] = useState([]);
@@ -91,15 +93,18 @@ function TotalAuthors() {
   };
 
   return (
+    <>      
+    <div className="breadcrumb-container">
+            <Breadcrumb
+          items={[
+            { label: 'Home', link: '/admindashboard' },
+            { label: 'Authors', link: '#' },
+          ]}
+            />
+    </div>
     <div className="total-authors-container container mt-4">
-      <div>
-       <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
-          <FaArrowLeft className="me-2" /> Back
-        </Button>
-      </div>
-      <div className="text-center mb-4">
         <h3 className="display-8">Authors Overview</h3>
-      </div>
+        <div className="author-underline"></div>
 
       {/* Search Bar, Filter, and Add Author Button */}
       <div className="d-flex justify-content-between align-items-center mb-3" style={{ width: '75%', margin: '0 auto' }}>
@@ -244,6 +249,7 @@ function TotalAuthors() {
         </>
       )}
     </div>
+    </>
   );
 }
 

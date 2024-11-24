@@ -24,6 +24,7 @@ import KeywordOverview from './pages/user/KeywordOverview';
 import EditAuthor from './pages/admin/EditAuthor';
 import Departments from './pages/user/Departments';
 import DepartmentProjects from './pages/user/DepartmentProjects';
+import Authors from './pages/user/Authors';
 function MainLayout({ isAdmin }) {
   const location = useLocation();
 
@@ -49,6 +50,8 @@ function MainLayout({ isAdmin }) {
             <Route path="/topic" element={<Topics />} />
             <Route path="/Departments" element={<Departments />} />
             <Route path="/departments/:departmentName" element={<DepartmentProjects />} />
+            <Route path="/Authors" element={<Authors />} />
+
 
           </>
         )}

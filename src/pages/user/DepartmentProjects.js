@@ -75,12 +75,8 @@ function DepartmentProjects() {
       </div>
 
       <div className="centered-content">
-        <div>
-          <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
-            <FaArrowLeft className="me-2" /> Back
-          </Button>
-        </div>
         <h2 className="department-title">{fullDepartmentName}</h2>
+        <div className="author-underline"></div>
         {projects.length === 0 ? (
           <p className="no-projects-message">No projects found for this department.</p>
         ) : (

@@ -21,6 +21,8 @@ function Departments() {
             {/* Main content */}
             <div className="centered-content departments-container">
                 <h3>Research Departments</h3>
+                <div className="author-underline"></div>
+
                 <div className="departments-grid-container">
                     <div className="departments-grid-item">
                         <a href="/departments/ccis" className="department-link">

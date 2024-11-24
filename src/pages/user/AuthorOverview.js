@@ -1,4 +1,3 @@
-// AuthorOverview.js
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Table from 'react-bootstrap/Table';
@@ -8,7 +7,6 @@ import Button from 'react-bootstrap/Button';
 import { FaArrowLeft } from 'react-icons/fa';  
 import './styles/authoroverview.css';
 import Breadcrumb from '../../components/BreadCrumb';
-
 
 function AuthorOverview() {
   const { authorId } = useParams();
@@ -55,14 +53,14 @@ function AuthorOverview() {
   return (
     <>
     <div className="breadcrumb-container">
-    <Breadcrumb
-      items={[
-        { label: 'Home', link: '/' },
-        { label: 'Authors', link: '/authors' },
-        { label: author?.name || 'Category', link: `/Departments/Authors` },
-      ]}
-    />
-  </div>
+      <Breadcrumb
+        items={[
+          { label: 'Home', link: '/' },
+          { label: 'Authors', link: '/authors' },
+          { label: author?.name || 'Category', link: `/Departments/Authors` },
+        ]}
+      />
+    </div>
     <div className="author-overview-container container mt-4">
       {loading && (
         <div className="text-center mt-4">
@@ -72,16 +70,13 @@ function AuthorOverview() {
         </div>
       )}
       {error && <Alert variant="danger">{error}</Alert>}
-      <Button variant="btn" onClick={() => navigate(-1)} className="back-button mb-3">
-        <FaArrowLeft className="me-2" /> Back
-      </Button>
+
       {author && (
         <>
           <h2 className="text-center">{author.name}</h2>
           <div className="author-underline"></div>
 
           <div className="table-with-back-button">
-            <h4 className="mt-4">Works:</h4>
             {works.length > 0 ? (
               <Table striped bordered hover responsive className="mt-3">
                 <thead>
@@ -99,7 +94,7 @@ function AuthorOverview() {
                           {work.title}
                         </Link>
                       </td>
-                      <td>{work.description}</td>
+                      <td className="truncate">{work.description}</td>
                       <td>{work.year}</td>
                     </tr>
                   ))}
