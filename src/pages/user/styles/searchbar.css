@@ -1,18 +1,83 @@
+/* searchbar.css */
 
-
-.search1-container {
-  width: 100%;              /* Ensures the search bar takes up full width of the container */
-  display: flex;
-  justify-content: center;  /* Centers the search bar horizontally */
-  border-radius: 8px;       /* Optional: Adds rounded corners */
-  margin-top: 10px;
-  margin-right: 40px;
-
+/* Main container for the search section */
+.search-section {
+  padding: 20px;
 }
-/* Filter container styling */
-.filter-container {
-  justify-content: center;  /* Centers the items horizontally */
-  margin-top: -10px;         /* Adds space above the filter container */
-  margin-bottom: 20px; 
-  background-color:  /* Adds space below the filter container */
+
+/* Search container wrapping all elements */
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between search elements */
+  max-width: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Search input field */
+.searchBar {
+  width: 300px;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.searchBar:focus {
+  border-color: #007bff; /* Highlight border on focus */
+}
+
+/* Search button */
+.btn-search {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  background-color: #a33307; /* Button color */
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-search:hover {
+  background-color: #99320a; /* Darker button color on hover */
+}
+
+/* Dropdown menu for search options */
+.search-options {
+  width: 100px;
+  padding: 10px;
+  font-size: 13px;
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-options:focus {
+  border-color: #007bff; /* Highlight border on focus */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-container {
+    flex-direction: column;
+    gap: 15px; /* Increase gap for vertical layout */
+  }
+
+  .btn-search {
+    width: 100%; /* Button takes full width */
+  }
+
+  .search-options {
+    width: 100%; /* Dropdown takes full width */
+  }
 }

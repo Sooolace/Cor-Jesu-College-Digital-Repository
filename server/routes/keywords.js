@@ -115,5 +115,21 @@ router.get('/:keyword_id/projects', async (req, res) => {
     }
 });
 
+// GET - Fetch a single keyword by keyword name
+router.get('/by-name/:keyword_name', async (req, res) => {
+    const { keyword_name } = req.params; // Get the keyword name from the URL
+    try {
+        const result = await pool.query('SELECT * FROM keywords WHERE keyword = $1', [keyword_name]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Keyword not found' });
+        }
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        console.error('Error retrieving keyword by name:', error.stack);
+        res.status(500).json({ error: 'Failed to retrieve keyword' });
+    }
+});
+
+
 
 module.exports = router;

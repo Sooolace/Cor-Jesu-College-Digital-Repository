@@ -31,11 +31,14 @@ function AdminNavbar() {
                             Academics
                         </span>
                         {isDropdownOpen && (
-                            <div className="dropdown-menu">
-                                <Link to="/admin/Departments">Departments</Link>
-                                <Link to="/all">Capstone & Thesis</Link>
-                                <Link to="/resources">Resources</Link>
-                            </div>
+                        <div className="dropdown-menu">
+                            
+                        <Link to="/Authors">Authors</Link>
+                        <Link to="/Keywords">Keywords</Link>
+                        <Link to="/Departments">Departments</Link>
+                        <Link to="/AllWorks">Capstone & Thesis</Link>
+                        <Link to="/resources">Resources</Link>
+                    </div>
                         )}
                     </div>
 

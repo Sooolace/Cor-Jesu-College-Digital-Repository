@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Pagination, Spinner, Form, Modal, Alert } from 'react-bootstrap';
 import { CiViewList } from "react-icons/ci";
-import { MdPageview, MdDelete } from 'react-icons/md';
+import { MdDelete } from 'react-icons/md';
 import { FaUserEdit } from "react-icons/fa";
-import { IoPersonAddOutline } from 'react-icons/io5'; // Only imported from io5 now
-import { useNavigate } from 'react-router-dom';  // Import useNavigate from react-router-dom
+import { IoPersonAddOutline } from 'react-icons/io5'; 
+import { useNavigate } from 'react-router-dom';
 import AddNewAuthor from './components/addNewAuthor';
 import EditAuthor from './EditAuthor';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../admin/styles/TotalAuthors.css';
 import Breadcrumb from '../../components/BreadCrumb';
-
 
 function TotalAuthors() {
   const [authors, setAuthors] = useState([]);
@@ -20,13 +19,13 @@ function TotalAuthors() {
   const itemsPerPage = 10;
   const [filterName, setFilterName] = useState('');
   const [filteredAuthors, setFilteredAuthors] = useState([]);
-  const [showModal, setShowModal] = useState(false); // Add New Author Modal
-  const [showEditModal, setShowEditModal] = useState(false); // Edit Author Modal
+  const [showModal, setShowModal] = useState(false); 
+  const [showEditModal, setShowEditModal] = useState(false); 
   const [editingAuthorId, setEditingAuthorId] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // Delete Confirmation Modal
-  const [authorToDelete, setAuthorToDelete] = useState(null); // Author ID to delete
+  const [showDeleteModal, setShowDeleteModal] = useState(false); 
+  const [authorToDelete, setAuthorToDelete] = useState(null);
 
-  const navigate = useNavigate();  // Hook for navigation
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     fetchAuthors();
@@ -52,7 +51,7 @@ function TotalAuthors() {
       ? authors.filter(author => author.name.toLowerCase().includes(filterName.toLowerCase()))
       : authors;
     setFilteredAuthors(filtered);
-    setCurrentPage(1); // Reset to page 1 when filtering
+    setCurrentPage(1); 
   };
 
   const openEditModal = (authorId) => {
@@ -61,7 +60,7 @@ function TotalAuthors() {
   };
 
   const refreshAuthors = () => {
-    fetchAuthors(); // Refresh author data after editing
+    fetchAuthors(); 
   };
 
   const openDeleteModal = (authorId) => {
@@ -74,33 +73,35 @@ function TotalAuthors() {
     try {
       await fetch(`/api/authors/${authorToDelete}`, { method: 'DELETE' });
       setShowDeleteModal(false);
-      fetchAuthors(); // Refresh author list after deletion
+      fetchAuthors(); 
     } catch (error) {
       console.error('Error deleting author:', error);
       setError('Failed to delete author');
     }
   };
 
-  const totalPages = Math.ceil(filteredAuthors.length / itemsPerPage); // Total pages based on authors data
+  const totalPages = Math.ceil(filteredAuthors.length / itemsPerPage); 
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  const handleViewClick = (authorId) => {
-    // Navigate to AuthorOverview page with the author's ID in the URL
-    navigate(`/AuthorOverview/${authorId}`);
+  // Updated handleViewClick to use author name
+  const handleViewClick = (authorName) => {
+    // Encode the name to handle spaces and special characters
+    const encodedName = encodeURIComponent(authorName);
+    navigate(`/AuthorOverview/${encodedName}`); // Use author's name in the URL
   };
 
   return (
     <>      
     <div className="breadcrumb-container">
-            <Breadcrumb
-          items={[
-            { label: 'Home', link: '/admindashboard' },
-            { label: 'Authors', link: '#' },
-          ]}
-            />
+      <Breadcrumb
+        items={[
+          { label: 'Home', link: '/admindashboard' },
+          { label: 'Authors', link: '#' },
+        ]}
+      />
     </div>
     <div className="total-authors-container container mt-4">
         <h3 className="display-8">Authors Overview</h3>
@@ -129,70 +130,70 @@ function TotalAuthors() {
 
       {filteredAuthors.length > 0 && (
         <>
-<Table striped bordered hover style={{ width: '75%', margin: '0 auto' }}>
-  <thead>
-    <tr>
-      <th style={{ width: '30%' }}>Name</th>
-      <th style={{ width: '50%' }}>Department</th> {/* Column for category */}
-      <th style={{ width: '13%' }}>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    {filteredAuthors
-      .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-      .map((author) => (
-        <tr key={author.author_id}>
-          <td>{author.name}</td>
-          <td>{author.category_name || 'No Department'}</td>
-          <td>
-            {/* View Icon with Blue Background */}
-            <CiViewList
-              size={30}
-              title="View"
-              style={{
-                cursor: 'pointer',
-                color: 'white',
-                backgroundColor: '#007bff',
-                borderRadius: '5px',
-                padding: '2px',
-                marginRight: '10px'
-              }}
-              onClick={() => handleViewClick(author.author_id)}
-            />
+          <Table striped bordered hover style={{ width: '75%', margin: '0 auto' }}>
+            <thead>
+              <tr>
+                <th style={{ width: '30%' }}>Name</th>
+                <th style={{ width: '50%' }}>Department</th>
+                <th style={{ width: '13%' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAuthors
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((author) => (
+                  <tr key={author.author_id}>
+                    <td>{author.name}</td>
+                    <td>{author.category_name || 'No Department'}</td>
+                    <td>
+                      {/* View Icon with Blue Background */}
+                      <CiViewList
+                        size={30}
+                        title="View"
+                        style={{
+                          cursor: 'pointer',
+                          color: 'white',
+                          backgroundColor: '#007bff',
+                          borderRadius: '5px',
+                          padding: '2px',
+                          marginRight: '10px'
+                        }}
+                        onClick={() => handleViewClick(author.name)} // Use author name for navigation
+                      />
 
-            {/* Edit Icon with Green Background */}
-            <FaUserEdit
-              size={30}
-              title="Edit"
-              style={{
-                cursor: 'pointer',
-                color: 'white',
-                backgroundColor: '#28a745',
-                borderRadius: '5px',
-                padding: '4px',
-                marginRight: '10px'
-              }}
-              onClick={() => openEditModal(author.author_id)}
-            />
+                      {/* Edit Icon with Green Background */}
+                      <FaUserEdit
+                        size={30}
+                        title="Edit"
+                        style={{
+                          cursor: 'pointer',
+                          color: 'white',
+                          backgroundColor: '#28a745',
+                          borderRadius: '5px',
+                          padding: '4px',
+                          marginRight: '10px'
+                        }}
+                        onClick={() => openEditModal(author.author_id)}
+                      />
 
-            {/* Delete Icon with Red Background */}
-            <MdDelete
-              size={30}
-              title="Delete"
-              style={{
-                cursor: 'pointer',
-                color: 'white',
-                backgroundColor: '#dc3545',
-                borderRadius: '5px',
-                padding: '3px'
-              }}
-              onClick={() => openDeleteModal(author.author_id)}
-            />
-          </td>
-        </tr>
-      ))}
-  </tbody>
-</Table>
+                      {/* Delete Icon with Red Background */}
+                      <MdDelete
+                        size={30}
+                        title="Delete"
+                        style={{
+                          cursor: 'pointer',
+                          color: 'white',
+                          backgroundColor: '#dc3545',
+                          borderRadius: '5px',
+                          padding: '3px'
+                        }}
+                        onClick={() => openDeleteModal(author.author_id)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
 
           {/* Edit Author Modal */}
           <EditAuthor

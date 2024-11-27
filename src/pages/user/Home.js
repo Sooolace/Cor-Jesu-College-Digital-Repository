@@ -9,7 +9,7 @@ import './styles/homepage.css'
 function Home() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchOption, setSearchOption] = useState('title');
+  const [searchOption, setSearchOption] = useState('');
 
   const handleSearch = () => {
     navigate('/search', { state: { query: searchQuery, option: searchOption } });

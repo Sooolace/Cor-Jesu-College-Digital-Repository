@@ -56,80 +56,25 @@ router.post('/', upload.single('file_path'), async (req, res) => {
     }
 });
 
-// GET - Fetch all projects or search projects by title, author, or keyword
+  // GET - Fetch all projects without any search conditions
 router.get('/', async (req, res) => {
-    const { query, option } = req.query; // Get query and option from request parameters
+    const searchQuery = `
+SELECT p.*, 
+       STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+       STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+FROM projects p
+LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+LEFT JOIN authors a ON pa.author_id = a.author_id 
+LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+GROUP BY p.project_id 
+ORDER BY p.publication_date DESC
 
-    let searchQuery = '';
-    let searchOption = 'title'; // Default search option
-
-    // Check if a search option was provided
-    if (option) {
-        searchOption = option;
-    }
-
-    // Building the search query based on the provided search option
-    if (query) {
-        switch (searchOption) {
-            case 'author':
-                // Search projects by author
-                searchQuery = `
-                    SELECT p.*, STRING_AGG(a.name, ', ') AS authors 
-                    FROM projects p 
-                    LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
-                    LEFT JOIN authors a ON pa.author_id = a.author_id 
-                    WHERE a.name ILIKE $1 
-                    GROUP BY p.project_id 
-                    ORDER BY p.publication_date DESC
-                `;
-                break;
-            case 'title':
-                // Search projects by title
-                searchQuery = `
-                    SELECT p.*, STRING_AGG(a.name, ', ') AS authors 
-                    FROM projects p 
-                    LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
-                    LEFT JOIN authors a ON pa.author_id = a.author_id 
-                    WHERE p.title ILIKE $1 
-                    GROUP BY p.project_id 
-                    ORDER BY p.publication_date DESC
-                `;
-                break;
-            case 'keywords':
-                // Search projects by keyword
-                searchQuery = `
-                    SELECT p.*, STRING_AGG(a.name, ', ') AS authors, STRING_AGG(k.keyword, ', ') AS keywords
-                    FROM projects p 
-                    LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
-                    LEFT JOIN authors a ON pa.author_id = a.author_id 
-                    LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
-                    LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
-                    WHERE k.keyword ILIKE $1 
-                    GROUP BY p.project_id 
-                    ORDER BY p.publication_date DESC
-                `;
-                break;
-
-            default:
-                return res.status(400).json({ error: 'Invalid search option' });
-        }
-    } else {
-        // If no query is provided, fetch all projects
-        searchQuery = `
-            SELECT p.*, STRING_AGG(a.name, ', ') AS authors, STRING_AGG(k.keyword, ', ') AS keywords
-            FROM projects p 
-            LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
-            LEFT JOIN authors a ON pa.author_id = a.author_id 
-            LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
-            LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
-            GROUP BY p.project_id 
-            ORDER BY p.publication_date DESC
-        `;
-    }
+    `;
 
     try {
-        const searchParams = query ? [`%${query}%`] : []; // Prepare search parameters
-        const result = await pool.query(searchQuery, searchParams);
+        // Execute the query to retrieve all projects
+        const result = await pool.query(searchQuery);
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error retrieving projects:', error);

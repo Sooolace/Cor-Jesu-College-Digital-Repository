@@ -2,7 +2,7 @@
 
 const express = require('express');
 const cors = require('cors');
-const path = require('path'); // Import path module
+const path = require('path'); 
 const pool = require('./db'); 
 const authorsRouter = require('./routes/authors');
 const projectsRouter = require('./routes/projects');
@@ -12,7 +12,9 @@ const researchAreasRouter = require('./routes/researchAreas');
 const topicsRouter = require('./routes/topics'); 
 const researchTypesRouter = require('./routes/researchTypes');
 const keywordsRouter = require('./routes/keywords');
-const projectKeywordsRouter = require('./routes/project_keywords'); // Import your new route
+const projectKeywordsRouter = require('./routes/project_keywords');
+const featuredDocumentsRouter = require('./routes/featureddocuments');
+const searchRouter = require('./routes/search');  // Import search route
 
 require('dotenv').config();
 
@@ -32,6 +34,12 @@ app.use('/api/topics', topicsRouter);
 app.use('/api/researchTypes', researchTypesRouter);
 app.use('/api/keywords', keywordsRouter); 
 app.use('/api/project_keywords', projectKeywordsRouter);
+
+// Featured documents route
+app.use('/api/featured-documents', featuredDocumentsRouter);
+
+// Search route
+app.use('/api/search', searchRouter);  // Use search route
 
 // Health check route
 app.get('/api/health', (req, res) => {

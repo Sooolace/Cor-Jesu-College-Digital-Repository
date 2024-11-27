@@ -25,6 +25,11 @@ import EditAuthor from './pages/admin/EditAuthor';
 import Departments from './pages/user/Departments';
 import DepartmentProjects from './pages/user/DepartmentProjects';
 import Authors from './pages/user/Authors';
+import EditFeatured from './pages/user/EditFeatured';
+import Keywords from './pages/user/Keywords';
+import AllWorks from './pages/user/AllWorks';
+
+
 function MainLayout({ isAdmin }) {
   const location = useLocation();
 
@@ -51,7 +56,10 @@ function MainLayout({ isAdmin }) {
             <Route path="/Departments" element={<Departments />} />
             <Route path="/departments/:departmentName" element={<DepartmentProjects />} />
             <Route path="/Authors" element={<Authors />} />
+            <Route path="/Keywords" element={<Keywords />} />
+            <Route path="/AllWorks" element={<AllWorks />} />
 
+            <Route path="/EditFeatured" element={<EditFeatured />} />
 
           </>
         )}
@@ -72,13 +80,11 @@ function MainLayout({ isAdmin }) {
             <Route path="/admin/EditProject/:projectId" element={<EditProject />} />
             <Route path="/admin/EditAuthor/:authorId" element={<EditAuthor />} />
             <Route path="/admin/DocumentOverview/:projectId" element={<DocumentOverview />} />
-            <Route path="/DocumentOverview/:projectId" element={<DocumentOverview />} />
             <Route path="/AuthorOverview/:authorId" element={<AuthorOverview />} />
             <Route path="/KeywordOverview/:keywordId" element={<KeywordOverview />} />
-            <Route path="/AddNewAuthor" element={<addNewAuthor />} />
+            <Route path="/AddNewAuthor" element={<AddNewAuthor />} />
             <Route path="/admin/Departments" element={<Departments />} />
-            <Route path="/departments/:departmentName" element={<DepartmentProjects />} /> 
-
+            <Route path="/departments/:departmentName" element={<DepartmentProjects />} />
           </>
         )}
       </Routes>
