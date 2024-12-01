@@ -2,38 +2,46 @@
 .sections-container {
   display: flex;
   justify-content: space-between;
-  gap: 20px;  /* Space between the two sections */
+  gap: 20px;
   margin: 0 auto;
-  flex-wrap: wrap;  /* Allow sections to wrap on smaller screens */
+  flex-wrap: wrap; /* Allow sections to wrap on smaller screens */
 }
 
-/* Styling for the "Most Viewed" section */
-.most-viewed-container {
+/* Shared container styling for sections */
+.most-viewed-container,
+.recent-submissions-container {
   padding: 20px;
-  width: 100%;  /* Ensures the width is 48% to align with the other section */
+  width: 100%; /* Make sections responsive */
   height: 100%;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Container for Recent Submissions */
-/* Remove underline from links */
-.most-viewed-container a {
-  text-decoration: none; /* Remove underline */
+/* Links styling */
+.most-viewed-container a,
+.recent-submissions-container a {
+  text-decoration: none;
 }
 
 .recent-submissions-container a:hover {
-  text-decoration: underline; /* Optionally, add underline on hover for better UX */
-  color: #ff6600; /* Inherit color from parent element */
+  text-decoration: underline;
+  color: #ff6600;
 }
 
-/* Title of the Most Viewed Section */
-.most-viewed-container h3 {
+/* Section titles */
+.most-viewed-container h3,
+.recent-submissions-container h3 {
   font-size: 1.8rem;
   color: #333;
   margin-bottom: 20px;
-  font-weight: 500;
+  font-weight: 400;
+}
+
+/* Table container for horizontal scrolling */
+.table-container {
+  overflow-x: auto;
+  margin-top: 20px;
 }
 
 /* Styling the Table */
@@ -41,129 +49,46 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-family: 'Roboto', sans-serif; /* Apply modern font */
+  font-family: 'Roboto', sans-serif;
 }
 
-/* Table Header */
 .results-table th,
 .results-table td {
   padding: 12px;
   text-align: left;
-  font-size: 1.1rem; /* Slightly larger font for readability */
+  font-size: 1rem;
   border-bottom: 1px solid #ddd;
 }
 
 .results-table th {
   background-color: #f7f7f7;
   font-weight: bold;
-  letter-spacing: 1px;  /* Slight letter-spacing for headers */
-  color: #333;  /* Darker color for better contrast */
-}
-
-/* Table Column Widths */
-.results-table th:nth-child(1), /* First column (Title) */
-.results-table td:nth-child(1) {
-  width: 70%;
-}
-
-.results-table th:nth-child(2), /* Second column (Views) */
-.results-table td:nth-child(2) {
-  width: 30%;
-  text-align: center;
-}
-
-.results-table td .fa {
-  margin-right: 5px;
-  color: #cc3217;
-}
-
-.results-table tr:hover {
-  background-color: #f1f1f1;
-  cursor: pointer;
-}
-
-.results-table td:nth-child(2) {
-  font-weight: bold;
-  color: #2771c0;
-}
-
-/* Pagination Controls */
-/* Pagination Controls */
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.pagination-controls .page-number {
-  padding: 8px 12px;
-  background-color: #f7f7f7;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
   color: #333;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  margin: 0;  /* Remove margin to eliminate space between buttons */
 }
 
-.pagination-controls .page-number:hover {
-  background-color: #ff6600;
-  color: white;
-}
-
-.pagination-controls .page-number.active {
-  background-color: #ff6600;
-  color: white;
-  font-weight: bold;
-}
-
-.pagination-controls .page-number:disabled {
-  background-color: #d3d3d3;
-  cursor: not-allowed;
-}
-
-
-
-/* Styling the Table */
-.results-table {
-  width: 100%;  /* Adjust to fill container */
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-family: 'Roboto', sans-serif; /* Apply modern font */
-}
-
-.results-table th,
-.results-table td {
-  padding: 12px;
-  text-align: left;
-  font-size: 1rem;
-  border-bottom: 1px solid #ddd;
-  color: #555; /* Slightly darker text for better readability */
-}
-
-/* Table Column Widths */
-.results-table th:nth-child(1), /* First column (Title) */
+/* Column-specific widths */
+.results-table th:nth-child(1),
 .results-table td:nth-child(1) {
   width: 60%;
 }
 
-.results-table th:nth-child(2), /* Second column (Expand button) */
+.results-table th:nth-child(2),
 .results-table td:nth-child(2) {
   width: 10%;
   text-align: center;
 }
 
-.results-table th:nth-child(3), /* Third column (Authors) */
+.results-table th:nth-child(3),
 .results-table td:nth-child(3) {
   width: 15%;
 }
 
-.results-table th:nth-child(4), /* Fourth column (Date) */
+.results-table th:nth-child(4),
 .results-table td:nth-child(4) {
   width: 15%;
 }
 
+/* Expand icon button */
 .expand-icon {
   background: none;
   border: none;
@@ -172,7 +97,7 @@
   color: #ff6600;
 }
 
-/* Details Row Transition */
+/* Details row transition */
 .details-row {
   background-color: #f9f9f9;
   transition: all 0.3s ease-in-out;
@@ -201,47 +126,54 @@
   padding-bottom: 10px;
 }
 
-/* Pagination Controls */
+/* Pagination controls */
 .pagination-controls {
   display: flex;
   justify-content: center;
-  gap: 20px;
   margin-top: 20px;
 }
 
-.pagination-controls button {
-  padding: 8px 16px;
-  background-color: #ff6600;
-  color: white;
-  border: none;
+.pagination-controls .page-number {
+  padding: 8px 12px;
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 1rem;
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
 }
 
-.pagination-controls button:disabled {
+.pagination-controls .page-number:hover {
+  background-color: #ff6600;
+  color: white;
+}
+
+.pagination-controls .page-number.active {
+  background-color: #ff6600;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination-controls .page-number:disabled {
   background-color: #d3d3d3;
   cursor: not-allowed;
-}
-
-.pagination-controls span {
-  align-self: center;
-  font-weight: bold;
 }
 
 /* Styling for icons inside table */
 .results-table td .fa {
   margin-right: 5px;
+  color: #cc3217;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  /* Stack sections on smaller screens */
   .sections-container {
     flex-direction: column;
   }
-
   .most-viewed-container,
   .recent-submissions-container {
-    width: 100%;  /* Make sections full width on smaller screens */
+    width: 100%;
   }
 }

@@ -6,7 +6,6 @@ function Help() {
     <div className="help-container">
       <h2>Welcome to the Campus Digital Repository Help Page</h2>
       <div className="author-underline"></div>
-
       <section>
         <h3>What is the Campus Digital Repository?</h3>
         <p>

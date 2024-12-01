@@ -4,6 +4,7 @@ import Table from 'react-bootstrap/Table';
 import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 import Breadcrumb from '../../components/BreadCrumb';
+import './styles/keywordoverview.css';
 
 function KeywordOverview() {
   const { keywordId } = useParams();  // Extract keyword name from the URL
@@ -68,6 +69,7 @@ function KeywordOverview() {
       </div>
 
       <div className="keyword-overview-container container mt-4">
+        
         {loading && (
           <div className="text-center mt-4">
             <Spinner animation="border" role="status" />
@@ -79,33 +81,37 @@ function KeywordOverview() {
 
         {keyword && (
           <>
-            <h2 className="text-center">{keyword.keyword}</h2>
-            <div className="keyword-underline"></div>
-
+          <h4 className="text-center">
+            Projects tagged with "{keyword.keyword}"
+          </h4>
+          <div className="author-underline"></div>
             <div className="table-with-back-button">
               {projects.length > 0 ? (
                 <Table striped bordered hover responsive className="mt-3">
-                  <thead>
-                    <tr>
-                      <th>Project Title</th>
-                      <th>Description</th>
-                      <th>Year</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {projects.map((project) => (
-                      <tr key={project.project_id}>
-                        <td>
-                          <Link to={`/DocumentOverview/${project.project_id}`}>
-                            {project.title}
-                          </Link>
-                        </td>
-                        <td>{project.description}</td>
-                        <td>{project.year}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+  <thead>
+    <tr>
+      <th style={{ width: '30%' }}>Project Title</th>
+      <th style={{ width: '50%' }}>Description</th>
+      <th style={{ width: '5%' }}>Year</th>
+    </tr>
+  </thead>
+  <tbody>
+    {projects.map((project) => (
+      <tr key={project.project_id}>
+        <td>
+          <Link to={`/DocumentOverview/${project.project_id}`}>
+            {project.title}
+          </Link>
+        </td>
+        <td className="table-column table-column-description">
+          {project.description}
+        </td>
+        <td>{project.year}</td>
+      </tr>
+    ))}
+  </tbody>
+</Table>
+
               ) : (
                 <p>No projects found for this keyword.</p>
               )}

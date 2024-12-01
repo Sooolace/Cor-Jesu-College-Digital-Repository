@@ -84,7 +84,7 @@ function AuthorOverview() {
 
         {author && (
           <>
-            <h2 className="text-center">{author.name}</h2>
+            <h4 className="text-center">Works by "{author.name}"</h4>
             <div className="author-underline"></div>
 
             <div className="table-with-back-button">

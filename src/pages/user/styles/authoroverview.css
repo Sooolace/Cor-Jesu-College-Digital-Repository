@@ -20,3 +20,8 @@ table td.truncate {
   text-overflow: ellipsis; /* Add ellipsis when the text overflows */
   white-space: nowrap; /* Prevent wrapping the text into multiple lines */
 }
+
+/* General Table Styling */
+.table {
+  border-style: solid;
+}

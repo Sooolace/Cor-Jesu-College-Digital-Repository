@@ -14,6 +14,7 @@
   width: 100%;
   box-sizing: border-box;
   flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  margin-top: 5px;
 }
 
 /* Search input field */

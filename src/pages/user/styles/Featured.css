@@ -5,6 +5,7 @@
   width: 100%;  /* Full width */
   max-width: 1250px; /* Limits the width on large screens */
   box-sizing: border-box; /* Ensures padding and border don't affect the width */
+  margin-top: -20px;
 }
 
 /* Section Title */

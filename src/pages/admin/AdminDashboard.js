@@ -18,6 +18,7 @@ function AdminDashboard() {
   // Check for authentication on component mount
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
     if (!token) {
       // If no token is found, redirect to login page
       navigate('/login');
@@ -100,13 +101,13 @@ function AdminDashboard() {
         </div>
 
         <div className="two-column-section">
-  <section className="recent-submissions">
-    <RecentSubmissions />
-  </section>
-  <section className="most-viewed">
-    <MostViewed />
-  </section>
-</div>
+          <section className="recent-submissions">
+            <RecentSubmissions />
+          </section>
+          <section className="most-viewed">
+            <MostViewed />
+          </section>
+        </div>
 
 
         <Section title="Trending Topics">

@@ -12,6 +12,8 @@ function Login({ setIsAdmin }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const role = 'admin';  // or get the role from the server response
+    const token = 'your-jwt-token';  // the token from your API response
 
     try {
       // Make API request to backend for authentication
@@ -29,17 +31,19 @@ function Login({ setIsAdmin }) {
         // If login is successful, store token and user data in localStorage
         const { token } = data; // Assume token is sent in the response
 
-        localStorage.setItem('token', token);
+        localStorage.setItem('role', role);
         localStorage.setItem('username', username); // Store the username in localStorage
+        localStorage.setItem('token', token);
 
-        // You can add additional information like the user's role if returned from the API
-        // For example:
-        // localStorage.setItem('role', user.role);
 
-        // Set the admin state (if the role is returned by the API)
-        setIsAdmin(true);  // Set as admin if needed (you can modify based on role)
-
-        // Redirect user based on their role or dashboard
+        if (role === 'admin') {
+          localStorage.setItem('isAdmin', 'true');
+        } else {
+          localStorage.setItem('isAdmin', 'false');
+        }
+      
+        // Navigate to admin dashboard or home
+        setIsAdmin(true); // set isAdmin state
         navigate('/admindashboard'); // Navigate to admin dashboard (or other page based on role)
       } else {
         // Show error message if login fails
