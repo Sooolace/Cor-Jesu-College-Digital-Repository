@@ -23,53 +23,53 @@ function DocumentOverview() {
     const fetchData = async () => {
       try {
         setLoading(true); // Start loading
-
+  
         // Fetch project data
         const projectResponse = await fetch(`/api/projects/${projectId}`);
         if (!projectResponse.ok) throw new Error('Failed to fetch project data');
         const projectData = await projectResponse.json();
         setProject(projectData); // Save project data
-
+  
         // Fetch keywords for the project
         const keywordsResponse = await fetch(`/api/project_keywords/${projectId}`);
         if (!keywordsResponse.ok) throw new Error('Failed to fetch keywords');
         const keywordsData = await keywordsResponse.json();
         setKeywords(keywordsData); // Save keywords data
-
+  
         // Fetch authors for the project
         const authorsResponse = await fetch(`/api/project_authors/${projectId}`);
         if (!authorsResponse.ok) throw new Error('Failed to fetch authors');
         const authorsData = await authorsResponse.json();
         setAuthors(authorsData); // Save authors data
-
-        // Fetch category directly using projectData.category_id
-        const categoryRes = await fetch(`/api/categories/${projectData.category_id}`);
-        if (categoryRes.ok) {
-          const categoryData = await categoryRes.json();
-          setCategory(categoryData); // Save category data
+  
+        // Fetch categories related to the project
+        const categoriesRes = await fetch(`/api/project_category/${projectId}`);
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          setCategory(categoriesData); // Save all category data
         }
 
-        // Fetch research area independently, using projectData.research_area_id
+        // Fetch research area independently
         const researchAreaRes = await fetch(`/api/researchAreas/researchArea/${projectData.research_area_id}`);
         if (researchAreaRes.ok) {
           const researchAreaData = await researchAreaRes.json();
           setResearchArea(researchAreaData); // Save research area data
         }
-
-        // Fetch topic independently, using projectData.topic_id
+  
+        // Fetch topic independently
         const topicRes = await fetch(`/api/topics/topics/${projectData.topic_id}`);
         if (topicRes.ok) {
           const topicData = await topicRes.json();
           setTopic(topicData); // Save topic data
         }
-
-        // Fetch research type after all the other data
+  
+        // Fetch research type
         const researchTypeRes = await fetch(`/api/researchTypes/${projectData.research_type_id}`);
         if (researchTypeRes.ok) {
           const researchTypeData = await researchTypeRes.json();
           setResearchType(researchTypeData); // Save research type data
         }
-
+  
       } catch (err) {
         console.error(err);
         setError('Failed to load project or related data');
@@ -77,7 +77,7 @@ function DocumentOverview() {
         setLoading(false); // Finish loading
       }
     };
-
+  
     fetchData(); // Call the fetchData function when the component is mounted or projectId changes
   }, [projectId]); // Dependency array: runs when projectId changes
 
@@ -125,7 +125,6 @@ function DocumentOverview() {
       
       <div className="d-table-container">
         <div className="table-with-back-button">
-
           <h1 className="text-left mt-4" style={{ fontSize: '24px', fontWeight: 'bold' }}>
             {project.title}
           </h1>
@@ -138,7 +137,7 @@ function DocumentOverview() {
                   {authors.length > 0 ? (
                     authors.map((author, index) => (
                       <span key={author.author_id}>
-                        <Link to={`/AuthorOverview/${author.author_id}`} className="author-link">
+                        <Link to={`/AuthorOverview/${encodeURIComponent(author.name)}`} className="author-link">
                           {author.name}
                         </Link>
                         {index < authors.length - 1 && ', '}
@@ -157,10 +156,25 @@ function DocumentOverview() {
                   {keywords.length > 0 ? (
                     keywords.map((keyword, index) => (
                       <span key={keyword.keyword_id}>
-                        <Link to={`/KeywordOverview/${keyword.keyword_id}`} className="keyword-link">
+                        <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword)}`} className="keyword-link">
                           {keyword.keyword}
                         </Link>
                         {index < keywords.length - 1 && ', '}
+                      </span>
+                    ))
+                  ) : 'N/A'}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Departments</strong></td>
+                <td>
+                  {Array.isArray(category) && category.length > 0 ? (
+                    category.map((categoryItem, index) => (
+                      <span key={categoryItem.category_id}>
+                        <Link to={`/DepartmentOverview/${categoryItem.category_id}`} className="category-link">
+                          {categoryItem.name}
+                        </Link>
+                        {index < category.length - 1 && ', '}
                       </span>
                     ))
                   ) : 'N/A'}
@@ -174,12 +188,6 @@ function DocumentOverview() {
                 <tr>
                   <td><strong>Research Type</strong></td>
                   <td>{researchType.name}</td>
-                </tr>
-              )}
-              {category && (
-                <tr>
-                  <td><strong>Category</strong></td>
-                  <td>{category.name}</td>
                 </tr>
               )}
               {researchArea && (

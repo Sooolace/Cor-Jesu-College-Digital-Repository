@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Use Link from React Router for navigation
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCalendar, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import '../pages/user/styles/recentsubmissions.css';
@@ -16,6 +17,9 @@ const RecentSubmissions = ({ searchQuery }) => {
       try {
         setIsLoading(true);
         const response = await fetch('/api/projects'); // Replace with your actual API endpoint
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
         const data = await response.json();
 
         // Sort submissions by created_at (timestamp) in descending order
@@ -54,7 +58,7 @@ const RecentSubmissions = ({ searchQuery }) => {
 
   return (
     <div className="recent-submissions-container">
-      <h3>{searchQuery ? `Search Results for "${searchQuery}"` : 'Recent Submissions'}</h3>
+      <h3 className="section-title">{searchQuery ? `Search Results for "${searchQuery}"` : 'Recent Submissions'}</h3>
 
       {isLoading ? (
         <p className="loading-message">Loading...</p>
@@ -64,15 +68,14 @@ const RecentSubmissions = ({ searchQuery }) => {
             <>
               <div className="table-container">
                 <table className="results-table">
-
                   <tbody>
                     {displayedSubmissions.map((submission, index) => (
                       <React.Fragment key={index}>
                         <tr>
                           <td>
-                            <a href={`/DocumentOverview/${submission.id}`}>
+                            <Link to={`/DocumentOverview/${submission.project_id}`}>
                               {submission.title}
-                            </a>
+                            </Link>
                           </td>
                           <td>
                             <button 
@@ -89,9 +92,23 @@ const RecentSubmissions = ({ searchQuery }) => {
                           <tr className="details-row">
                             <td colSpan="2">
                               <div className="details-content">
-                                <p><FontAwesomeIcon icon={faUser} /> {submission.authors || 'No authors listed'}</p>
-                                <p><FontAwesomeIcon icon={faCalendar} /> {new Date(submission.created_at).toLocaleDateString()}</p>
-                                <p>Category: {submission.category || 'No category listed'}</p>
+                              <p>
+  <FontAwesomeIcon icon={faUser} />
+  {submission.authors && submission.authors.length > 0 ? (
+    submission.authors.split(',').map((author, index) => (
+      <span key={index}>
+        <Link to={`/AuthorOverview/${encodeURIComponent(author.trim())}`} className="author-link">
+          {author.trim()}
+        </Link>
+        {index < submission.authors.split(',').length - 1 && ', '}
+      </span>
+    ))
+  ) : (
+    'No authors listed'
+  )}
+</p>
+                             <p><FontAwesomeIcon icon={faCalendar} /> {new Date(submission.created_at).toLocaleDateString()}</p>
+                                <p>Department: {submission.category_id || 'No category listed'}</p>
                               </div>
                             </td>
                           </tr>
@@ -104,20 +121,17 @@ const RecentSubmissions = ({ searchQuery }) => {
 
               {/* Pagination Controls */}
               <div className="pagination-controls">
-                <button
-                  onClick={() => handlePagination('prev')}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                <span>Page {currentPage} of {totalPages}</span>
-                <button
-                  onClick={() => handlePagination('next')}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </button>
-              </div>
+  {Array.from({ length: totalPages }, (_, index) => (
+    <button
+      key={index + 1}
+      className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
+      onClick={() => setCurrentPage(index + 1)}
+    >
+      {index + 1}
+    </button>
+  ))}
+</div>
+
             </>
           ) : (
             <p className="no-results-message">No recent submissions found.</p>

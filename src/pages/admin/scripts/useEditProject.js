@@ -20,6 +20,7 @@ export const useEditProject = (projectId, navigate) => {
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const [keywords, setKeywords] = useState([]); // New state for keywords
     const [selectedKeywords, setSelectedKeywords] = useState([]); // New state for selected keywords
+    const [selectedDepartments, setSelectedDepartments] = useState([]); // Corrected state initialization
     const [categories, setCategories] = useState([]);
     const [researchAreas, setResearchAreas] = useState([]);
     const [topics, setTopics] = useState([]); // Topics state
@@ -59,6 +60,7 @@ export const useEditProject = (projectId, navigate) => {
             });
             setSelectedAuthors(data.authors ? data.authors.map(author => author.author_id) : []);
             setSelectedKeywords(data.keywords ? data.keywords.map(keyword => keyword.keyword_id) : []); // Set selected keywords
+            setSelectedDepartments(data.categories ? data.categories.map(category => category.category_id) : []); // Set selected keywords
         } catch (error) {
             console.error('Error fetching project:', error);
             setError('Failed to load project details');
@@ -151,17 +153,20 @@ export const useEditProject = (projectId, navigate) => {
         }));
     };    
 
-    const handleCategoryChange = (e) => {
-        const selectedCategoryId = e.target.value;
-        setFormData(prevState => ({
-            ...prevState,
-            category_id: selectedCategoryId,
-            research_area_id: '', // Clear dependent field
-            topic_id: '', // Clear dependent field
-        }));
-        setResearchAreas([]); // Clear the research areas dropdown
-        setTopics([]); // Clear the topics dropdown
-    };
+const handleCategoryChange = (e) => {
+    const selectedCategoryId = e?.target?.value;  // Safeguard in case value is undefined
+    if (!selectedCategoryId) return; // Avoid running the code if no category is selected
+    
+    setFormData(prevState => ({
+        ...prevState,
+        category_id: selectedCategoryId,
+        research_area_id: '', // Clear dependent field
+        topic_id: '', // Clear dependent field
+    }));
+    setResearchAreas([]); // Clear the research areas dropdown
+    setTopics([]); // Clear the topics dropdown
+};
+
     
     const handleResearchAreaChange = (e) => {
         const selectedResearchAreaId = e.target.value;
@@ -195,6 +200,18 @@ export const useEditProject = (projectId, navigate) => {
         setSelectedKeywords(selected);
     };
 
+    const handleDepartmentChange = (e) => {
+        const options = e.target.options;
+        const selected = [];
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].selected) {
+                selected.push(options[i].value);
+            }
+        }
+        setSelectedDepartments(selected); // Corrected function name
+    };
+    
+    
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -203,64 +220,118 @@ export const useEditProject = (projectId, navigate) => {
         }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        // Remove existing authors and keywords
-        await Promise.all(selectedAuthors.map(author_id => 
-            fetch('/api/project_authors', { 
-                method: 'DELETE', 
+ const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+        // Fetch existing authors, keywords, and categories
+        const existingAuthors = await fetch(`/api/project_authors/${projectId}`).then(res => res.json());
+        const existingAuthorIds = existingAuthors.map(a => a.author_id);
+
+        const existingKeywords = await fetch(`/api/project_keywords/${projectId}`).then(res => res.json());
+        const existingKeywordIds = existingKeywords.map(k => k.keyword_id);
+
+        const existingDepartments = await fetch(`/api/project_category/${projectId}`).then(res => res.json());
+        const existingDepartmentIds = existingDepartments.map(d => d.category_id);
+
+        // Compute which authors, keywords, and categories need to be removed or added
+        const authorsToRemove = existingAuthorIds.filter(id => !selectedAuthors.includes(id));
+        const authorsToAdd = selectedAuthors.filter(id => !existingAuthorIds.includes(id));
+
+        const keywordsToRemove = existingKeywordIds.filter(id => !selectedKeywords.includes(id));
+        const keywordsToAdd = selectedKeywords.filter(id => !existingKeywordIds.includes(id));
+
+        const departmentsToRemove = existingDepartmentIds.filter(id => !selectedDepartments.includes(id));
+        const departmentsToAdd = selectedDepartments.filter(id => !existingDepartmentIds.includes(id));
+
+        // Only send requests for authors, keywords, and departments if there are changes
+        await Promise.all(authorsToRemove.map(author_id =>
+            fetch('/api/project_authors', {
+                method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ project_id: projectId, author_id })
             })
         ));
-        
-        await Promise.all(selectedKeywords.map(keyword_id => 
-            fetch('/api/project_keywords', { 
-                method: 'DELETE', 
+
+        await Promise.all(keywordsToRemove.map(keyword_id =>
+            fetch('/api/project_keywords', {
+                method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ project_id: projectId, keyword_id })
             })
         ));
-    
-        // Create new authors and keywords
-        await Promise.all(selectedAuthors.map(author_id => 
-            fetch('/api/project_authors', { 
-                method: 'POST', 
+
+        await Promise.all(departmentsToRemove.map(category_id =>
+            fetch('/api/project_category', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: projectId, category_id })
+            })
+        ));
+
+        // Step 4: Add new authors, keywords, and categories if needed
+        await Promise.all(authorsToAdd.map(author_id =>
+            fetch('/api/project_authors', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ project_id: projectId, author_id })
             })
         ));
-        
-        await Promise.all(selectedKeywords.map(keyword_id => 
-            fetch('/api/project_keywords', { 
-                method: 'POST', 
+
+        await Promise.all(keywordsToAdd.map(keyword_id =>
+            fetch('/api/project_keywords', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ project_id: projectId, keyword_id })
             })
         ));
-    
-        // Update project details
+
+        // Only add new categories that don't already exist
+        const departmentsToAddUnique = [];
+        for (let category_id of departmentsToAdd) {
+            // Check if the category already exists
+            const categoryExists = existingDepartmentIds.includes(category_id);
+            if (!categoryExists) {
+                departmentsToAddUnique.push(category_id);
+            }
+        }
+
+        // Send requests for new departments
+        await Promise.all(departmentsToAddUnique.map(category_id =>
+            fetch('/api/project_category', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: projectId, category_id })
+            })
+        ));
+
+        // Step 5: Update project details with selected authors, keywords, and departments
         const updatedData = {
             ...formData,
             authors: selectedAuthors,
             keywords: selectedKeywords,
+            departments: selectedDepartments // Include updated departments
         };
+
+        // Send PUT request to update project
+        const response = await fetch(`/api/projects/${projectId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData),
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        navigate(`/DocumentOverview/${projectId}`);  // Navigate to the updated document overview page
+
+    } catch (error) {
+        console.error('Error updating project:', error);
+        setError('Failed to update project');  // Set error state if something goes wrong
+    }
+};
+
     
-        try {
-            const response = await fetch(`/api/projects/${projectId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedData),
-            });
     
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            navigate(`/admin/DocumentOverview/${projectId}`);
-        } catch (error) {
-            console.error('Error updating project:', error);
-            setError('Failed to update project');
-        }
-    };
+    
     
 
     return {
@@ -274,6 +345,8 @@ export const useEditProject = (projectId, navigate) => {
         keywords,
         selectedKeywords,
         setSelectedKeywords,
+        selectedDepartments,
+        setSelectedDepartments,
         categories,
         researchAreas,
         topics,
@@ -286,5 +359,6 @@ export const useEditProject = (projectId, navigate) => {
         handleKeywordChange, // New handler for keyword selection
         handleChange,
         handleResearchTypeChange,
+        handleDepartmentChange
     };
 };

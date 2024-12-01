@@ -1,157 +1,192 @@
 import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios'; // Assuming you're using Axios for API calls
+import axios from 'axios';
 import '../styles/subjectfilter.css';
 
-function SubjectFilter({ selectedCategories, setSelectedCategories, onApply }) {
-  const [expandedAreas, setExpandedAreas] = useState({});
+const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, handleClearFilters }) => {
   const [categories, setCategories] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState(null);
+  const [expandedResearchArea, setExpandedResearchArea] = useState(null);
+  const [selectedResearchAreas, setSelectedResearchAreas] = useState([]);
+  const [selectedTopics, setSelectedTopics] = useState([]);
 
-  // Fetch categories, research areas, and topics from the API
+  // Fetch the categories with their research areas and topics
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get('/api/categories');
-        setCategories(response.data || []); 
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-
-    fetchCategories();
+    axios.get('/api/categories')
+      .then(response => {
+        setCategories(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching categories", error);
+      });
   }, []);
 
-  const handleDepartmentChange = (department) => {
-    const isDepartmentSelected = selectedCategories.includes(department);
+  // Helper function to toggle selection of a category
+  const toggleCategorySelection = (categoryId) => {
+    setSelectedCategories(prevState => {
+        const isSelected = prevState.includes(categoryId);
+        let newState;
+        
+        if (isSelected) {
+            newState = prevState.filter(id => id !== categoryId);
+            const category = categories.find(cat => cat.category_id === categoryId);
+            const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
+            const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
+            
+            setSelectedResearchAreas(prevResearchAreas => prevResearchAreas.filter(ra => !researchAreaIds.includes(ra)));
+            setSelectedTopics(prevTopics => prevTopics.filter(topic => !topicIds.includes(topic)));
+        } else {
+            newState = [...prevState, categoryId];
+            const category = categories.find(cat => cat.category_id === categoryId);
+            const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
+            const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
+            
+            setSelectedResearchAreas(prev => [...new Set([...prev, ...researchAreaIds])]);
+            setSelectedTopics(prev => [...new Set([...prev, ...topicIds])]);
+        }
+  
+        return newState;
+    });
+  };
 
-    if (isDepartmentSelected) {
-      setSelectedCategories(selectedCategories.filter(item => item !== department));
-    } else {
-      setSelectedCategories([...selectedCategories, department]);
+  // Define the missing functions here:
+
+  // Function to toggle research area selection
+  const toggleResearchAreaSelection = (researchAreaId) => {
+    setSelectedResearchAreas(prevState => {
+        const isSelected = prevState.includes(researchAreaId);
+        const newState = isSelected
+            ? prevState.filter(id => id !== researchAreaId)
+            : [...prevState, researchAreaId];
+
+        const categoryId = categories.find(cat => cat.research_areas.some(ra => ra.research_area_id === researchAreaId))?.category_id;
+        const topics = categories.find(cat => cat.category_id === categoryId)
+            .research_areas.find(ra => ra.research_area_id === researchAreaId).topics;
+
+        if (!isSelected) {
+            // Include all topics in the selected research area
+            setSelectedTopics(prev => [
+                ...new Set([...prev, ...topics.map(topic => topic.topic_id)]),
+            ]);
+        } else {
+            // Remove topics if research area is deselected
+            setSelectedTopics(prev => prev.filter(id => !topics.some(topic => topic.topic_id === id)));
+        }
+
+        return newState;
+    });
+  };
+
+  // Function to toggle topic selection
+  const toggleTopicSelection = (topicId) => {
+    setSelectedTopics(prevState => {
+        const isSelected = prevState.includes(topicId);
+        return isSelected
+            ? prevState.filter(id => id !== topicId)
+            : [...prevState, topicId];
+    });
+  };
+
+  // Handle expanding categories and research areas
+  const handleExpandCategory = (categoryId) => {
+    setExpandedCategory(prevState => prevState === categoryId ? null : categoryId);
+  };
+
+  const handleExpandResearchArea = (researchAreaId) => {
+    setExpandedResearchArea(prevState => prevState === researchAreaId ? null : researchAreaId);
+  };
+
+  // Check if all research areas are selected for a category
+  const isCategorySelected = (categoryId) => {
+    return selectedCategories.includes(categoryId);
+  };
+
+  const isResearchAreaSelected = (researchAreaId) => {
+    return selectedResearchAreas.includes(researchAreaId);
+  };
+
+  const isTopicSelected = (topicId) => {
+    return selectedTopics.includes(topicId);
+  };
+
+  // Trigger the apply filters action
+  const handleApplyFilters = () => {
+    if (onApply) {
+        onApply(selectedCategories, selectedResearchAreas, selectedTopics);
     }
   };
 
-  const handleCategoryChange = (department, category) => {
-    const isCategorySelected = selectedCategories.includes(category);
-    if (isCategorySelected) {
-      setSelectedCategories(selectedCategories.filter(item => item !== category));
-    } else {
-      setSelectedCategories([...selectedCategories, category]);
+  const handleClearData = () => {
+    setSelectedCategories([]);
+    setSelectedResearchAreas([]);
+    setSelectedTopics([]);
+    if (handleClearFilters) {
+      handleClearFilters();  // Trigger the parent's clear filter function if provided
     }
-  };
-
-  const handleSubcategoryChange = (subcategory) => {
-    if (selectedCategories.includes(subcategory)) {
-      setSelectedCategories(selectedCategories.filter(item => item !== subcategory));
-    } else {
-      setSelectedCategories([...selectedCategories, subcategory]);
-    }
-  };
-
-  const toggleAreaExpansion = (area) => {
-    setExpandedAreas(prev => ({ ...prev, [area]: !prev[area] }));
   };
 
   return (
     <div className="subject-filter">
-      <button
-        className="btn btn-secondary"
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center' }}
-      >
-        <FontAwesomeIcon icon={isOpen ? faChevronDown : faChevronRight} style={{ marginRight: '10px' }} />
-        Filter by Category
-      </button>
+  <div className="filter-header">
+    <h3>Filter by Category</h3>
+    <button className="clear-button" onClick={handleClearData}>Clear Filters</button>
+  </div>    
+    <div className="dropdown-content">
+        {categories.map(category => (
+          <div key={category.category_id} className="category-group">
+            <div className="category-checkbox">
+              <input
+                type="checkbox"
+                checked={isCategorySelected(category.category_id)}
+                onChange={() => toggleCategorySelection(category.category_id)}
+              />
+              <label onClick={() => handleExpandCategory(category.category_id)}>
+                {category.name} {expandedCategory === category.category_id && "▼"}
+              </label>
+            </div>
 
-      {isOpen && (
-        <>
-          <div className="dropdown-content">
-            <div className="subject-list">
-              {Array.isArray(categories) &&
-                categories.map(department => (
-                  <div key={department.category_id} className="category-group">
-                    <div className="form-check category-checkbox">
-                      <FontAwesomeIcon
-                        icon={expandedAreas[department.category_id] ? faChevronDown : faChevronRight}
-                        style={{ marginRight: '10px', cursor: 'pointer' }}
-                        onClick={() => toggleAreaExpansion(department.category_id)}
-                      />
+            {expandedCategory === category.category_id && category.research_areas && (
+              <div className="subcategories">
+                {category.research_areas.map(researchArea => (
+                  <div key={researchArea.research_area_id}>
+                    <div className="category-checkbox">
                       <input
                         type="checkbox"
-                        id={department.category_id}
-                        checked={selectedCategories.includes(department.category_id)}
-                        onChange={() => handleDepartmentChange(department.category_id)}
+                        checked={isResearchAreaSelected(researchArea.research_area_id) || isCategorySelected(category.category_id)}
+                        onChange={() => toggleResearchAreaSelection(researchArea.research_area_id)}
                       />
-                      <label htmlFor={department.category_id} style={{ marginLeft: '5px', fontWeight: 'bold' }}>
-                        {department.name}
+                      <label onClick={() => handleExpandResearchArea(researchArea.research_area_id)}>
+                        {researchArea.name} {expandedResearchArea === researchArea.research_area_id && "▼"}
                       </label>
                     </div>
 
-                    {expandedAreas[department.category_id] && (
-                      <div style={{ marginLeft: '20px' }}>
-                        {Array.isArray(department.research_areas) &&
-                          department.research_areas.map(area => (
-                            <div key={area.research_area_id}>
-                              <div className="form-check category-checkbox">
-                                <FontAwesomeIcon
-                                  icon={expandedAreas[area.research_area_id] ? faChevronDown : faChevronRight}
-                                  style={{ marginRight: '10px', cursor: 'pointer' }}
-                                  onClick={() => toggleAreaExpansion(area.research_area_id)}
-                                />
-                                <input
-                                  type="checkbox"
-                                  id={area.research_area_id}
-                                  checked={selectedCategories.includes(area.research_area_id)}
-                                  onChange={() => handleCategoryChange(department.category_id, area.research_area_id)}
-                                />
-                                <label
-                                  htmlFor={area.research_area_id}
-                                  style={{ marginLeft: '5px', fontWeight: 'bold' }}
-                                >
-                                  {area.name}
-                                </label>
-                              </div>
-
-                              {expandedAreas[area.research_area_id] && (
-                                <div
-                                  className="subcategories"
-                                  style={{ marginLeft: '20px', marginTop: '5px' }}
-                                >
-                                  {Array.isArray(area.topics) &&
-                                    area.topics.map(topic => (
-                                      <div key={topic.topic_id} className="form-check">
-                                        <input
-                                          type="checkbox"
-                                          id={topic.topic_id}
-                                          checked={selectedCategories.includes(topic.topic_id)}
-                                          onChange={() => handleSubcategoryChange(topic.topic_id)}
-                                        />
-                                        <label htmlFor={topic.topic_id} style={{ marginLeft: '5px' }}>
-                                          {topic.name}
-                                        </label>
-                                      </div>
-                                    ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                    {expandedResearchArea === researchArea.research_area_id && researchArea.topics && (
+                      <div className="topic-list">
+                        {researchArea.topics.map(topic => (
+                          <div key={topic.topic_id} className="form-check">
+                            <input
+                              type="checkbox"
+                              checked={isTopicSelected(topic.topic_id) || isResearchAreaSelected(researchArea.research_area_id) || isCategorySelected(category.category_id)}
+                              onChange={() => toggleTopicSelection(topic.topic_id)}
+                            />
+                            <label>{topic.name}</label>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
                 ))}
-            </div>
+              </div>
+            )}
           </div>
-          <div className="apply-button-container">
-            <button className="apply-button" onClick={onApply}>
-              Apply
-            </button>
-          </div>
-        </>
-      )}
+        ))}
+      </div>
+
+      {/* Apply and Clear Filters Button Section */}
+      <div className="apply-button-container">
+        <button className="apply-button" onClick={handleApplyFilters}>Apply</button>
+      </div>
     </div>
   );
-}
+};
 
 export default SubjectFilter;

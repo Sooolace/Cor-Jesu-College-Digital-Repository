@@ -11,13 +11,14 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
           id="searchOptions"
           className="search-options"
           value={selectedOption}
-          onChange={(e) => onOptionChange(e.target.value)} // Just updates the selectedOption
+          onChange={(e) => onOptionChange(e.target.value)}
         >
           <option value="allfields">All Fields</option>
           <option value="title">Title</option>
           <option value="author">Author</option>
           <option value="keywords">Keywords</option>
           <option value="abstract">Abstract</option>
+          <option value="category">Category</option> {/* Added Category option */}
         </select>
         <input
           type="text"
@@ -25,7 +26,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
           className="searchBar"
           placeholder="Search for..."
           value={query}
-          onChange={(e) => onChange(e.target.value)} // Updates typedQuery
+          onChange={(e) => onChange(e.target.value)}
         />
         <button className="btn-search" onClick={onSearch}>
           <FontAwesomeIcon icon={faMagnifyingGlass} />

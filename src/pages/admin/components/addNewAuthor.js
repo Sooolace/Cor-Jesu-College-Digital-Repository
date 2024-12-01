@@ -114,11 +114,10 @@ function AddNewAuthor({ onHide }) {
           </Form.Group>
 
           <div style={{ textAlign: 'center' }}>
-  <Button type="submit" variant="primary">
-    Add Author
-  </Button>
-</div>
-
+            <Button type="submit" variant="primary">
+              Add Author
+            </Button>
+          </div>
         </Form>
       )}
     </div>

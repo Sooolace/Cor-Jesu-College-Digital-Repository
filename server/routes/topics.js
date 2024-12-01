@@ -1,26 +1,35 @@
+//topics.js
+
 const express = require('express');
 const pool = require('../db'); // Database connection
 const router = express.Router();
 
-// GET topics by research area ID
+// GET topics by research area ID, including category information
 router.get('/:researchAreaId', async (req, res) => {
     const { researchAreaId } = req.params; // Capture the research area ID from the request parameters
     try {
         const result = await pool.query(
-            'SELECT * FROM topics WHERE research_area_id = $1 ORDER BY name', 
+            `
+            SELECT topics.topic_id, topics.name, topics.category_id, categories.name AS category_name
+            FROM topics
+            LEFT JOIN categories ON topics.category_id = categories.category_id
+            WHERE research_area_id = $1
+            ORDER BY topics.name
+            `, 
             [researchAreaId]
         );
-        
+
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'No topics found for this research area' });
         }
 
-        res.status(200).json(result.rows);
+        res.status(200).json(result.rows);  // Return topics with category info
     } catch (error) {
         console.error('Error executing query', error.stack);
         res.status(500).json({ error: 'Server error' });
     }
 });
+
 
 router.get('/topics/:topicId', async (req, res) => {
     const { topicId } = req.params; // Capture the topicId from the request parameters

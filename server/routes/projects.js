@@ -21,40 +21,54 @@ const parseStudyUrl = (study_url) => {
     }
 };
 
-// POST - Add a new project
-router.post('/', upload.single('file_path'), async (req, res) => {
+  
+  // POST - Add a new project
+  router.post('/', upload.single('file_path'), async (req, res) => {
     const { title, description_type, abstract, publication_date, study_url, category_id, keywords } = req.body;
-
+  
     try {
-        if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-
-        const filePath = req.file.path;
-        const studyUrlString = parseStudyUrl(study_url);
-
-        const query = `
-            INSERT INTO projects (title, description_type, abstract, publication_date, file_path, study_url, category_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING *
+      // Log incoming request data for debugging
+      console.log('Request body:', req.body);
+      console.log('Uploaded file:', req.file);
+  
+      // Ensure that the file is uploaded
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+  
+      const filePath = req.file.path; // Path to the uploaded file
+      const studyUrlString = parseStudyUrl(study_url); // Parse the study URL
+  
+      // Insert project data into the 'projects' table
+      const query = `
+        INSERT INTO projects (title, description_type, abstract, publication_date, file_path, study_url, category_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+      `;
+      const result = await pool.query(query, [title, description_type, abstract, publication_date, filePath, studyUrlString, category_id]);
+  
+      // Get the inserted project ID
+      const projectId = result.rows[0].project_id;
+  
+      // Insert keywords into the 'keywords' table if they exist
+      if (keywords && Array.isArray(keywords) && keywords.length > 0) {
+        const insertKeywordsQuery = `
+          INSERT INTO keywords (project_id, keyword)
+          VALUES ($1, $2)
         `;
-        const result = await pool.query(query, [title, description_type, abstract, publication_date, filePath, studyUrlString, category_id]);
-
-        // Insert keywords into the keywords table
-        const projectId = result.rows[0].project_id; // Get the inserted project ID
-        if (keywords && keywords.length > 0) {
-            const insertKeywordsQuery = `
-                INSERT INTO keywords (project_id, keyword)
-                VALUES ($1, $2)
-            `;
-            const keywordInsertPromises = keywords.map(keyword => pool.query(insertKeywordsQuery, [projectId, keyword]));
-            await Promise.all(keywordInsertPromises);
-        }
-
-        res.status(201).json(result.rows[0]);
+        const keywordInsertPromises = keywords.map((keyword) =>
+          pool.query(insertKeywordsQuery, [projectId, keyword])
+        );
+        await Promise.all(keywordInsertPromises);
+      }
+  
+      // Respond with the created project data
+      res.status(201).json(result.rows[0]);
     } catch (error) {
-        console.error('Error adding project:', error);
-        res.status(500).json({ error: 'Server error' });
+      console.error('Error adding project:', error.message); // Log specific error message
+      res.status(500).json({ error: 'Server error' });
     }
-});
+  });
 
   // GET - Fetch all projects without any search conditions
 router.get('/', async (req, res) => {
@@ -180,20 +194,40 @@ router.post('/:project_id/authors', async (req, res) => {
     }
 });
 router.get('/top-viewed', async (req, res) => {
-  try {
-    const query = `
-      SELECT project_id, title, view_count
-      FROM projects
-      ORDER BY view_count DESC
-      LIMIT 10;
+    const topViewedQuery = `
+    SELECT p.*, 
+           STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+           STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+    FROM projects p
+    LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+    LEFT JOIN authors a ON pa.author_id = a.author_id 
+    LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+    LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+    GROUP BY p.project_id 
+    ORDER BY p.view_count DESC
+    LIMIT 10;
     `;
-    const result = await pool.query(query); // Assuming you have a pool of database connections
-    res.status(200).json(result.rows);  // Ensure the response is an array
-  } catch (error) {
-    console.error('Error fetching top viewed projects:', error); // Log the error to debug
-    res.status(500).json({ error: 'Failed to retrieve project' });  // Send error response
-  }
+
+    try {
+        // Execute the query to retrieve top-viewed projects with authors and keywords
+        const result = await pool.query(topViewedQuery);
+        
+        if (!result.rows || result.rows.length === 0) {
+            console.log('No top-viewed projects found.');
+            return res.status(404).json({ error: 'No top-viewed projects found' });
+        }
+
+        // Ensure you're sending an array of results
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error fetching top-viewed projects:', error);
+        res.status(500).json({ error: 'Failed to retrieve top-viewed projects' });
+    }
 });
+
+  
+
+
 router.delete('/:project_id', async (req, res) => {
     const { project_id } = req.params;
 

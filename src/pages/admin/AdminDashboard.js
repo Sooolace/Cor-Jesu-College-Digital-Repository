@@ -5,67 +5,62 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolderOpen, faUserFriends, faChartLine, faUpload, faTags, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import RecentSubmissions from '../../components/RecentSubmission';
 import HorizontalImageBanner from '../../components/HorizontalImageBanner';
+import MostViewed from '../../components/MostViewed';
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const [totalProjects, setTotalProjects] = useState(0);
   const [totalAuthors, setTotalAuthors] = useState(0);
-  const [totalDepartments, setTotalDepartments] = useState(0);  // New state for departments
-  const [totalKeywords, setTotalKeywords] = useState(0);        // New state for keywords
+  const [totalDepartments, setTotalDepartments] = useState(0);
+  const [totalKeywords, setTotalKeywords] = useState(0);
   const [recentProjects, setRecentProjects] = useState([]);
   
-  const mostActiveDepartment = 'CCIS'; // Example department
-  const mostActiveDepartmentCount = 40;
-
-  const trendingKeywords = ['AI', 'Sustainability', 'Healthcare', 'Data Science'];
-  const averageMonthlySubmissions = 10;
-
-  // Pagination settings
-  const itemsPerPage = 5; // Set the limit for items per page
-  const [currentPage, setCurrentPage] = useState(1);
-  
+  // Check for authentication on component mount
   useEffect(() => {
-    const fetchProjects = async () => {
-      const response = await fetch('/api/projects'); // Replace with your API endpoint
-      const data = await response.json();
-      setTotalProjects(data.length);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // If no token is found, redirect to login page
+      navigate('/login');
+    } else {
+      // If token exists, fetch data as usual
+      fetchProjects();
+      fetchTotalAuthors();
+      fetchDepartmentsCount();
+      fetchKeywordsCount();
+    }
+  }, [navigate]); // Dependency on navigate to ensure redirection works
 
-      // Filter recent projects from the last 7 days
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const filteredRecentProjects = data.filter(project => new Date(project.created_at) >= sevenDaysAgo);
-      setRecentProjects(filteredRecentProjects);
-    };
+  const fetchProjects = async () => {
+    const response = await fetch('/api/projects'); 
+    const data = await response.json();
+    setTotalProjects(data.length);
 
-    const fetchTotalAuthors = async () => {
-      const response = await fetch('/api/authors'); // Replace with your API endpoint
-      const data = await response.json();
-      setTotalAuthors(data.length);
-    };
-
-    const fetchDepartmentsCount = async () => {
-      const response = await fetch('/api/categories'); // Replace with your API endpoint for categories
-      const data = await response.json();
-      setTotalDepartments(data.length);  // Set the department count
-    };
-
-    const fetchKeywordsCount = async () => {
-      const response = await fetch('/api/keywords'); // Replace with your API endpoint for keywords
-      const data = await response.json();
-      setTotalKeywords(data.length);  // Set the keyword count
-    };
-
-    fetchProjects();
-    fetchTotalAuthors();
-    fetchDepartmentsCount();
-    fetchKeywordsCount();
-  }, []);
-
-  const goToDocumentOverview = (projectId) => {
-    console.log('Navigating to project ID:', projectId);
-    navigate(`/DocumentOverview/${projectId}`);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const filteredRecentProjects = data.filter(project => new Date(project.created_at) >= sevenDaysAgo);
+    setRecentProjects(filteredRecentProjects);
   };
 
-  // Pagination logic
+  const fetchTotalAuthors = async () => {
+    const response = await fetch('/api/authors'); 
+    const data = await response.json();
+    setTotalAuthors(data.length);
+  };
+
+  const fetchDepartmentsCount = async () => {
+    const response = await fetch('/api/categories'); 
+    const data = await response.json();
+    setTotalDepartments(data.length);  
+  };
+
+  const fetchKeywordsCount = async () => {
+    const response = await fetch('/api/keywords'); 
+    const data = await response.json();
+    setTotalKeywords(data.length);  
+  };
+
+  // Pagination settings
+  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(recentProjects.length / itemsPerPage);
   const displayedProjects = recentProjects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -99,21 +94,24 @@ function AdminDashboard() {
         <div className="metrics">
           <MetricItem title="Total Works" link="/admin/TotalWorks" value={totalProjects} icon={faFolderOpen} />
           <MetricItem title="Total Authors" link="/admin/TotalAuthors" value={totalAuthors} icon={faUserFriends} />
-          <MetricItem title="Departments" link="/admin/Departments" value={totalDepartments} icon={faBuilding} /> {/* Dynamic Departments */}
-          <MetricItem title="Keywords" value={totalKeywords} icon={faTags} /> {/* Dynamic Keywords */}
-          <MetricItem title="Add Featured" value={totalKeywords} icon={faTags} /> {/* Dynamic Keywords */}
-
+          <MetricItem title="Departments" link="/admin/Departments" value={totalDepartments} icon={faBuilding} />
+          <MetricItem title="Keywords" value={totalKeywords} icon={faTags} />
+          <MetricItem title="Add Featured" value={totalKeywords} icon={faTags} />
         </div>
 
         <div className="two-column-section">
-          <section className="recent-submissions">
-            <RecentSubmissions />
-          </section>
-        </div>
+  <section className="recent-submissions">
+    <RecentSubmissions />
+  </section>
+  <section className="most-viewed">
+    <MostViewed />
+  </section>
+</div>
+
 
         <Section title="Trending Topics">
           <ul>
-            {trendingKeywords.map((keyword, index) => (
+            {['AI', 'Sustainability', 'Healthcare', 'Data Science'].map((keyword, index) => (
               <li key={index}>
                 <Link to={`/projects/keyword/${keyword.toLowerCase()}`}>{keyword}</Link>
               </li>

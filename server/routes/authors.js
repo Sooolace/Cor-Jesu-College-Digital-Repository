@@ -4,23 +4,37 @@ const router = express.Router();
 
 // POST - Add a new author
 router.post('/', async (req, res) => {
-    const { name } = req.body;
+    const { name, category_id } = req.body;
 
     if (!name) {
         return res.status(400).json({ error: 'Name is required' });
     }
 
     try {
-        const result = await pool.query(
-            'INSERT INTO authors (name) VALUES ($1) RETURNING *',
-            [name]
-        );
+        // Check if the author already exists in the database
+        const checkAuthorQuery = 'SELECT * FROM authors WHERE name = $1';
+        const existingAuthor = await pool.query(checkAuthorQuery, [name]);
+
+        if (existingAuthor.rows.length > 0) {
+            // If author already exists, return a 400 error
+            return res.status(400).json({ error: 'Author with this name already exists' });
+        }
+
+        // Insert the new author into the authors table
+        const insertQuery = 'INSERT INTO authors (name, category_id) VALUES ($1, $2) RETURNING *';
+
+        // If no category_id is provided, we insert NULL for category_id (or handle based on your requirement)
+        const result = await pool.query(insertQuery, [name, category_id || null]);
+
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Error adding author:', error.stack);
         res.status(500).json({ error: 'Failed to add author' });
     }
 });
+
+
+
 // PUT - Update an existing author with category_id
 router.put('/authwcatid/:authorId', async (req, res) => {
     const { authorId } = req.params;

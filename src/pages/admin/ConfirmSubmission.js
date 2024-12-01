@@ -18,6 +18,8 @@ function ConfirmSubmission() {
       formData.append('publication_date', projectData.publication_date);
       formData.append('file_path', projectData.file_path); // Attach the uploaded file
 
+      console.log('FormData:', formData);
+
       // Step 1: Submit the project data
       const projectResponse = await axios.post('http://localhost:5000/api/projects', formData, {
         headers: {

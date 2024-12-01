@@ -1,0 +1,125 @@
+
+.logo {
+    height: 50px;
+    cursor: pointer;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #f8c471;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-link {
+    cursor: pointer;
+    font-size: 16px;
+    color: #fff;
+    transition: color 0.3s;
+}
+
+.dropdown-link:hover {
+    color: #f8c471;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    background-color: #fff;
+    color: #343a40;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu a {
+    display: block;
+    margin: 5px 0;
+    color: #343a40;
+    font-size: 14px;
+}
+
+.dropdown-menu a:hover {
+    color: #f8c471;
+}
+
+.welcome-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.welcome-message {
+    background-color: #f8c471;
+    color: #343a40;
+    padding: 10px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.welcome-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.logout-btn {
+    background: #c0392b;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #e74c3c;
+}
+
+.sign-in-btn {
+    background-color: #f8c471;
+    color: #ffffff;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.sign-in-btn:hover {
+    background-color: #f39c12;
+}
+
+@media (max-width: 768px) {
+    nav {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .welcome-container {
+        flex-direction: column;
+    }
+
+    .logo {
+        height: 40px;
+    }
+}

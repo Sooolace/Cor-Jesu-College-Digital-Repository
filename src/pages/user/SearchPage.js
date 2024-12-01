@@ -27,83 +27,85 @@ function SearchPage() {
   const itemsPerPage = 5;
 
   const [selectedCategories, setSelectedCategories] = useState([]); // Added state for selected categories
+  const [selectedResearchAreas, setSelectedResearchAreas] = useState([]); // Added state for research areas
+  const [selectedTopics, setSelectedTopics] = useState([]); // Added state for topics
   const [loading, setLoading] = useState(false); // Loading state
 
-  // Fetch projects based on search query, option, selected categories, and page number
-  const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = []) => {
-    setLoading(true); // Start loading
+  const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = []) => {
+    setLoading(true);
     try {
-      console.log('Fetching projects with params:', { query, option, page, categories });
+      const endpointMap = {
+        title: '/api/search/search/title',
+        author: '/api/search/search/author',
+        keywords: '/api/search/search/keywords',
+        abstract: '/api/search/search/abstract',
+        category: '/api/search/search/allprojs',
+      };
   
-      let endpoint = '/api/search/allprojs';
-      const params = { page, itemsPerPage };
+      const endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
   
-      if (query && query !== '') {
-        switch (option) {
-          case 'title':
-            endpoint = '/api/search/search/title';
-            break;
-          case 'author':
-            endpoint = '/api/search/search/author';
-            break;
-          case 'keywords':
-            endpoint = '/api/search/search/keywords';
-            break;
-          case 'abstract':
-            endpoint = '/api/search/search/abstract';
-            break;
-          case 'allfields':
-            endpoint = '/api/search/search/allfields';
-            break;
-          default:
-            endpoint = '/api/search/allfields';
-        }
-        params.query = query; // Attach the query to params for search cases
-      }
-  
-      if (categories.length > 0) {
-        params.categories = categories; // Add categories to the params
-      }
+      const params = {
+        page,
+        itemsPerPage,
+        ...(query && { query }),
+        ...(categories.length > 0 && { categories }),
+        ...(researchAreas.length > 0 && { researchAreas }),
+        ...(topics.length > 0 && { topics }),
+      };
   
       const response = await axios.get(endpoint, { params });
+  
       setFilteredData(response.data.data || []);
-      setTotalCount(response.data.totalCount); // Update total count with the response
+      setTotalCount(response.data.totalCount);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
-  
 
-  // On page load, if there's no search query, fetch all projects
+  const [searchTrigger, setSearchTrigger] = useState(0); // Counter to trigger search explicitly
   useEffect(() => {
     if (searchQuery === '') {
-      // Fetch all projects when there is no search query
-      fetchProjects('', searchOption, currentPage, selectedCategories);
+      fetchProjects('', searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
     } else {
-      fetchProjects(searchQuery, searchOption, currentPage, selectedCategories);
+      fetchProjects(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
     }
-  }, [searchQuery, searchOption, currentPage, selectedCategories]); // Add selectedCategories to the dependency list
+  }, [searchTrigger, currentPage, selectedCategories, selectedResearchAreas, selectedTopics]);
 
   const handleSearchChange = (query) => {
     setTypedQuery(query); // Update typedQuery without triggering search
   };
 
   const handleOptionChange = (option) => {
-    setSearchOption(option);
+    setSearchOption(option); // Only update the selected option
   };
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setSearchQuery(typedQuery); // Update searchQuery and trigger search
+    setSearchQuery(typedQuery); // Update the query
     setCurrentPage(1); // Reset to page 1 on new search
+    setSearchTrigger((prev) => prev + 1); // Increment the trigger counter to fetch data
   };
 
-  const handleClearData = () => {
-    setFilteredData([]); // Clear the filteredData state
-    setSearchQuery(''); // Optionally clear the search query as well
-    setCurrentPage(1); // Optionally reset to the first page
+  const handleApplyFilters = (categories, researchAreas, topics) => {
+    setSelectedCategories(categories);  // Apply selected categories
+    setSelectedResearchAreas(researchAreas); // Apply selected research areas
+    setSelectedTopics(topics); // Apply selected topics
+    setCurrentPage(1); // Reset to the first page when filters are applied
+
+    fetchProjects(searchQuery, searchOption, 1, categories, researchAreas, topics);
+  };
+
+  // Clear all filters and reset search
+  const handleClearFilters = () => {
+    setSelectedCategories([]); // Clear selected categories
+    setSelectedResearchAreas([]); // Clear selected research areas
+    setSelectedTopics([]); // Clear selected topics
+    setSearchQuery(''); // Clear search query
+    setTypedQuery(''); // Clear typed query
+    setCurrentPage(1); // Reset to page 1
+    setSearchTrigger((prev) => prev + 1); // Trigger the fetchProjects with cleared data
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -133,9 +135,13 @@ function SearchPage() {
               {/* Subject Filter Section */}
               <div className="subject-filter-wrapper">
                 <SubjectFilter
-                  selectedCategories={selectedCategories}
-                  setSelectedCategories={setSelectedCategories}
-                  onApply={() => fetchProjects(searchQuery, searchOption, currentPage, selectedCategories)} // Pass selectedCategories
+                  selectedCategories={selectedCategories} // Pass selected categories to SubjectFilter
+                  setSelectedCategories={setSelectedCategories} // Pass the function to update categories
+                  selectedResearchAreas={selectedResearchAreas} // Pass selected research areas to SubjectFilter
+                  setSelectedResearchAreas={setSelectedResearchAreas} // Pass the function to update research areas
+                  selectedTopics={selectedTopics} // Pass selected topics to SubjectFilter
+                  setSelectedTopics={setSelectedTopics} // Pass the function to update topics
+                  onApply={handleApplyFilters} // Pass handleApplyFilters function to apply selected filters
                 />
               </div>
             </div>
@@ -147,7 +153,13 @@ function SearchPage() {
                   {/* Results Count */}
                   <div className="results-count">
                     <p>
-                      {`Found ${totalCount} results for '${searchQuery}'. Showing ${indexOfFirstItem + 1} to ${Math.min(indexOfLastItem, totalCount)}.`}
+                      {`Found `}
+                      <b>{totalCount}</b>
+                      {` results for '`}<b>{searchQuery}</b>{`'. Showing page `}
+                      <b>{indexOfFirstItem + 1}</b>
+                      {` to `}
+                      <b>{Math.min(indexOfLastItem, totalCount)}</b>
+                      {`.`}
                     </p>
                   </div>
 

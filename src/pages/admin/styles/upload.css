@@ -54,13 +54,13 @@ body {
     font-size: 16px; /* Make font size responsive */
     cursor: pointer; /* Pointer cursor for buttons */
     transition: background-color 0.3s; /* Smooth transition for hover effect */
-    color: #6c757d; /* Secondary button color */
+    color: #ffffff; /* Secondary button color */
 
 }
 
 /* Optional: Add hover effect */
 .btn-primary:hover {
-    background-color: #ded4d5; /* Darker shade on hover */
+    background-color: #e4b211; /* Darker shade on hover */
 }
 
 .u-btn-secondary {

@@ -37,12 +37,14 @@ function Home() {
         <section className="featured">
           <Featured />
         </section>
-        <section className="recent-submissions">
-          <RecentSubmissions />
-        </section>
-        <section className="most-downloaded">
-          <MostViewed />
-        </section>
+        <div className="two-column-section">
+          <section className="recent-submissions">
+            <RecentSubmissions />
+          </section>
+          <section className="most-viewed">
+            <MostViewed />
+          </section>
+        </div>
       </div>
     </div>
   );

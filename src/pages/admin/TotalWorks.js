@@ -141,7 +141,7 @@ function TotalWorks() {
   };
 
   const goToDocumentOverview = (projectId) => {
-    navigate(`/admin/DocumentOverview/${projectId}`);
+    navigate(`/DocumentOverview/${projectId}`);
   };
 
   const goToEditAuthor = (projectId) => {

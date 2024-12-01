@@ -31,13 +31,19 @@
 }
 
 /* Flexbox Layout for Featured Documents */
+.featured-documents-wrapper {
+  max-height: 500px; /* Adjust this height as needed */
+  overflow-y: auto; /* Enable vertical scrolling */
+  margin-top: 20px;
+  box-sizing: border-box;
+}
+
+/* Flexbox Layout for Featured Documents */
 .featured-documents {
   display: flex;
   flex-wrap: wrap; /* Allow wrapping for items */
   gap: 20px; /* Adds space between items */
-  margin-top: 20px; /* Adds space between the title and documents */
   width: 100%; /* Let it take full width */
-  box-sizing: border-box; /* Ensure padding does not affect width */
   justify-content: space-between; /* Distribute items evenly across the row */
 }
 
@@ -62,10 +68,10 @@
 
 /* Title Link Styling */
 .document-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   color: #a33307;
   text-decoration: none;
-  font-weight: 250;
+  font-weight: 400;
   transition: color 0.3s ease-in-out;
 }
 

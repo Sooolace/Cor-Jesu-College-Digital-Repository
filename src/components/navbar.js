@@ -38,6 +38,7 @@ function Navbar() {
                 </div>
     
                 <Link to="/help">Help</Link>
+                <Link to="/login" className="sign-in-btn">Admin Access</Link>
             </nav>
         </div>
     </header>

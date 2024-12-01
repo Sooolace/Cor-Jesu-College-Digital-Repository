@@ -13,7 +13,7 @@ function EditProject() {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false); // State to control modal visibility
     const [successModal, setSuccessModal] = useState(false); // State for success modal
-    const {
+    const { 
         loading,
         error,
         formData,
@@ -24,18 +24,24 @@ function EditProject() {
         setSelectedAuthors,
         selectedKeywords,
         setSelectedKeywords,
-        categories,
-        researchAreas,
-        topics,
-        researchTypes,
+        selectedDepartments,
+        setSelectedDepartments,
+        categories,  // Default empty array
+        researchAreas, // Default empty array
+        topics, // Default empty array
+        researchTypes, // Default empty array
+        departments = [], // Default empty array
         handleSubmit,
         handleCategoryChange,
         handleResearchAreaChange,
         handleChange,
         handleResearchTypeChange,
-    } = useEditProject(projectId, navigate);
+      } = useEditProject(projectId, navigate);
+      
+
 
     useEffect(() => {
+        fetchDepartments();
         fetchProjectAuthors();
         fetchProjectKeywords();
     }, [projectId]);
@@ -62,6 +68,23 @@ function EditProject() {
         }
     };
 
+    const fetchDepartments = async () => {
+        try {
+            const response = await fetch(`/api/project_category/${projectId}`);  // Correct endpoint
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            
+            // Log data to ensure it's being fetched correctly
+            console.log('Fetched departments:', data);
+            
+            // Set the selected departments state
+            setSelectedDepartments(data.map(department => department.category_id));  // Assuming category_id is the unique identifier
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+        }
+    };
+    
+
     const handleAuthorChange = (selected) => {
         setSelectedAuthors(selected ? selected.map(author => author.value) : []);
     };
@@ -70,7 +93,10 @@ function EditProject() {
         setSelectedKeywords(selected ? selected.map(keyword => keyword.value) : []);
     };
 
-    // Toggle the modal visibility
+    const handleDepartmentChange = (selected) => {
+        setSelectedDepartments(selected ? selected.map(categories => categories.value) : []);
+    };
+
     const toggleModal = () => setShowModal(!showModal);
 
     const authorOptions = authors.map(author => ({
@@ -81,6 +107,11 @@ function EditProject() {
     const keywordOptions = keywords.map(keyword => ({
         value: keyword.keyword_id,
         label: keyword.keyword
+    }));
+
+    const departmentOptions = categories.map(category => ({
+        value: category.category_id,
+        label: category.name
     }));
 
     const handleSuccessModalClose = () => {
@@ -182,6 +213,21 @@ function EditProject() {
                         />
                     </div>
 
+                    {/* Departments */}
+                    <div className="mb-3">
+                        <label htmlFor="formDepartments" className="form-label">Departments</label>
+                        <Select
+                            id="formDepartments"
+                            isMulti
+                            options={departmentOptions}
+                            value={departmentOptions.filter(option => selectedDepartments.includes(option.value))}
+                            onChange={handleDepartmentChange}
+                            isClearable
+                            placeholder="Select departments..."
+                        />
+                    </div>        
+
+
                     {/* Publication Date and Study URL */}
                     <div className="row mb-3">
                         <div className="col-md-6">
@@ -240,62 +286,66 @@ function EditProject() {
                         </select>
                     </div>
 
-                    {/* Category */}
-                    <div className="mb-3">
-                        <label htmlFor="formCategory" className="form-label">Category</label>
-                        <select
-                            className="form-select"
-                            id="formCategory"
-                            name="category_id"
-                            value={formData.category_id}
-                            onChange={handleCategoryChange}
-                        >
-                            <option value="">Select a category</option>
-                            {categories.map(category => (
-                                <option key={category.category_id} value={category.category_id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+ {/* Category */}
+<div className="mb-3">
+    <label htmlFor="formCategory" className="form-label">Category <span className="text-danger">*</span></label>
+    <select
+        className="form-select"
+        id="formCategory"
+        name="category_id"
+        value={formData.category_id}
+        onChange={handleCategoryChange}
+        required // Make the category field required
+    >
+        <option value="">Select a category</option>
+        {categories.map(category => (
+            <option key={category.category_id} value={category.category_id}>
+                {category.name}
+            </option>
+        ))}
+    </select>
+</div>
 
-                    {/* Research Area */}
-                    <div className="mb-3">
-                        <label htmlFor="formResearchArea" className="form-label">Research Area</label>
-                        <select
-                            className="form-select"
-                            id="formResearchArea"
-                            name="research_area_id"
-                            value={formData.research_area_id}
-                            onChange={handleResearchAreaChange}
-                        >
-                            <option value="">Select a research area</option>
-                            {researchAreas.map(area => (
-                                <option key={area.research_area_id} value={area.research_area_id}>
-                                    {area.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+{/* Research Area */}
+<div className="mb-3">
+    <label htmlFor="formResearchArea" className="form-label">Research Area <span className="text-danger">*</span></label>
+    <select
+        className="form-select"
+        id="formResearchArea"
+        name="research_area_id"
+        value={formData.research_area_id}
+        onChange={handleResearchAreaChange}
+        required // Make the research area field required
+    >
+        <option value="">Select a research area</option>
+        {researchAreas.map(area => (
+            <option key={area.research_area_id} value={area.research_area_id}>
+                {area.name}
+            </option>
+        ))}
+    </select>
+</div>
 
-                    {/* Topic */}
-                    <div className="mb-3">
-                        <label htmlFor="formTopic" className="form-label">Topic</label>
-                        <select
-                            className="form-select"
-                            id="formTopic"
-                            name="topic_id"
-                            value={formData.topic_id}
-                            onChange={handleChange}
-                        >
-                            <option value="">Select a topic</option>
-                            {topics.map(topic => (
-                                <option key={topic.topic_id} value={topic.topic_id}>
-                                    {topic.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+{/* Topic */}
+<div className="mb-3">
+    <label htmlFor="formTopic" className="form-label">Topic <span className="text-danger">*</span></label>
+    <select
+        className="form-select"
+        id="formTopic"
+        name="topic_id"
+        value={formData.topic_id}
+        onChange={handleChange}
+        required // Make the topic field required
+    >
+        <option value="">Select a topic</option>
+        {topics.map(topic => (
+            <option key={topic.topic_id} value={topic.topic_id}>
+                {topic.name}
+            </option>
+        ))}
+    </select>
+</div>
+
 
                     <div className="d-flex justify-content-center mb-3">
                         <button type="submit" className="btn btn-primary">Save Changes</button>

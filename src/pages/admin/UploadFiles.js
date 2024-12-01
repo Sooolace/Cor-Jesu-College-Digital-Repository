@@ -32,13 +32,7 @@ function UploadFiles() {
 
   const handleConfirmSubmission = (e) => {
     e.preventDefault();
-    
-    // Check if a file is uploaded
-    if (!file) {
-      alert('Please upload a project file before proceeding.');
-      return;
-    }
-    
+
     // Prepare project data to send to the confirmation page
     const updatedProjectData = {
       ...projectData,
@@ -56,18 +50,6 @@ function UploadFiles() {
       <div className="upload-container">
         <section id="uploadSection">
           <h2 className="text-center mb-4">Upload Files</h2>
-          {projectData ? (
-            <>
-              <p><strong>Title:</strong> {projectData.title}</p>
-              <p><strong>Authors:</strong> {projectData.authors?.length > 0 ? projectData.authors.join(', ') : 'N/A'}</p>
-              <p><strong>Type:</strong> {projectData.description_type}</p>
-              <p><strong>Description:</strong> {projectData.abstract}</p>
-              <p><strong>Keywords:</strong> {projectData.keywords?.length > 0 ? projectData.keywords.join(', ') : 'N/A'}</p>
-              <p><strong>Study Url:</strong> {projectData.study_urls?.length > 0 ? projectData.study_urls.join(', ') : 'N/A'}</p>
-            </>
-          ) : (
-            <p>No submission data available. Please ensure all steps are completed properly.</p>
-          )}
           <form onSubmit={handleConfirmSubmission} className="form-style">
             {/* File Upload */}
             <div className="form-group mb-3">
@@ -78,7 +60,6 @@ function UploadFiles() {
                 className="form-control"
                 accept=".pdf, .doc, .docx"
                 onChange={handleFileChange}
-                required
               />
             </div>
 

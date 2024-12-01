@@ -48,31 +48,34 @@ function Featured() {
   return (
     <section className="featured-section">
       <h2 className="section-title">Featured Documents</h2>
-      <div className="featured-documents">
-        {featuredDocuments.map((document) => (
-          <div key={document.project_id} className="featured-document">
-            {/* Clickable Document Title */}
-            <h3
-              className="document-title"
-              style={{ cursor: 'pointer' }} // Only make it clickable, no style change
-              onClick={() => navigate(`/DocumentOverview/${encodeURIComponent(document.title)}`)}
-            >
-              {document.title}
-            </h3>
-            {/* Clickable Author */}
-            <p>
-              <strong>Author:</strong>{' '}
-              <span
-                style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline' }} // Keeps author as link style
-                onClick={() => navigate(`/AuthorOverview/${encodeURIComponent(document.author)}`)}
-              >
-                {document.author}
-              </span>
-            </p>
-            <p><strong>Date Published:</strong> {new Date(document.publication_date).toLocaleDateString()}</p>
-            <p className="document-description">{document.description}</p>
-          </div>
-        ))}
+      <div className="featured-documents-wrapper">
+        <div className="featured-documents">
+          {featuredDocuments.map((document) => (
+            <div key={document.project_id} className="featured-document">
+              {/* Clickable Document Title */}
+              <h3
+  className="document-title"
+  style={{ cursor: 'pointer' }} // Only make it clickable, no style change
+  onClick={() => navigate(`/DocumentOverview/${document.project_id}`)} // Closing parentheses
+>
+  {document.title}
+</h3>
+
+              {/* Clickable Author */}
+              <p>
+                <strong>Author:</strong>{' '}
+                <span
+                  style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline' }} // Keeps author as link style
+                  onClick={() => navigate(`/AuthorOverview/${encodeURIComponent(document.author)}`)}
+                >
+                  {document.author}
+                </span>
+              </p>
+              <p><strong>Date Published:</strong> {new Date(document.publication_date).toLocaleDateString()}</p>
+              <p className="document-description">{document.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
