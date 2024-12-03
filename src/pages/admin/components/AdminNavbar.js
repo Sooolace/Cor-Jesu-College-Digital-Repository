@@ -7,7 +7,7 @@ function AdminNavbar({ handleLogout }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState('');
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Hook to navigate programmatically
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -19,6 +19,23 @@ function AdminNavbar({ handleLogout }) {
             setIsAuthenticated(false);
         }
     }, []);
+
+    // Handle logout and redirect to login page
+    const handleLogoutAndRedirect = () => {
+        // Clear the local storage
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('username');
+
+        // Call the handleLogout function passed from parent (if any)
+        if (handleLogout) handleLogout();
+
+        // Set isAuthenticated to false
+        setIsAuthenticated(false);
+
+        // Redirect to login page
+        navigate('/login'); // Use useNavigate to redirect to login page
+    };
 
     return (
         <header>
@@ -57,7 +74,7 @@ function AdminNavbar({ handleLogout }) {
                                 <span className="welcome-text">
                                     <i className="fas fa-user-circle"></i> Hi, {username}
                                 </span>
-                                <button onClick={handleLogout} className="logout-btn">
+                                <button onClick={handleLogoutAndRedirect} className="logout-btn">
                                     <i className="fas fa-sign-out-alt"></i> Logout
                                 </button>
                             </div>

@@ -67,4 +67,4 @@ function Departments() {
     );
 }
 
-export default Departments;
+export default React.memo(Departments);

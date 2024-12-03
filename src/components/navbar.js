@@ -13,7 +13,7 @@ function Navbar() {
     return (
         <header>
         <div className="header-container">
-            <Link to="/home">
+            <Link to="/">
                 <img src={logo} alt="CJC Repository Logo" className="logo" />
             </Link>
     
