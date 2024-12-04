@@ -59,7 +59,7 @@ const MostViewed = ({ searchQuery }) => {
 
   return (
     <div className="most-viewed-container">
-        <h3 className="section-title">{searchQuery ? `Search Results for "${searchQuery}"` : 'Most Viewed Documents'}</h3>
+      <h3 className="section-title">{searchQuery ? `Search Results for "${searchQuery}"` : 'Most Viewed Documents'}</h3>
 
       {isLoading ? (
         <p className="loading-message">Loading...</p>
@@ -74,7 +74,7 @@ const MostViewed = ({ searchQuery }) => {
                       <React.Fragment key={index}>
                         <tr>
                           <td>
-                            <a href={`/DocumentOverview/${doc.id}`}>
+                            <a href={`/DocumentOverview/${doc.project_id}`}>
                               {doc.title}
                             </a>
                           </td>
@@ -125,17 +125,16 @@ const MostViewed = ({ searchQuery }) => {
 
               {/* Pagination Controls */}
               <div className="pagination-controls">
-  {Array.from({ length: totalPages }, (_, index) => (
-    <button
-      key={index + 1}
-      className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
-      onClick={() => setCurrentPage(index + 1)}
-    >
-      {index + 1}
-    </button>
-  ))}
-</div>
-
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index + 1}
+                    className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
             </>
           ) : (
             <p className="no-results-message">No most viewed documents found.</p>

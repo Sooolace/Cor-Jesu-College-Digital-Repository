@@ -8,19 +8,17 @@
 }
 
 /* Shared container styling for sections */
-.most-viewed-container,
-.recent-submissions-container {
+.most-viewed-container{
   padding: 20px;
-  width: 100%; /* Make sections responsive */
-  height: 100%;
+  min-width: 600px;  /* Ensures the width is 48% to align with the other section */
+  min-height: 530px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Links styling */
-.most-viewed-container a,
-.recent-submissions-container a {
+.most-viewed-container a{
   text-decoration: none;
 }
 
@@ -30,8 +28,7 @@
 }
 
 /* Section titles */
-.most-viewed-container h3,
-.recent-submissions-container h3 {
+.most-viewed-container h3 {
   font-size: 1.8rem;
   color: #333;
   margin-bottom: 20px;

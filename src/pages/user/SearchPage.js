@@ -44,13 +44,14 @@ function SearchPage() {
   
       const endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
   
+      // Create a params object with repeated array parameters for categories, researchAreas, and topics
       const params = {
         page,
         itemsPerPage,
         ...(query && { query }),
-        ...(categories.length > 0 && { categories }),
-        ...(researchAreas.length > 0 && { researchAreas }),
-        ...(topics.length > 0 && { topics }),
+        ...(categories.length > 0 && { categories: categories }),
+        ...(researchAreas.length > 0 && { researchAreas: researchAreas }),
+        ...(topics.length > 0 && { topics: topics }),
       };
   
       const response = await axios.get(endpoint, { params });
@@ -63,15 +64,15 @@ function SearchPage() {
       setLoading(false);
     }
   };
+  
 
   const [searchTrigger, setSearchTrigger] = useState(0); // Counter to trigger search explicitly
   useEffect(() => {
-    if (searchQuery === '') {
-      fetchProjects('', searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
-    } else {
-      fetchProjects(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
-    }
-  }, [searchTrigger, currentPage, selectedCategories, selectedResearchAreas, selectedTopics]);
+    console.log("Fetching projects with filters:", { searchQuery, selectedCategories, selectedResearchAreas, selectedTopics });
+    fetchProjects(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
+  }, [searchTrigger, currentPage]); // Trigger fetch only on explicit search or page change
+  
+  
 
   const handleSearchChange = (query) => {
     setTypedQuery(query); // Update typedQuery without triggering search
@@ -89,13 +90,13 @@ function SearchPage() {
   };
 
   const handleApplyFilters = (categories, researchAreas, topics) => {
-    setSelectedCategories(categories);  // Apply selected categories
-    setSelectedResearchAreas(researchAreas); // Apply selected research areas
-    setSelectedTopics(topics); // Apply selected topics
-    setCurrentPage(1); // Reset to the first page when filters are applied
-
-    fetchProjects(searchQuery, searchOption, 1, categories, researchAreas, topics);
+    console.log("Applying Filters:", { categories, researchAreas, topics });
+    setSelectedCategories(categories);
+    setSelectedResearchAreas(researchAreas);
+    setSelectedTopics(topics);
+    setSearchTrigger((prev) => prev + 1); // Trigger a search
   };
+  
 
   // Clear all filters and reset search
   const handleClearFilters = () => {

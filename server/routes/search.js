@@ -51,8 +51,8 @@ router.get('/allprojs', async (req, res) => {
     // Handle category filtering
     if (categories.length > 0) {
         categories.forEach((category, index) => {
-            categoriesParams.push(`$${queryParams.length + index + 1}`);
             queryParams.push(category);
+            categoriesParams.push(`$${queryParams.length}`);
         });
         searchQuery += ` AND p.category_id IN (${categoriesParams.join(', ')})`;
         countQuery += ` AND p.category_id IN (${categoriesParams.join(', ')})`;
@@ -61,33 +61,31 @@ router.get('/allprojs', async (req, res) => {
     // Handle research area filtering
     if (researchAreas.length > 0) {
         researchAreas.forEach((area, index) => {
-            researchAreasParams.push(`$${queryParams.length + index + 1}`);
             queryParams.push(area);
+            researchAreasParams.push(`$${queryParams.length}`);
         });
         searchQuery += ` AND p.research_area_id IN (${researchAreasParams.join(', ')})`;
         countQuery += ` AND p.research_area_id IN (${researchAreasParams.join(', ')})`;
     }
 
-// Handle topic filtering
-if (researchAreas.length > 0 && topics.length === 0) {
-    // Add topics dynamically for selected research areas
-    const associatedTopics = await getTopicsForResearchAreas(researchAreas);
-    topics.push(...associatedTopics);  // Add the associated topics for the research areas
-}
+    // Handle topic filtering
+    if (researchAreas.length > 0 && topics.length === 0) {
+        // Dynamically get topics for selected research areas
+        const associatedTopics = await getTopicsForResearchAreas(researchAreas);
+        topics.push(...associatedTopics);  // Add the associated topics for the research areas
+    }
 
-if (topics.length > 0) {
-    topics.forEach((topic, index) => {
-        topicsParams.push(`$${queryParams.length + index + 1}`);
-        queryParams.push(topic);
-    });
-    searchQuery += ` AND p.topic_id IN (${topicsParams.join(', ')})`;
-    countQuery += ` AND p.topic_id IN (${topicsParams.join(', ')})`;
-}
-
+    if (topics.length > 0) {
+        topics.forEach((topic, index) => {
+            queryParams.push(topic);
+            topicsParams.push(`$${queryParams.length}`);
+        });
+        searchQuery += ` AND p.topic_id IN (${topicsParams.join(', ')})`;
+        countQuery += ` AND p.topic_id IN (${topicsParams.join(', ')})`;
+    }
 
     // Pagination
     searchQuery += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
-
     const finalParams = [...queryParams, itemsPerPage, offset];
 
     try {
@@ -103,6 +101,7 @@ if (topics.length > 0) {
         res.status(500).json({ error: 'Failed to retrieve projects', details: error.message });
     }
 });
+
 
 
 

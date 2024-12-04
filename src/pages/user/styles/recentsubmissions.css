@@ -10,8 +10,8 @@
 /* Container for Recent Submissions */
 .recent-submissions-container {
   padding: 20px;
-  width: 100%;  /* Ensures the width is 48% to align with the other section */
-  height: 100%;
+  min-width: 550px;  /* Ensures the width is 48% to align with the other section */
+  min-height: 530px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);

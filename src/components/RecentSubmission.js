@@ -78,7 +78,7 @@ const RecentSubmissions = ({ searchQuery }) => {
                             </Link>
                           </td>
                           <td>
-                            <button 
+                            <button
                               className="expand-icon"
                               onClick={() => toggleDetails(index)}
                             >
@@ -92,22 +92,22 @@ const RecentSubmissions = ({ searchQuery }) => {
                           <tr className="details-row">
                             <td colSpan="2">
                               <div className="details-content">
-                              <p>
-  <FontAwesomeIcon icon={faUser} />
-  {submission.authors && submission.authors.length > 0 ? (
-    submission.authors.split(',').map((author, index) => (
-      <span key={index}>
-        <Link to={`/AuthorOverview/${encodeURIComponent(author.trim())}`} className="author-link">
-          {author.trim()}
-        </Link>
-        {index < submission.authors.split(',').length - 1 && ', '}
-      </span>
-    ))
-  ) : (
-    'No authors listed'
-  )}
-</p>
-                             <p><FontAwesomeIcon icon={faCalendar} /> {new Date(submission.created_at).toLocaleDateString()}</p>
+                                <p>
+                                  <FontAwesomeIcon icon={faUser} />
+                                  {submission.authors && submission.authors.length > 0 ? (
+                                    submission.authors.split(',').map((author, idx) => (
+                                      <span key={idx}>
+                                        <Link to={`/AuthorOverview/${encodeURIComponent(author.trim())}`} className="author-link">
+                                          {author.trim()}
+                                        </Link>
+                                        {idx < submission.authors.split(',').length - 1 && ', '}
+                                      </span>
+                                    ))
+                                  ) : (
+                                    'No authors listed'
+                                  )}
+                                </p>
+                                <p><FontAwesomeIcon icon={faCalendar} /> {new Date(submission.created_at).toLocaleDateString()}</p>
                                 <p>Department: {submission.category_id || 'No category listed'}</p>
                               </div>
                             </td>
@@ -121,17 +121,16 @@ const RecentSubmissions = ({ searchQuery }) => {
 
               {/* Pagination Controls */}
               <div className="pagination-controls">
-  {Array.from({ length: totalPages }, (_, index) => (
-    <button
-      key={index + 1}
-      className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
-      onClick={() => setCurrentPage(index + 1)}
-    >
-      {index + 1}
-    </button>
-  ))}
-</div>
-
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index + 1}
+                    className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
             </>
           ) : (
             <p className="no-results-message">No recent submissions found.</p>
