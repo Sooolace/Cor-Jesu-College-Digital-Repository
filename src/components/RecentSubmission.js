@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Use Link from React Router for navigation
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCalendar, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import '../pages/user/styles/recentsubmissions.css';
@@ -11,9 +11,17 @@ const RecentSubmissions = ({ searchQuery }) => {
   const [expandedIndex, setExpandedIndex] = useState(null); // To track which item is expanded
   const itemsPerPage = 5; // Set the limit for items per page
 
-  // Fetch project submissions from your API
-  useEffect(() => {
-    const fetchSubmissions = async () => {
+  // Function to load from localStorage or fetch from the API
+  const loadData = async () => {
+    const cachedData = localStorage.getItem('recentSubmissions');
+    const cacheTimestamp = localStorage.getItem('recentSubmissionsTimestamp');
+
+    // If data is available in cache and it's not expired
+    if (cachedData && cacheTimestamp && new Date().getTime() - cacheTimestamp < 3600000) {
+      // Use cached data if it's less than 1 hour old
+      setSubmissions(JSON.parse(cachedData));
+      setIsLoading(false);
+    } else {
       try {
         setIsLoading(true);
         const response = await fetch('/api/projects'); // Replace with your actual API endpoint
@@ -24,16 +32,24 @@ const RecentSubmissions = ({ searchQuery }) => {
 
         // Sort submissions by created_at (timestamp) in descending order
         const sortedData = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        // Save to localStorage
+        localStorage.setItem('recentSubmissions', JSON.stringify(sortedData));
+        localStorage.setItem('recentSubmissionsTimestamp', new Date().getTime());
+
         setSubmissions(sortedData);
       } catch (error) {
         console.error('Error fetching submissions:', error);
       } finally {
         setIsLoading(false);
       }
-    };
+    }
+  };
 
-    fetchSubmissions();
-  }, []);
+  // Fetch data when the component is mounted
+  useEffect(() => {
+    loadData();
+  }, []); // Empty dependency array to fetch data on initial render
 
   // Pagination Logic
   const totalPages = Math.ceil(submissions.length / itemsPerPage);

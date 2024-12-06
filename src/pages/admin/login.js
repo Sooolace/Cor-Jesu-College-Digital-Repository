@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/cjclogo.PNG';
 import backgroundImage from '../../assets/loginbg.png'; // Ensure this path is correct
@@ -10,8 +10,25 @@ function Login({ setIsAdmin }) {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
+  // Check if user is already logged in by looking at localStorage
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedRole = localStorage.getItem('role');
+    if (storedToken && storedRole) {
+      // Redirect to dashboard if user is already logged in
+      if (storedRole === 'admin') {
+        setIsAdmin(true);
+        navigate('/admindashboard');
+      } else {
+        // Handle non-admin role if needed
+        navigate('/');
+      }
+    }
+  }, [navigate, setIsAdmin]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
     const role = 'admin';  // or get the role from the server response
     const token = 'your-jwt-token';  // the token from your API response
 
@@ -35,13 +52,12 @@ function Login({ setIsAdmin }) {
         localStorage.setItem('username', username); // Store the username in localStorage
         localStorage.setItem('token', token);
 
-
         if (role === 'admin') {
           localStorage.setItem('isAdmin', 'true');
         } else {
           localStorage.setItem('isAdmin', 'false');
         }
-      
+
         // Navigate to admin dashboard or home
         setIsAdmin(true); // set isAdmin state
         navigate('/admindashboard'); // Navigate to admin dashboard (or other page based on role)
@@ -57,7 +73,7 @@ function Login({ setIsAdmin }) {
   const goToHome = () => {
     navigate('/');
   };
-
+  
   return (
     <section
       className="vh-100 d-flex align-items-center justify-content-center bg-cover"

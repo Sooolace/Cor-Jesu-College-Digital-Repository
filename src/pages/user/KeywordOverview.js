@@ -70,13 +70,6 @@ function KeywordOverview() {
 
       <div className="keyword-overview-container container mt-4">
         
-        {loading && (
-          <div className="text-center mt-4">
-            <Spinner animation="border" role="status" />
-            <span className="visually-hidden">Loading...</span>
-            <p>Loading keyword details...</p>
-          </div>
-        )}
         {error && <Alert variant="danger">{error}</Alert>} {/* Display error message if any */}
 
         {keyword && (
@@ -84,7 +77,15 @@ function KeywordOverview() {
           <h4 className="text-center">
             Projects tagged with "{keyword.keyword}"
           </h4>
+          
           <div className="author-underline"></div>
+          {loading && (
+          <div className="text-center mt-4">
+            <Spinner animation="border" role="status" />
+            <span className="visually-hidden">Loading...</span>
+            <p>Loading keyword details...</p>
+          </div>
+        )}
             <div className="table-with-back-button">
               {projects.length > 0 ? (
                 <Table striped bordered hover responsive className="mt-3">

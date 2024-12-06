@@ -11,40 +11,51 @@ const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, han
 
   // Fetch the categories with their research areas and topics
   useEffect(() => {
-    axios.get('/api/categories')
-      .then(response => {
-        setCategories(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching categories", error);
-      });
+    const cachedCategories = localStorage.getItem('categories');
+
+    if (cachedCategories) {
+      // Use cached data if available
+      const parsedCategories = JSON.parse(cachedCategories);
+      setCategories(parsedCategories);
+    } else {
+      // Fetch data from API and cache it
+      axios.get('/api/categories')
+        .then(response => {
+          const fetchedCategories = response.data;
+          setCategories(fetchedCategories);
+          localStorage.setItem('categories', JSON.stringify(fetchedCategories)); // Cache the categories data
+        })
+        .catch(error => {
+          console.error("Error fetching categories", error);
+        });
+    }
   }, []);
 
   // Helper function to toggle selection of a category
   const toggleCategorySelection = (categoryId) => {
     setSelectedCategories(prevState => {
-        const isSelected = prevState.includes(categoryId);
-        let newState;
-        
-        if (isSelected) {
-            newState = prevState.filter(id => id !== categoryId);
-            const category = categories.find(cat => cat.category_id === categoryId);
-            const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
-            const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
-            
-            setSelectedResearchAreas(prevResearchAreas => prevResearchAreas.filter(ra => !researchAreaIds.includes(ra)));
-            setSelectedTopics(prevTopics => prevTopics.filter(topic => !topicIds.includes(topic)));
-        } else {
-            newState = [...prevState, categoryId];
-            const category = categories.find(cat => cat.category_id === categoryId);
-            const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
-            const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
-            
-            setSelectedResearchAreas(prev => [...new Set([...prev, ...researchAreaIds])]);
-            setSelectedTopics(prev => [...new Set([...prev, ...topicIds])]);
-        }
-  
-        return newState;
+      const isSelected = prevState.includes(categoryId);
+      let newState;
+
+      if (isSelected) {
+        newState = prevState.filter(id => id !== categoryId);
+        const category = categories.find(cat => cat.category_id === categoryId);
+        const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
+        const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
+
+        setSelectedResearchAreas(prevResearchAreas => prevResearchAreas.filter(ra => !researchAreaIds.includes(ra)));
+        setSelectedTopics(prevTopics => prevTopics.filter(topic => !topicIds.includes(topic)));
+      } else {
+        newState = [...prevState, categoryId];
+        const category = categories.find(cat => cat.category_id === categoryId);
+        const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
+        const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
+
+        setSelectedResearchAreas(prev => [...new Set([...prev, ...researchAreaIds])]);
+        setSelectedTopics(prev => [...new Set([...prev, ...topicIds])]);
+      }
+
+      return newState;
     });
   };
 
@@ -53,36 +64,36 @@ const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, han
   // Function to toggle research area selection
   const toggleResearchAreaSelection = (researchAreaId) => {
     setSelectedResearchAreas(prevState => {
-        const isSelected = prevState.includes(researchAreaId);
-        const newState = isSelected
-            ? prevState.filter(id => id !== researchAreaId)
-            : [...prevState, researchAreaId];
+      const isSelected = prevState.includes(researchAreaId);
+      const newState = isSelected
+        ? prevState.filter(id => id !== researchAreaId)
+        : [...prevState, researchAreaId];
 
-        const categoryId = categories.find(cat => cat.research_areas.some(ra => ra.research_area_id === researchAreaId))?.category_id;
-        const topics = categories.find(cat => cat.category_id === categoryId)
-            .research_areas.find(ra => ra.research_area_id === researchAreaId).topics;
+      const categoryId = categories.find(cat => cat.research_areas.some(ra => ra.research_area_id === researchAreaId))?.category_id;
+      const topics = categories.find(cat => cat.category_id === categoryId)
+        .research_areas.find(ra => ra.research_area_id === researchAreaId).topics;
 
-        if (!isSelected) {
-            // Include all topics in the selected research area
-            setSelectedTopics(prev => [
-                ...new Set([...prev, ...topics.map(topic => topic.topic_id)]),
-            ]);
-        } else {
-            // Remove topics if research area is deselected
-            setSelectedTopics(prev => prev.filter(id => !topics.some(topic => topic.topic_id === id)));
-        }
+      if (!isSelected) {
+        // Include all topics in the selected research area
+        setSelectedTopics(prev => [
+          ...new Set([...prev, ...topics.map(topic => topic.topic_id)]),
+        ]);
+      } else {
+        // Remove topics if research area is deselected
+        setSelectedTopics(prev => prev.filter(id => !topics.some(topic => topic.topic_id === id)));
+      }
 
-        return newState;
+      return newState;
     });
   };
 
   // Function to toggle topic selection
   const toggleTopicSelection = (topicId) => {
     setSelectedTopics(prevState => {
-        const isSelected = prevState.includes(topicId);
-        return isSelected
-            ? prevState.filter(id => id !== topicId)
-            : [...prevState, topicId];
+      const isSelected = prevState.includes(topicId);
+      return isSelected
+        ? prevState.filter(id => id !== topicId)
+        : [...prevState, topicId];
     });
   };
 
@@ -111,7 +122,7 @@ const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, han
   // Trigger the apply filters action
   const handleApplyFilters = () => {
     if (onApply) {
-        onApply(selectedCategories, selectedResearchAreas, selectedTopics);
+      onApply(selectedCategories, selectedResearchAreas, selectedTopics);
     }
   };
 

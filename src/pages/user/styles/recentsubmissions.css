@@ -15,6 +15,7 @@
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  flex: 1; /* Allow the container to grow if needed */
 }
 
 /* Container for Recent Submissions */
@@ -27,7 +28,6 @@
   text-decoration: underline; /* Optionally, add underline on hover for better UX */
   color: #ff6600; /* Inherit color from parent element */
 }
-
 
 /* Title of the Recent Submissions Section */
 .recent-submissions-container h3 {
@@ -159,21 +159,81 @@
   cursor: not-allowed;
 }
 
-
 /* Styling for icons inside table */
 .results-table td .fa {
   margin-right: 5px;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  /* Stack sections on smaller screens */
+@media (max-width: 1024px) {
+  /* Adjust for medium screens like tablets */
   .sections-container {
     flex-direction: column;
+    gap: 15px;  /* Reduced space between sections on smaller screens */
   }
 
-  .most-viewed-container,
-  .recent-submissions-container {
-    width: 100%;  /* Make sections full width on smaller screens */
+  .recent-submissions-container,
+  .most-viewed-container {
+    min-width: 100%; /* Ensure full-width on small screens */
+    width: 100%; /* Take up the full available width */
   }
+
+  .results-table th,
+  .results-table td {
+    font-size: 0.9rem;  /* Slightly smaller text on smaller screens */
+  }
+
+  /* Make the expand button a bit more prominent */
+  .expand-icon {
+    font-size: 1.5rem;
+  }
+
+  /* Pagination button size adjustment */
+  .pagination-controls .page-number {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* For smaller devices like mobile */
+  .sections-container {
+    flex-direction: column;
+    gap: 10px;  /* Reduce the gap even more */
+  }
+
+  .recent-submissions-container,
+  .most-viewed-container {
+    width: 100%;  /* Make the sections full width on smaller screens */
+  }
+
+  .results-table {
+    font-size: 0.85rem; /* Reduce font size on smaller screens */
+  }
+
+  /* Adjust column widths for small screens */
+  .results-table th:nth-child(1), /* Title column */
+  .results-table td:nth-child(1) {
+    width: 50%;  /* Title column takes 50% width */
+  }
+
+  .results-table th:nth-child(2), /* Expand button */
+  .results-table td:nth-child(2) {
+    width: 20%;  /* Expand button takes 20% width */
+  }
+
+  .results-table th:nth-child(3), /* Authors column */
+  .results-table td:nth-child(3) {
+    width: 15%;  /* Authors column still 15% */
+  }
+
+  .results-table th:nth-child(4), /* Date column */
+  .results-table td:nth-child(4) {
+    width: 15%;  /* Date column still 15% */
+  }
+
+  .expand-icon {
+    font-size: 1.5rem; /* Make expand icon slightly bigger for easy tapping */
+  }
+
 }

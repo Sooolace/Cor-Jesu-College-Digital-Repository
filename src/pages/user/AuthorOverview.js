@@ -73,13 +73,7 @@ function AuthorOverview() {
         />
       </div>
       <div className="author-overview-container container mt-4">
-        {loading && (
-          <div className="text-center mt-4">
-            <Spinner animation="border" role="status" />
-            <span className="visually-hidden">Loading...</span>
-            <p>Loading author details...</p>
-          </div>
-        )}
+
         {error && <Alert variant="danger">{error}</Alert>} {/* Display error message if any */}
 
         {author && (
@@ -88,6 +82,13 @@ function AuthorOverview() {
             <div className="author-underline"></div>
 
             <div className="table-with-back-button">
+            {loading && (
+          <div className="text-center mt-4">
+            <Spinner animation="border" role="status" />
+            <span className="visually-hidden">Loading...</span>
+            <p>Loading author details...</p>
+          </div>
+        )}
               {works.length > 0 ? (
                 <Table striped bordered hover responsive className="mt-3">
                   <thead>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../../pages/user/styles/departments.css'; 
 import CCIS from '../../assets/CCIS.png';
 import CJC from '../../assets/GRAD_SCHOOL.png';
@@ -12,11 +12,30 @@ import Breadcrumb from '../../components/BreadCrumb';
 function Departments() {
     const navigate = useNavigate();
 
+    useEffect(() => {
+        // Cache the departments on first load or if not cached
+        const cachedDepartments = localStorage.getItem('departments');
+        if (!cachedDepartments) {
+            const departmentsData = [
+                { id: 'ccis', name: 'College of Computing and Information Sciences', image: CCIS },
+                { id: 'cjc', name: 'Graduate School', image: CJC },
+                { id: 'cabe', name: 'College of Accountancy, Business, and Entrepreneurship', image: CABE },
+                { id: 'coe', name: 'College of Engineering', image: COE },
+                { id: 'chs', name: 'College of Health Sciences', image: CHS },
+                { id: 'cedas', name: 'College of Education Arts and Sciences', image: CEDAS },
+            ];
+            // Cache this data in localStorage
+            localStorage.setItem('departments', JSON.stringify(departmentsData));
+        }
+    }, []);
+
+    const departments = JSON.parse(localStorage.getItem('departments')) || [];
+
     return (
         <>
         <div className="breadcrumb-container">
-        <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Departments', link: '/search' }]} />
-      </div>
+            <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Departments', link: '/search' }]} />
+        </div>
         <div className="home-page">
             {/* Main content */}
             <div className="centered-content departments-container">
@@ -24,42 +43,18 @@ function Departments() {
                 <div className="author-underline"></div>
 
                 <div className="departments-grid-container">
-                    <div className="departments-grid-item">
-                        <a href="/departments/ccis" className="department-link">
-                            <img src={CCIS} alt="College of Computing and Information Sciences" className="department-image" />
-                            <p>College of Computing and Information Sciences</p>
-                        </a>
-                    </div>
-                    <div className="departments-grid-item">
-                        <a href="/departments/cjc" className="department-link">
-                            <img src={CJC} alt="Graduate School" className="department-image" />
-                            <p>Graduate School</p>
-                        </a>
-                    </div>
-                    <div className="departments-grid-item">
-                        <a href="/departments/cabe" className="department-link">
-                            <img src={CABE} alt="College of Accountancy, Business, and Entrepreneurship" className="department-image" />
-                            <p>College of Accountancy, Business, and Entrepreneurship</p>
-                        </a>
-                    </div>
-                    <div className="departments-grid-item">
-                        <a href="/departments/coe" className="department-link">
-                            <img src={COE} alt="College of Engineering" className="department-image" />
-                            <p>College of Engineering</p>
-                        </a>
-                    </div>
-                    <div className="departments-grid-item">
-                        <a href="/departments/chs" className="department-link">
-                            <img src={CHS} alt="College of Health Sciences" className="department-image" />
-                            <p>College of Health Sciences</p>
-                        </a>
-                    </div>
-                    <div className="departments-grid-item">
-                        <a href="/departments/cedas" className="department-link">
-                            <img src={CEDAS} alt="College of Education Arts and Sciences" className="department-image" />
-                            <p>College of Education Arts and Sciences</p>
-                        </a>
-                    </div>
+                    {departments.map((department) => (
+                        <div className="departments-grid-item" key={department.id}>
+                            <a href={`/departments/${department.id}`} className="department-link">
+                                <img 
+                                    src={department.image} 
+                                    alt={department.name} 
+                                    className="department-image" 
+                                />
+                                <p>{department.name}</p>
+                            </a>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

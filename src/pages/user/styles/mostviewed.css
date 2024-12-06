@@ -8,21 +8,22 @@
 }
 
 /* Shared container styling for sections */
-.most-viewed-container{
+.most-viewed-container {
   padding: 20px;
   min-width: 600px;  /* Ensures the width is 48% to align with the other section */
   min-height: 530px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;  /* Allow container to expand */
 }
 
 /* Links styling */
-.most-viewed-container a{
+.most-viewed-container a {
   text-decoration: none;
 }
 
-.recent-submissions-container a:hover {
+.most-viewed-container a:hover {
   text-decoration: underline;
   color: #ff6600;
 }
@@ -142,6 +143,7 @@
   margin: 0;
 }
 
+/* Pagination buttons hover state */
 .pagination-controls .page-number:hover {
   background-color: #ff6600;
   color: white;
@@ -158,19 +160,47 @@
   cursor: not-allowed;
 }
 
-/* Styling for icons inside table */
-.results-table td .fa {
-  margin-right: 5px;
-  color: #cc3217;
-}
 
-/* Responsive Design */
+
+
 @media (max-width: 768px) {
+  /* For smaller devices like mobile */
   .sections-container {
     flex-direction: column;
+    gap: 10px;  /* Reduce the gap even more */
   }
+
   .most-viewed-container,
   .recent-submissions-container {
-    width: 100%;
+    width: 0%;  /* Make the sections full width on smaller screens */
+  }
+
+  .results-table {
+    font-size: 0.85rem; /* Reduce font size on smaller screens */
+  }
+
+  /* Adjust column widths for small screens */
+  .results-table th:nth-child(1), /* Title column */
+  .results-table td:nth-child(1) {
+    width: 50%;  /* Title column takes 50% width */
+  }
+
+  .results-table th:nth-child(2), /* Expand button */
+  .results-table td:nth-child(2) {
+    width: 20%;  /* Expand button takes 20% width */
+  }
+
+  .results-table th:nth-child(3), /* Authors column */
+  .results-table td:nth-child(3) {
+    width: 15%;  /* Authors column still 15% */
+  }
+
+  .results-table th:nth-child(4), /* Date column */
+  .results-table td:nth-child(4) {
+    width: 15%;  /* Date column still 15% */
+  }
+
+  .expand-icon {
+    font-size: 1.5rem; /* Make expand icon slightly bigger for easy tapping */
   }
 }

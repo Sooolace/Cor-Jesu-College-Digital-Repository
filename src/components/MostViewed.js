@@ -11,30 +11,41 @@ const MostViewed = ({ searchQuery }) => {
   const itemsPerPage = 5; // Set the limit for items per page
 
   // Fetch most viewed documents from your API
-  useEffect(() => {
-    const fetchMostViewed = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/projects'); // Replace with your actual API endpoint
-        const data = await response.json();
+  useEffect(() => { 
+    // Check if data is already stored in localStorage
+    const cachedData = localStorage.getItem('mostViewedDocs');
+    if (cachedData) {
+      // If cached data is found, use it
+      setMostViewedDocs(JSON.parse(cachedData));
+      setIsLoading(false); // No need to load data again
+    } else {
+      // If no cached data, fetch it from the API
+      const fetchMostViewed = async () => {
+        try {
+          setIsLoading(true);
+          const response = await fetch('/api/projects'); // Replace with your actual API endpoint
+          const data = await response.json();
 
-        // Ensure the data is an array and contains the necessary properties
-        if (Array.isArray(data)) {
-          // Sort by view_count in descending order
-          const sortedData = data.sort((a, b) => b.view_count - a.view_count);
-          setMostViewedDocs(sortedData);
-        } else {
-          console.error('Invalid data format:', data);
+          // Ensure the data is an array and contains the necessary properties
+          if (Array.isArray(data)) {
+            // Sort by view_count in descending order
+            const sortedData = data.sort((a, b) => b.view_count - a.view_count);
+            setMostViewedDocs(sortedData);
+            // Cache the data in localStorage for subsequent visits
+            localStorage.setItem('mostViewedDocs', JSON.stringify(sortedData));
+          } else {
+            console.error('Invalid data format:', data);
+          }
+        } catch (error) {
+          console.error('Error fetching most viewed projects:', error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching most viewed projects:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      };
 
-    fetchMostViewed();
-  }, []);
+      fetchMostViewed();
+    }
+  }, []); // Empty dependency array ensures this effect runs only once when the component mounts
 
   // Pagination Logic
   const totalPages = Math.ceil(mostViewedDocs.length / itemsPerPage);

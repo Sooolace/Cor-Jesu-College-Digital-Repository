@@ -13,19 +13,29 @@ function Featured() {
   // Fetch featured documents from the API
   useEffect(() => {
     const fetchFeaturedDocuments = async () => {
-      try {
-        const response = await axios.get('/api/featured-documents');
-        setFeaturedDocuments(response.data);
-      } catch (error) {
-        setError('Failed to fetch featured documents');
-        console.error(error);
-      } finally {
-        setLoading(false);
+      // Check if cached data exists
+      const cachedData = localStorage.getItem('featuredDocuments');
+      if (cachedData) {
+        setFeaturedDocuments(JSON.parse(cachedData));
+        setLoading(false); // Set loading to false if data is found in cache
+      } else {
+        try {
+          const response = await axios.get('/api/featured-documents'); // Adjust API endpoint
+          const data = response.data;
+          setFeaturedDocuments(data);
+          // Cache the fetched data for future use
+          localStorage.setItem('featuredDocuments', JSON.stringify(data));
+        } catch (error) {
+          setError('Failed to fetch featured documents');
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
     fetchFeaturedDocuments();
-  }, []);
+  }, []); // Only run once when the component mounts
 
   if (loading) {
     return (
@@ -54,19 +64,25 @@ function Featured() {
             <div key={document.project_id} className="featured-document">
               {/* Clickable Document Title */}
               <h3
-  className="document-title"
-  style={{ cursor: 'pointer' }} // Only make it clickable, no style change
-  onClick={() => navigate(`/DocumentOverview/${document.project_id}`)} // Closing parentheses
->
-  {document.title}
-</h3>
+                className="document-title"
+                style={{ cursor: 'pointer' }} // Only make it clickable, no style change
+                onClick={() => navigate(`/DocumentOverview/${document.project_id}`)} // Closing parentheses
+              >
+                {document.title}
+              </h3>
 
               {/* Clickable Author */}
               <p>
                 <strong>Author:</strong>{' '}
                 <span
-                  style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline' }} // Keeps author as link style
-                  onClick={() => navigate(`/AuthorOverview/${encodeURIComponent(document.author)}`)}
+                  style={{
+                    cursor: 'pointer',
+                    color: '#007bff',
+                    textDecoration: 'underline',
+                  }} // Keeps author as link style
+                  onClick={() =>
+                    navigate(`/AuthorOverview/${encodeURIComponent(document.author)}`)
+                  }
                 >
                   {document.author}
                 </span>

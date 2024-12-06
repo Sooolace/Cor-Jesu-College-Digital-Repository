@@ -31,6 +31,21 @@ function SearchPage() {
   const [selectedTopics, setSelectedTopics] = useState([]); // Added state for topics
   const [loading, setLoading] = useState(false); // Loading state
 
+  // Function to check cache before API call
+  const checkCacheAndFetch = async (query, option, page, categories, researchAreas, topics) => {
+    const cacheKey = `${query}-${option}-${categories.join(',')}-${researchAreas.join(',')}-${topics.join(',')}-${page}`;
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      setFilteredData(parsedData.data);
+      setTotalCount(parsedData.totalCount);
+      setLoading(false);
+    } else {
+      fetchProjects(query, option, page, categories, researchAreas, topics);
+    }
+  };
+
   const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = []) => {
     setLoading(true);
     try {
@@ -41,21 +56,30 @@ function SearchPage() {
         abstract: '/api/search/search/abstract',
         category: '/api/search/search/allprojs',
       };
-  
+
       const endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
-  
+
       // Create a params object with repeated array parameters for categories, researchAreas, and topics
       const params = {
         page,
         itemsPerPage,
         ...(query && { query }),
-        ...(categories.length > 0 && { categories: categories }),
-        ...(researchAreas.length > 0 && { researchAreas: researchAreas }),
-        ...(topics.length > 0 && { topics: topics }),
+        ...(categories.length > 0 && { categories }),
+        ...(researchAreas.length > 0 && { researchAreas }),
+        ...(topics.length > 0 && { topics }),
       };
-  
+
       const response = await axios.get(endpoint, { params });
-  
+
+      const dataToCache = {
+        data: response.data.data || [],
+        totalCount: response.data.totalCount,
+      };
+
+      // Cache the response with a key based on the search parameters
+      const cacheKey = `${query}-${option}-${categories.join(',')}-${researchAreas.join(',')}-${topics.join(',')}-${page}`;
+      localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+
       setFilteredData(response.data.data || []);
       setTotalCount(response.data.totalCount);
     } catch (error) {
@@ -64,15 +88,13 @@ function SearchPage() {
       setLoading(false);
     }
   };
-  
 
   const [searchTrigger, setSearchTrigger] = useState(0); // Counter to trigger search explicitly
+
   useEffect(() => {
     console.log("Fetching projects with filters:", { searchQuery, selectedCategories, selectedResearchAreas, selectedTopics });
-    fetchProjects(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
+    checkCacheAndFetch(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
   }, [searchTrigger, currentPage]); // Trigger fetch only on explicit search or page change
-  
-  
 
   const handleSearchChange = (query) => {
     setTypedQuery(query); // Update typedQuery without triggering search
@@ -96,7 +118,6 @@ function SearchPage() {
     setSelectedTopics(topics);
     setSearchTrigger((prev) => prev + 1); // Trigger a search
   };
-  
 
   // Clear all filters and reset search
   const handleClearFilters = () => {

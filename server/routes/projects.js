@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../db'); // Database connection
 const multer = require('multer'); // For handling file uploads
+const NodeCache = require('node-cache'); // In-memory cache
 
 const router = express.Router();
 
@@ -9,6 +10,9 @@ const upload = multer({
     dest: 'downloads/',
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
+
+// Initialize in-memory cache (TTL: 10 minutes)
+const cache = new NodeCache({ stdTTL: 600 });
 
 // Utility to parse and validate `study_url`
 const parseStudyUrl = (study_url) => {
@@ -21,81 +25,88 @@ const parseStudyUrl = (study_url) => {
     }
 };
 
-  
-  // POST - Add a new project
-  router.post('/', upload.single('file_path'), async (req, res) => {
+// POST - Add a new project
+router.post('/', upload.single('file_path'), async (req, res) => {
     const { title, description_type, abstract, publication_date, study_url, category_id, keywords } = req.body;
-  
+
     try {
-      // Log incoming request data for debugging
-      console.log('Request body:', req.body);
-      console.log('Uploaded file:', req.file);
-  
-      // Ensure that the file is uploaded
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-      }
-  
-      const filePath = req.file.path; // Path to the uploaded file
-      const studyUrlString = parseStudyUrl(study_url); // Parse the study URL
-  
-      // Insert project data into the 'projects' table
-      const query = `
-        INSERT INTO projects (title, description_type, abstract, publication_date, file_path, study_url, category_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING *
-      `;
-      const result = await pool.query(query, [title, description_type, abstract, publication_date, filePath, studyUrlString, category_id]);
-  
-      // Get the inserted project ID
-      const projectId = result.rows[0].project_id;
-  
-      // Insert keywords into the 'keywords' table if they exist
-      if (keywords && Array.isArray(keywords) && keywords.length > 0) {
-        const insertKeywordsQuery = `
-          INSERT INTO keywords (project_id, keyword)
-          VALUES ($1, $2)
+        // Ensure that the file is uploaded
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const filePath = req.file.path; // Path to the uploaded file
+        const studyUrlString = parseStudyUrl(study_url); // Parse the study URL
+
+        // Insert project data into the 'projects' table
+        const query = `
+            INSERT INTO projects (title, description_type, abstract, publication_date, file_path, study_url, category_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
         `;
-        const keywordInsertPromises = keywords.map((keyword) =>
-          pool.query(insertKeywordsQuery, [projectId, keyword])
-        );
-        await Promise.all(keywordInsertPromises);
-      }
-  
-      // Respond with the created project data
-      res.status(201).json(result.rows[0]);
+        const result = await pool.query(query, [title, description_type, abstract, publication_date, filePath, studyUrlString, category_id]);
+
+        // Get the inserted project ID
+        const projectId = result.rows[0].project_id;
+
+        // Insert keywords into the 'keywords' table if they exist
+        if (keywords && Array.isArray(keywords) && keywords.length > 0) {
+            const insertKeywordsQuery = `
+                INSERT INTO keywords (project_id, keyword)
+                VALUES ($1, $2)
+            `;
+            const keywordInsertPromises = keywords.map((keyword) =>
+                pool.query(insertKeywordsQuery, [projectId, keyword])
+            );
+            await Promise.all(keywordInsertPromises);
+        }
+
+        // Clear cache after adding a new project
+        cache.del('allProjectsCache'); // Invalidate the cache for the list of all projects
+
+        // Respond with the created project data
+        res.status(201).json(result.rows[0]);
     } catch (error) {
-      console.error('Error adding project:', error.message); // Log specific error message
-      res.status(500).json({ error: 'Server error' });
+        console.error('Error adding project:', error.message);
+        res.status(500).json({ error: 'Server error' });
     }
-  });
+});
 
-  // GET - Fetch all projects without any search conditions
+// GET - Fetch all projects with caching
 router.get('/', async (req, res) => {
-    const searchQuery = `
-SELECT p.*, 
-       STRING_AGG(DISTINCT a.name, ', ') AS authors, 
-       STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
-FROM projects p
-LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
-LEFT JOIN authors a ON pa.author_id = a.author_id 
-LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
-LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
-GROUP BY p.project_id 
-ORDER BY p.publication_date DESC
+    // Check if the data is already in the cache
+    const cachedProjects = cache.get('allProjectsCache');
+    if (cachedProjects) {
+        console.log('Serving from cache');
+        return res.status(200).json(cachedProjects); // Return cached data if available
+    }
 
+    const searchQuery = `
+        SELECT p.*, 
+               STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+               STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+        FROM projects p
+        LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+        LEFT JOIN authors a ON pa.author_id = a.author_id 
+        LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+        LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+        GROUP BY p.project_id 
+        ORDER BY p.publication_date DESC
     `;
 
     try {
         // Execute the query to retrieve all projects
         const result = await pool.query(searchQuery);
+
+        // Cache the result for future requests
+        cache.set('allProjectsCache', result.rows);
+
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error retrieving projects:', error);
         res.status(500).json({ error: 'Failed to retrieve projects' });
     }
 });
-
 
 // GET - Fetch a single project by project_id
 router.get('/:project_id', async (req, res) => {
@@ -110,8 +121,7 @@ router.get('/:project_id', async (req, res) => {
     }
 });
 
-
-
+// PUT - Update project by project_id
 router.put('/:project_id', upload.single('file_path'), async (req, res) => {
     const { project_id } = req.params;
     const {
@@ -119,29 +129,16 @@ router.put('/:project_id', upload.single('file_path'), async (req, res) => {
         publication_date,
         keywords,
         abstract,
-        study_url,  // Assume it's always a single URL
+        study_url, // Assume it's always a single URL
         category_id,
         research_area_id,
         topic_id,
         research_type_id
     } = req.body;
 
-    console.log('Updating project:', {
-        project_id,
-        title,
-        publication_date,
-        abstract,
-        category_id,
-        research_area_id,
-        topic_id,
-        research_type_id,
-    });
-
     try {
         const filePath = req.file ? req.file.path : undefined;
-        
-        // Directly use the single study_url
-        const studyUrlString = study_url;  
+        const studyUrlString = study_url;
 
         const query = `
             UPDATE projects 
@@ -160,12 +157,14 @@ router.put('/:project_id', upload.single('file_path'), async (req, res) => {
 
         if (!result.rows.length) return res.status(404).json({ error: 'Project not found' });
         res.status(200).json(result.rows[0]);
+
+        // Clear the cache after updating a project
+        cache.del('allProjectsCache');
     } catch (error) {
         console.error('Error updating project:', error);
         res.status(500).json({ error: 'Failed to update project' });
     }
 });
-
 
 // POST - Add an author to a project
 router.post('/:project_id/authors', async (req, res) => {
@@ -193,31 +192,36 @@ router.post('/:project_id/authors', async (req, res) => {
         res.status(500).json({ error: 'Failed to create link' });
     }
 });
+
+// GET - Fetch top-viewed projects with caching
 router.get('/top-viewed', async (req, res) => {
+    const cachedTopViewed = cache.get('topViewedCache');
+    if (cachedTopViewed) {
+        console.log('Serving from cache');
+        return res.status(200).json(cachedTopViewed); // Return cached data if available
+    }
+
     const topViewedQuery = `
-    SELECT p.*, 
-           STRING_AGG(DISTINCT a.name, ', ') AS authors, 
-           STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
-    FROM projects p
-    LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
-    LEFT JOIN authors a ON pa.author_id = a.author_id 
-    LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
-    LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
-    GROUP BY p.project_id 
-    ORDER BY p.view_count DESC
-    LIMIT 10;
+        SELECT p.*, 
+               STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+               STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+        FROM projects p
+        LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+        LEFT JOIN authors a ON pa.author_id = a.author_id 
+        LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+        LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+        GROUP BY p.project_id 
+        ORDER BY p.view_count DESC
+        LIMIT 10
     `;
 
     try {
-        // Execute the query to retrieve top-viewed projects with authors and keywords
+        // Execute the query to retrieve top-viewed projects
         const result = await pool.query(topViewedQuery);
-        
-        if (!result.rows || result.rows.length === 0) {
-            console.log('No top-viewed projects found.');
-            return res.status(404).json({ error: 'No top-viewed projects found' });
-        }
 
-        // Ensure you're sending an array of results
+        // Cache the result for future requests
+        cache.set('topViewedCache', result.rows);
+
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching top-viewed projects:', error);
@@ -225,14 +229,11 @@ router.get('/top-viewed', async (req, res) => {
     }
 });
 
-  
-
-
+// DELETE - Delete project by project_id
 router.delete('/:project_id', async (req, res) => {
     const { project_id } = req.params;
 
     try {
-        // Check if the project exists
         const checkQuery = 'SELECT * FROM projects WHERE project_id = $1';
         const checkResult = await pool.query(checkQuery, [project_id]);
 
@@ -248,6 +249,10 @@ router.delete('/:project_id', async (req, res) => {
         // Delete the project from the database
         await pool.query('DELETE FROM projects WHERE project_id = $1', [project_id]);
 
+        // Clear cache after deleting a project
+        cache.del('allProjectsCache');
+        cache.del('topViewedCache');
+
         res.status(200).json({ message: `Project with ID ${project_id} and its related data have been deleted` });
     } catch (error) {
         console.error('Error deleting project:', error);
@@ -255,9 +260,9 @@ router.delete('/:project_id', async (req, res) => {
     }
 });
 
-
+// GET - Fetch projects by department name
 router.get('/departments/:departmentName', async (req, res) => {
-    const { departmentName } = req.params;  // Capture the department short code from the URL
+    const { departmentName } = req.params;  
 
     // Mapping of department short codes to full department names
     const departmentNameMapping = {
@@ -271,7 +276,6 @@ router.get('/departments/:departmentName', async (req, res) => {
 
     const fullDepartmentName = departmentNameMapping[departmentName.toLowerCase()];
 
-    // Check if the department name exists in the mapping
     if (!fullDepartmentName) {
         return res.status(404).json({ error: 'Department not found' });
     }
@@ -290,14 +294,12 @@ router.get('/departments/:departmentName', async (req, res) => {
             ORDER BY p.publication_date DESC;
         `;
         
-        // Pass `fullDepartmentName` as the parameter for the query
         const result = await pool.query(query, [fullDepartmentName]);
-        res.status(200).json(result.rows);  // Return the list of projects for the department
+        res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error retrieving projects by department:', error);
         res.status(500).json({ error: 'Failed to retrieve projects' });
     }
 });
-
 
 module.exports = router;
