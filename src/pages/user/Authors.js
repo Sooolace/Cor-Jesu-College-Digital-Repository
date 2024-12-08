@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Pagination, Spinner, Form, Alert, Button } from 'react-bootstrap';
+import { Table, Pagination, Spinner, Form, Alert, Button, Dropdown } from 'react-bootstrap';
 import { CiViewList } from "react-icons/ci";
-import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/BreadCrumb';
+import '../user/styles/authors.css';
 
 function Authors() {
   const [authors, setAuthors] = useState([]);
@@ -12,7 +12,9 @@ function Authors() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [filterName, setFilterName] = useState('');
+  const [filterDepartment, setFilterDepartment] = useState('');
   const [filteredAuthors, setFilteredAuthors] = useState([]);
+  const [departments, setDepartments] = useState([]);
 
   const navigate = useNavigate();
 
@@ -23,10 +25,15 @@ function Authors() {
   const fetchAuthors = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/authors'); // Adjust API endpoint if necessary
+      const response = await fetch('/api/authors');
       const data = await response.json();
       setAuthors(data);
       setFilteredAuthors(data);
+
+      const uniqueDepartments = [
+        ...new Set(data.map((author) => author.category_name).filter(Boolean)),
+      ];
+      setDepartments(uniqueDepartments);
     } catch (error) {
       console.error('Error fetching authors:', error);
       setError('Failed to load authors');
@@ -36,18 +43,25 @@ function Authors() {
   };
 
   const handleFilter = () => {
-    const filtered = filterName
-      ? authors.filter((author) =>
-          author.name.toLowerCase().includes(filterName.toLowerCase())
-        )
-      : authors;
+    let filtered = authors;
+
+    if (filterName) {
+      filtered = filtered.filter((author) =>
+        author.name.toLowerCase().includes(filterName.toLowerCase())
+      );
+    }
+
+    if (filterDepartment) {
+      filtered = filtered.filter(
+        (author) => author.category_name === filterDepartment
+      );
+    }
+
     setFilteredAuthors(filtered);
     setCurrentPage(1);
   };
 
-  // Updated handleViewClick function to navigate with the author's name
   const handleViewClick = (authorName) => {
-    // Encode the name to handle spaces and special characters
     const encodedName = encodeURIComponent(authorName);
     navigate(`/AuthorOverview/${encodedName}`);
   };
@@ -59,6 +73,7 @@ function Authors() {
       <div className="breadcrumb-container">
         <Breadcrumb items={[{ label: 'Home', link: '/' }, { label: 'Authors', link: '#' }]} />
       </div>
+
       <div className="author-overview-container container mt-4">
         {/* Title */}
         <div className="text-center mb-4">
@@ -66,24 +81,66 @@ function Authors() {
         </div>
         <div className="author-underline"></div>
 
-        {/* Search Bar */}
-        <div
-          className="d-flex justify-content-between align-items-center mb-3"
-          style={{ width: '75%', margin: '0 auto' }}
-        >
-          <div className="d-flex align-items-center">
-            <Form.Control
-              type="text"
-              style={{ width: '400px' }}
-              className="me-2"
-              placeholder="Search by Name"
-              value={filterName}
-              onChange={(e) => setFilterName(e.target.value)}
-            />
-            <Button classname="btn-primary" onClick={handleFilter}>
-              Filter
-            </Button>
+        {/* Search and Filter Bar */}
+        <div className="d-flex justify-content-between align-items-center mb-3" style={{ width: '75%', margin: '0 auto', gap: '10px' }}>
+          
+          {/* Fixed-width Department Dropdown */}
+          <div style={{ width: '200px' }}>
+            <Dropdown>
+              <Dropdown.Toggle
+                id="dropdown-custom-components"
+                style={{
+                  backgroundColor: '#a33307',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {filterDepartment || 'Filter by Department'}
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                <Dropdown.Item onClick={() => setFilterDepartment('')}>
+                  All Departments
+                </Dropdown.Item>
+                {departments.map((department) => (
+                  <Dropdown.Item
+                    key={department}
+                    onClick={() => setFilterDepartment(department)}
+                    style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {department}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
           </div>
+
+          {/* Search Input aligned to the right */}
+          <Form.Control
+            type="text"
+            placeholder="Search by Name"
+            value={filterName}
+            onChange={(e) => setFilterName(e.target.value)}
+            style={{ width: '500px', marginLeft: 'auto', borderColor: '#a33307' }}
+          />
+
+          {/* Search Button */}
+          <Button
+            className="btn"
+            style={{
+              backgroundColor: '#a33307',
+              borderColor: '#a33307',
+              color: 'white',
+              borderRadius: '5px',
+            }}
+            onClick={handleFilter}
+          >
+            Search
+          </Button>
         </div>
 
         {/* Loading and Error Messages */}
@@ -106,20 +163,21 @@ function Authors() {
                 .map((author) => (
                   <tr key={author.author_id}>
                     <td>{author.name}</td>
-                    <td>{author.category_name || 'No Department'}</td>
+                    <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {author.category_name || 'No Department'}
+                    </td>
                     <td>
-                      {/* View Button */}
                       <CiViewList
                         size={30}
                         title="View"
                         style={{
                           cursor: 'pointer',
                           color: 'white',
-                          backgroundColor: '#007bff',
+                          backgroundColor: '#007BFF',
                           borderRadius: '5px',
                           padding: '2px',
                         }}
-                        onClick={() => handleViewClick(author.name)} // Use name here
+                        onClick={() => handleViewClick(author.name)}
                       />
                     </td>
                   </tr>

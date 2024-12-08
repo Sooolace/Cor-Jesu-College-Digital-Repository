@@ -7,6 +7,7 @@ import Breadcrumb from '../../components/BreadCrumb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faTags } from '@fortawesome/free-solid-svg-icons';
 import './styles/filter.css';
+import { Button } from 'react-bootstrap';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ function SearchPage() {
   const [selectedResearchAreas, setSelectedResearchAreas] = useState([]); // Added state for research areas
   const [selectedTopics, setSelectedTopics] = useState([]); // Added state for topics
   const [loading, setLoading] = useState(false); // Loading state
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   // Function to check cache before API call
   const checkCacheAndFetch = async (query, option, page, categories, researchAreas, topics) => {
@@ -251,30 +253,18 @@ function SearchPage() {
                     </div>
                   ))}
 
-                  {/* Pagination */}
-                  <div className="pagination">
-                    {currentPage > 1 && (
-                      <button onClick={() => paginate(currentPage - 1)} className="pagination-button">
-                        Previous
-                      </button>
-                    )}
-
-                    {Array.from({ length: Math.ceil(totalCount / itemsPerPage) }, (_, i) => (
-                      <button
-                        key={i + 1}
-                        onClick={() => paginate(i + 1)}
-                        className={`pagination-button ${currentPage === i + 1 ? 'active' : ''}`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-
-                    {currentPage < Math.ceil(totalCount / itemsPerPage) && (
-                      <button onClick={() => paginate(currentPage + 1)} className="pagination-button">
-                        Next
-                      </button>
-                    )}
-                  </div>
+{/* Pagination Buttons */}
+<div className="pagination mt-3 d-flex justify-content-center align-items-center flex-wrap">
+  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+    <Button
+      key={pageNumber}
+      onClick={() => paginate(pageNumber)}
+      className={`btn btn-secondary mx-1 ${currentPage === pageNumber ? 'active' : ''}`}
+    >
+      {pageNumber}
+    </Button>
+  ))}
+</div>
                 </>
               ) : loading ? (
                 <div>Loading...</div>

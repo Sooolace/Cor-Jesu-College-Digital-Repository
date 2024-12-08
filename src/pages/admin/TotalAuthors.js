@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Pagination, Spinner, Form, Modal, Alert } from 'react-bootstrap';
+import { Table, Button, Pagination, Spinner, Form, Modal, Alert, Dropdown } from 'react-bootstrap';
 import { CiViewList } from "react-icons/ci";
 import { MdDelete } from 'react-icons/md';
 import { FaUserEdit } from "react-icons/fa";
@@ -19,11 +19,13 @@ function TotalAuthors() {
   const itemsPerPage = 10;
   const [filterName, setFilterName] = useState('');
   const [filteredAuthors, setFilteredAuthors] = useState([]);
+  const [filterDepartment, setFilterDepartment] = useState('');
   const [showModal, setShowModal] = useState(false); 
   const [showEditModal, setShowEditModal] = useState(false); 
   const [editingAuthorId, setEditingAuthorId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false); 
   const [authorToDelete, setAuthorToDelete] = useState(null);
+  const [departments, setDepartments] = useState([]);
 
   const navigate = useNavigate(); 
 
@@ -36,8 +38,15 @@ function TotalAuthors() {
     try {
       const response = await fetch('/api/authors');
       const data = await response.json();
+      
       setAuthors(data);
       setFilteredAuthors(data);
+  
+      const uniqueDepartments = [
+        ...new Set(data.map((author) => author.category_name).filter(Boolean)),
+      ];
+      setDepartments(uniqueDepartments);
+  
     } catch (error) {
       console.error('Error fetching authors:', error);
       setError('Failed to load authors');
@@ -45,13 +54,25 @@ function TotalAuthors() {
       setLoading(false);
     }
   };
+  
 
   const handleFilter = () => {
-    const filtered = filterName
-      ? authors.filter(author => author.name.toLowerCase().includes(filterName.toLowerCase()))
-      : authors;
+    let filtered = authors;
+
+    if (filterName) {
+      filtered = filtered.filter((author) =>
+        author.name.toLowerCase().includes(filterName.toLowerCase())
+      );
+    }
+
+    if (filterDepartment) {
+      filtered = filtered.filter(
+        (author) => author.category_name === filterDepartment
+      );
+    }
+
     setFilteredAuthors(filtered);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
   const openEditModal = (authorId) => {
@@ -80,6 +101,7 @@ function TotalAuthors() {
     }
   };
 
+  
   const totalPages = Math.ceil(filteredAuthors.length / itemsPerPage); 
 
   const handlePageChange = (pageNumber) => {
@@ -109,6 +131,40 @@ function TotalAuthors() {
 
       {/* Search Bar, Filter, and Add Author Button */}
       <div className="d-flex justify-content-between align-items-center mb-3" style={{ width: '75%', margin: '0 auto' }}>
+                  {/* Fixed-width Department Dropdown */}
+                  <div style={{ width: '200px' }}>
+            <Dropdown>
+              <Dropdown.Toggle
+                id="dropdown-custom-components"
+                style={{
+                  backgroundColor: '#a33307',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {filterDepartment || 'Filter by Department'}
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                <Dropdown.Item onClick={() => setFilterDepartment('')}>
+                  All Departments
+                </Dropdown.Item>
+                {departments.map((department) => (
+                  <Dropdown.Item
+                    key={department}
+                    onClick={() => setFilterDepartment(department)}
+                    style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {department}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
         <div className="d-flex align-items-center">
           <Form.Control
             type="text"
@@ -118,8 +174,19 @@ function TotalAuthors() {
             value={filterName}
             onChange={(e) => setFilterName(e.target.value)}
           />
-          <Button variant="btn-primary" onClick={handleFilter}>Filter</Button>
-        </div>
+          {/* Search Button */}
+          <Button
+            className="btn"
+            style={{
+              backgroundColor: '#a33307',
+              borderColor: '#a33307',
+              color: 'white',
+              borderRadius: '5px',
+            }}
+            onClick={handleFilter}
+          >
+            Search
+          </Button>        </div>
         <Button variant="success" onClick={() => setShowModal(true)}>
           <IoPersonAddOutline size={20} style={{ marginRight: '10px' }} /> Add Author
         </Button>
