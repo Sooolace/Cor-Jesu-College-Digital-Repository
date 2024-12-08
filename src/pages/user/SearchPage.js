@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SearchBar from '../../components/Searchbar';
-import SubjectFilter from '../../components/SubjectFilter/SubjectFilter'; // Import the SubjectFilter component
+import SubjectFilter from '../../components/SubjectFilter/SubjectFilter';
 import Breadcrumb from '../../components/BreadCrumb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faTags } from '@fortawesome/free-solid-svg-icons';
 import './styles/filter.css';
-import { Button } from 'react-bootstrap';
 
 function SearchPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber); // Update the current page state
+    setCurrentPage(pageNumber);
   };
 
   const { query: initialQuery, option: initialOption } = location.state || { query: '', option: 'allfield' };
@@ -23,45 +22,30 @@ function SearchPage() {
   const [typedQuery, setTypedQuery] = useState(initialQuery || '');
   const [searchOption, setSearchOption] = useState(initialOption);
   const [filteredData, setFilteredData] = useState([]);
-  const [totalCount, setTotalCount] = useState(0); // To store the total count of search results
+  const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const [selectedCategories, setSelectedCategories] = useState([]); // Added state for selected categories
-  const [selectedResearchAreas, setSelectedResearchAreas] = useState([]); // Added state for research areas
-  const [selectedTopics, setSelectedTopics] = useState([]); // Added state for topics
-  const [loading, setLoading] = useState(false); // Loading state
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedResearchAreas, setSelectedResearchAreas] = useState([]);
+  const [selectedTopics, setSelectedTopics] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Function to check cache before API call
-  const checkCacheAndFetch = async (query, option, page, categories, researchAreas, topics) => {
-    const cacheKey = `${query}-${option}-${categories.join(',')}-${researchAreas.join(',')}-${topics.join(',')}-${page}`;
-    const cachedData = localStorage.getItem(cacheKey);
-
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      setFilteredData(parsedData.data);
-      setTotalCount(parsedData.totalCount);
-      setLoading(false);
-    } else {
-      fetchProjects(query, option, page, categories, researchAreas, topics);
-    }
-  };
-
+  // Function to fetch data from API
   const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = []) => {
     setLoading(true);
     try {
       const endpointMap = {
+        allfields: '/api/search/allfields',
         title: '/api/search/search/title',
         author: '/api/search/search/author',
         keywords: '/api/search/search/keywords',
         abstract: '/api/search/search/abstract',
-        category: '/api/search/search/allprojs',
+        category: '/api/search/allprojs',
       };
 
       const endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
 
-      // Create a params object with repeated array parameters for categories, researchAreas, and topics
       const params = {
         page,
         itemsPerPage,
@@ -73,15 +57,6 @@ function SearchPage() {
 
       const response = await axios.get(endpoint, { params });
 
-      const dataToCache = {
-        data: response.data.data || [],
-        totalCount: response.data.totalCount,
-      };
-
-      // Cache the response with a key based on the search parameters
-      const cacheKey = `${query}-${option}-${categories.join(',')}-${researchAreas.join(',')}-${topics.join(',')}-${page}`;
-      localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-
       setFilteredData(response.data.data || []);
       setTotalCount(response.data.totalCount);
     } catch (error) {
@@ -91,46 +66,67 @@ function SearchPage() {
     }
   };
 
-  const [searchTrigger, setSearchTrigger] = useState(0); // Counter to trigger search explicitly
+  const [searchTrigger, setSearchTrigger] = useState(0);
 
   useEffect(() => {
-    console.log("Fetching projects with filters:", { searchQuery, selectedCategories, selectedResearchAreas, selectedTopics });
-    checkCacheAndFetch(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
-  }, [searchTrigger, currentPage]); // Trigger fetch only on explicit search or page change
+    console.log('Fetching projects with filters:', {
+      searchQuery,
+      selectedCategories,
+      selectedResearchAreas,
+      selectedTopics
+    });
+
+    fetchProjects(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
+  }, [searchTrigger, currentPage]);
 
   const handleSearchChange = (query) => {
-    setTypedQuery(query); // Update typedQuery without triggering search
+    setTypedQuery(query);
   };
 
   const handleOptionChange = (option) => {
-    setSearchOption(option); // Only update the selected option
+    setSearchOption(option);
   };
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setSearchQuery(typedQuery); // Update the query
-    setCurrentPage(1); // Reset to page 1 on new search
-    setSearchTrigger((prev) => prev + 1); // Increment the trigger counter to fetch data
+    setSearchQuery(typedQuery);
+    setCurrentPage(1);
+    setSearchTrigger((prev) => prev + 1);
   };
 
   const handleApplyFilters = (categories, researchAreas, topics) => {
-    console.log("Applying Filters:", { categories, researchAreas, topics });
+    console.log('Applying Filters:', { categories, researchAreas, topics });
     setSelectedCategories(categories);
     setSelectedResearchAreas(researchAreas);
     setSelectedTopics(topics);
-    setSearchTrigger((prev) => prev + 1); // Trigger a search
+    setSearchTrigger((prev) => prev + 1);
   };
 
-  // Clear all filters and reset search
   const handleClearFilters = () => {
-    setSelectedCategories([]); // Clear selected categories
-    setSelectedResearchAreas([]); // Clear selected research areas
-    setSelectedTopics([]); // Clear selected topics
-    setSearchQuery(''); // Clear search query
-    setTypedQuery(''); // Clear typed query
-    setCurrentPage(1); // Reset to page 1
-    setSearchTrigger((prev) => prev + 1); // Trigger the fetchProjects with cleared data
+    setSelectedCategories([]);
+    setSelectedResearchAreas([]);
+    setSelectedTopics([]);
+    setSearchQuery('');
+    setTypedQuery('');
+    setCurrentPage(1);
+    setSearchTrigger((prev) => prev + 1);
   };
+
+  // Cleanup effect to ensure no localStorage or cache references
+  useEffect(() => {
+    return () => {
+      console.log('Cleaning up component state.');
+      // Explicitly clean up state to prevent unintended caching issues
+      setSelectedCategories([]);
+      setSelectedResearchAreas([]);
+      setSelectedTopics([]);
+      setSearchQuery('');
+      setTypedQuery('');
+      setCurrentPage(1);
+      setFilteredData([]);
+      setTotalCount(0);
+    };
+  }, []);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -144,42 +140,45 @@ function SearchPage() {
       <div className="search-page-container">
         <div className="centered-content">
           <div className="search-results-wrapper">
-            {/* Filters and Search Bar Section */}
+            
+            {/* Search Bar */}
             <div className="filters-container">
               <div className="search-bar-wrapper">
                 <SearchBar
                   query={typedQuery}
-                  onChange={handleSearchChange} // Update typedQuery
+                  onChange={handleSearchChange}
                   selectedOption={searchOption}
                   onOptionChange={handleOptionChange}
-                  onSearch={handleSearchSubmit} // Explicit search only on submit
+                  onSearch={handleSearchSubmit}
                 />
               </div>
 
-              {/* Subject Filter Section */}
+              {/* Subject Filter */}
               <div className="subject-filter-wrapper">
                 <SubjectFilter
-                  selectedCategories={selectedCategories} // Pass selected categories to SubjectFilter
-                  setSelectedCategories={setSelectedCategories} // Pass the function to update categories
-                  selectedResearchAreas={selectedResearchAreas} // Pass selected research areas to SubjectFilter
-                  setSelectedResearchAreas={setSelectedResearchAreas} // Pass the function to update research areas
-                  selectedTopics={selectedTopics} // Pass selected topics to SubjectFilter
-                  setSelectedTopics={setSelectedTopics} // Pass the function to update topics
-                  onApply={handleApplyFilters} // Pass handleApplyFilters function to apply selected filters
+                  selectedCategories={selectedCategories}
+                  setSelectedCategories={setSelectedCategories}
+                  selectedResearchAreas={selectedResearchAreas}
+                  setSelectedResearchAreas={setSelectedResearchAreas}
+                  selectedTopics={selectedTopics}
+                  setSelectedTopics={setSelectedTopics}
+                  onApply={handleApplyFilters}
                 />
               </div>
             </div>
 
-            {/* Results Section */}
+            {/* Search Results */}
             <div className="results-list-container">
               {filteredData.length > 0 ? (
                 <>
-                  {/* Results Count */}
+                  {/* Search Result Information */}
                   <div className="results-count">
                     <p>
                       {`Found `}
                       <b>{totalCount}</b>
-                      {` results for '`}<b>{searchQuery}</b>{`'. Showing page `}
+                      {` results for '`}
+                      <b>{searchQuery}</b>
+                      {`'. Showing page `}
                       <b>{indexOfFirstItem + 1}</b>
                       {` to `}
                       <b>{Math.min(indexOfLastItem, totalCount)}</b>
@@ -187,16 +186,16 @@ function SearchPage() {
                     </p>
                   </div>
 
-                  {/* Display Results */}
+                  {/* Mapping through search results */}
                   {filteredData.map((project) => (
                     <div key={project.project_id} className="research-card">
                       <Link to={`/DocumentOverview/${project.project_id}`} className="title-link">
                         <h4>{project.title}</h4>
                       </Link>
 
-                      {/* Authors Section */}
+                      {/* Display Authors */}
                       <p className="category">
-                        <FontAwesomeIcon icon={faUser} />{' '}
+                        <FontAwesomeIcon icon={faUser} />
                         {Array.isArray(project.authors) ? (
                           project.authors.map((author, index) => (
                             <span key={author.author_id || index}>
@@ -209,7 +208,10 @@ function SearchPage() {
                         ) : project.authors ? (
                           project.authors.split(', ').map((authorName, index) => (
                             <span key={index}>
-                              <Link to={`/AuthorOverview/${authorName}`} className="author-link">
+                              <Link
+                                to={`/AuthorOverview/${authorName}`}
+                                className="author-link"
+                              >
                                 {authorName}
                               </Link>
                               {index < project.authors.split(', ').length - 1 && ', '}
@@ -220,13 +222,16 @@ function SearchPage() {
                         )}
                       </p>
 
-                      {/* Keywords Section */}
+                      {/* Display Keywords */}
                       <p className="category">
-                        <FontAwesomeIcon icon={faTags} />{' '}
+                        <FontAwesomeIcon icon={faTags} />
                         {Array.isArray(project.keywords) ? (
                           project.keywords.map((keyword, index) => (
                             <span key={keyword.keyword_id || index}>
-                              <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword_id)}`} className="keyword-link">
+                              <Link
+                                to={`/KeywordOverview/${encodeURIComponent(keyword.keyword_id)}`}
+                                className="keyword-link"
+                              >
                                 {keyword.keyword}
                               </Link>
                               {index < project.keywords.length - 1 && ', '}
@@ -235,7 +240,10 @@ function SearchPage() {
                         ) : project.keywords ? (
                           project.keywords.split(', ').map((keyword, index) => (
                             <span key={index}>
-                              <Link to={`/KeywordOverview/${encodeURIComponent(keyword)}`} className="keyword-link">
+                              <Link
+                                to={`/KeywordOverview/${encodeURIComponent(keyword)}`}
+                                className="keyword-link"
+                              >
                                 {keyword}
                               </Link>
                               {index < project.keywords.split(', ').length - 1 && ', '}
@@ -246,25 +254,37 @@ function SearchPage() {
                         )}
                       </p>
 
-                      {/* Abstract */}
+                      {/* Abstract Container */}
                       <div className="abstract-container">
                         {project.abstract || 'No abstract available.'}
                       </div>
                     </div>
                   ))}
 
-{/* Pagination Buttons */}
-<div className="pagination mt-3 d-flex justify-content-center align-items-center flex-wrap">
-  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-    <Button
-      key={pageNumber}
-      onClick={() => paginate(pageNumber)}
-      className={`btn btn-secondary mx-1 ${currentPage === pageNumber ? 'active' : ''}`}
-    >
-      {pageNumber}
-    </Button>
-  ))}
-</div>
+                  {/* Pagination Buttons */}
+                  <div className="pagination">
+                    {currentPage > 1 && (
+                      <button onClick={() => paginate(currentPage - 1)} className="pagination-button">
+                        Previous
+                      </button>
+                    )}
+
+                    {Array.from({ length: Math.ceil(totalCount / itemsPerPage) }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => paginate(i + 1)}
+                        className={`pagination-button ${currentPage === i + 1 ? 'active' : ''}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+
+                    {currentPage < Math.ceil(totalCount / itemsPerPage) && (
+                      <button onClick={() => paginate(currentPage + 1)} className="pagination-button">
+                        Next
+                      </button>
+                    )}
+                  </div>
                 </>
               ) : loading ? (
                 <div>Loading...</div>
@@ -272,6 +292,7 @@ function SearchPage() {
                 <div>No results found.</div>
               )}
             </div>
+
           </div>
         </div>
       </div>

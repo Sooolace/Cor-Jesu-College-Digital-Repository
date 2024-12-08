@@ -5,12 +5,13 @@ import Button from 'react-bootstrap/Button';
 import Pagination from 'react-bootstrap/Pagination';
 import Spinner from 'react-bootstrap/Spinner';
 import Form from 'react-bootstrap/Form';
-import { MdEditSquare, MdArchive } from 'react-icons/md';
-import { CiViewList } from "react-icons/ci";
-import Breadcrumb from '../../components/BreadCrumb';
 import Modal from 'react-bootstrap/Modal';
+import { CiViewList } from "react-icons/ci";
+import { TbArchiveOff } from "react-icons/tb";
+import { FaUnlink } from "react-icons/fa";
+import Breadcrumb from '../../components/BreadCrumb';
 
-function TotalWorks() {
+function ArchivedProjects() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,37 +22,43 @@ function TotalWorks() {
   const [filterTitle, setFilterTitle] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [sortOrder, setSortOrder] = useState('latest');
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [projectIdToDelete, setProjectIdToDelete] = useState(null);
 
-  // Fetch projects from the API
+  
   useEffect(() => {
-    fetchProjects();
+    fetchArchivedProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchArchivedProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/projects');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setProjects(data);
-        setFilteredProjects(data);
-      } else {
-        console.error('Fetched data is not an array:', data);
-        setError('Failed to load projects');
-      }
+        const response = await fetch('/api/projects/archived-projects');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Ensure data is in the correct format
+        if (Array.isArray(data)) {
+            console.log('Fetched archived projects:', data); // Debugging purposes
+            setProjects(data);
+            setFilteredProjects(data);
+        } else {
+            console.error('Unexpected response format:', data);
+            setError('Invalid response format from the server');
+        }
     } catch (error) {
-      console.error('Error fetching projects:', error);
-      setError('Failed to load projects');
+        console.error('Error fetching archived projects:', error.message);
+        setError('Failed to load archived projects. Please try again later.');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
 
   const removeDuplicateAuthors = (authors) => {
     if (!Array.isArray(authors)) {
@@ -90,8 +97,6 @@ function TotalWorks() {
       );
     }
 
-    filtered = filtered.filter(project => !project.isArchived);
-
     const sortedFilteredProjects = filtered.sort((a, b) => {
       if (sortOrder === 'latest') {
         return new Date(b.publication_date) - new Date(a.publication_date);
@@ -119,34 +124,6 @@ function TotalWorks() {
     setFilteredProjects(sortedFilteredProjects);
   };
 
-  const handleArchive = async (projectId) => {
-    try {
-      const response = await fetch(`/api/projects/${projectId}/archive`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const updatedProject = await response.json();
-
-        setFilteredProjects(prevProjects =>
-          prevProjects.map(project =>
-            project.project_id === projectId ? { ...updatedProject, is_archived: true } : project
-          )
-        );
-
-        setShowSuccessModal(true);
-      } else {
-        throw new Error('Failed to archive the project');
-      }
-    } catch (error) {
-      console.error('Error archiving project:', error);
-      setError('Failed to archive the project');
-    }
-  };
-
   const indexOfLastProject = currentPage * itemsPerPage;
   const indexOfFirstProject = indexOfLastProject - itemsPerPage;
   const currentProjects = Array.isArray(filteredProjects)
@@ -165,78 +142,81 @@ function TotalWorks() {
     navigate(`/DocumentOverview/${projectId}`);
   };
 
-  const goToEditAuthor = (projectId) => {
-    navigate(`/admin/EditProject/${projectId}`);
-  };
-
-  const handleShowModal = (projectId) => {
-    setProjectIdToDelete(projectId);
-    setShowDeleteModal(true);
-  };
-
-  const confirmArchive = async () => {
-    await handleArchive(projectIdToDelete);
+  const confirmUnarchive = async () => {
+    await handleunarchive(projectIdToDelete);
     setShowDeleteModal(false);
   
     // Refresh the page after confirming the archive action
     window.location.reload();
   };
-  
 
-  const handleCancelArchive = () => setShowDeleteModal(false);
+
+
+// Define state for modal confirmation
+const [projectIdToDelete, setProjectIdToDelete] = useState(null);
+
+// Function to handle clicking the unarchive icon
+const handleUnarchiveClick = (projectId) => {
+  setProjectIdToDelete(projectId);
+  setShowModal(true);
+};
+
+
+
+const handleunarchive = async (projectId) => {
+  try {
+    const response = await fetch(`/api/projects/${projectId}/unarchive`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const updatedProject = await response.json();
+
+      setFilteredProjects(prevProjects =>
+        prevProjects.map(project =>
+          project.project_id === projectId ? { ...updatedProject, is_archived: true } : project
+        )
+      );
+
+      setShowSuccessModal(true);
+    } else {
+      throw new Error('Failed to unarchive the project');
+    }
+  } catch (error) {
+    console.error('Error unarchiving project:', error);
+    setError('Failed to unarchive the project');
+  }
+};
 
   return (
     <>
       <div className="breadcrumb-container">
         <Breadcrumb
           items={[
-            { label: 'Home', link: '/admindashboard' },
-            { label: 'Projects', link: '#' },
+            { label: 'Home', link: '/' },
+            { label: 'Archived Projects', link: '/archived-projects' }
           ]}
         />
       </div>
 
       <div className="total-works-container container mt-4">
         <div className="text-center mb-4">
-          <h2>Projects Overview</h2>
-          <div className="author-underline"></div>
-        </div>
-
-        <div className="d-flex justify-content-center mb-3">
-          <Form.Control
-            type="text"
-            className="flex-grow-1 me-2"
-            placeholder="Search by Title"
-            value={filterTitle}
-            onChange={(e) => setFilterTitle(e.target.value)}
-          />
-          <Form.Select
-            className="w-25 me-2"
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-          >
-            <option value="">Select Year</option>
-            {Array.from({ length: new Date().getFullYear() - 1999 }, (_, index) => (
-              <option key={index} value={new Date().getFullYear() - index}>
-                {new Date().getFullYear() - index}
-              </option>
-            ))}
-          </Form.Select>
-
-          <Button variant="primary" onClick={handleFilter}>Filter</Button>
+          <h2>Archived Projects</h2>
         </div>
 
         {loading && (
           <div className="text-center mt-4">
             <Spinner animation="border" role="status" />
-            <span className="visually-hidden">Loading...</span>
+            <span>Loading...</span>
           </div>
         )}
         {error && <p className="text-danger text-center">{error}</p>}
-        {!loading && !error && filteredProjects.length === 0 && <p className="text-center">No projects available.</p>}
 
         {currentProjects.length > 0 && (
-          <Table striped bordered hover>
+          <Table striped bordered hover className="mt-3">
             <thead>
               <tr>
                 <th>Title</th>
@@ -245,6 +225,7 @@ function TotalWorks() {
                 <th>Action</th>
               </tr>
             </thead>
+
             <tbody>
               {currentProjects.map((project) => (
                 <tr key={project.project_id}>
@@ -257,53 +238,45 @@ function TotalWorks() {
                 <CiViewList size={35} title="View" style={{ color: 'blue' }} />
               </span>
 
-              <span onClick={() => goToEditAuthor(project.project_id)}
-                    style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
-                <MdEditSquare size={35} title="Edit" style={{ color: 'green' }} />
-              </span>
-
-              <span onClick={() => handleShowModal(project.project_id)}
-                    style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
-                <MdArchive size={35} title="Archive" style={{ color: 'red' }} />
-              </span>
-
+                    <span
+                      onClick={() => handleUnarchiveClick(project.project_id)}
+                      style={{ cursor: 'pointer', color: '#a33307', padding: '5px' }}
+                    >
+                      <TbArchiveOff size={35} title="View" style={{ color: 'red' }}  />
+                    </span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </Table>
         )}
-
-        <Pagination>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Pagination.Item
-              key={i + 1}
-              active={i + 1 === currentPage}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </Pagination.Item>
-          ))}
-          <Button disabled={currentPage === totalPages} onClick={handleNext}>Next</Button>
-        </Pagination>
       </div>
 
-      <Modal show={showDeleteModal} onHide={handleCancelArchive}>
+      {/* Modal Confirmation */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Archive</Modal.Title>
+          <Modal.Title>Confirm Unarchive</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to archive this project?</Modal.Body>
+        <Modal.Body>
+          Are you sure you want to unarchive this project?
+        </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCancelArchive}>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={confirmArchive}>
+          <Button variant="danger" onClick={confirmUnarchive}>
             Confirm
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <Pagination>
+        <Pagination.Prev onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} />
+        <Pagination.Item active>{currentPage}</Pagination.Item>
+        <Pagination.Next onClick={handleNext} disabled={currentPage === totalPages} />
+      </Pagination>
     </>
   );
 }
 
-export default TotalWorks;
+export default ArchivedProjects;

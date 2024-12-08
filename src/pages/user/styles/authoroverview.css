@@ -11,13 +11,17 @@
   height: 1px;
   background-color: #b1b0af;
   margin: 10px auto;
-  margin-bottom: 30px;
 }
 
+.filter-title{
+  font-size: 16px;
+  font-weight: bold;
+  color: #a33307;
+}
 .a-filter-container {
-  background-color: #ffffff;
+  background-color: rgb(242, 243, 237);
   padding: 20px;
-  outline: 1px solid #cccccc;
+  outline: 1px solid #f1f1f1;
   width: 300px;
   max-width: 300px;
   box-sizing: border-box;

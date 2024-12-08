@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
+import Button from 'react-bootstrap/Button';
+import { FaArrowLeft } from 'react-icons/fa';
 import './styles/documentoverview.css';
 import Breadcrumb from '../../components/BreadCrumb';
 
@@ -21,95 +23,53 @@ function DocumentOverview() {
     const fetchData = async () => {
       try {
         setLoading(true); // Start loading
-
-        // Check if project data is cached
-        let cachedProject = localStorage.getItem(`project-${projectId}`);
-        if (cachedProject) {
-          setProject(JSON.parse(cachedProject));
-        } else {
-          const projectResponse = await fetch(`/api/projects/${projectId}`);
-          if (!projectResponse.ok) throw new Error('Failed to fetch project data');
-          const projectData = await projectResponse.json();
-          setProject(projectData);
-          localStorage.setItem(`project-${projectId}`, JSON.stringify(projectData)); // Cache project data
+  
+        // Fetch project data
+        const projectResponse = await fetch(`/api/projects/${projectId}`);
+        if (!projectResponse.ok) throw new Error('Failed to fetch project data');
+        const projectData = await projectResponse.json();
+        setProject(projectData); // Save project data
+  
+        // Fetch keywords for the project
+        const keywordsResponse = await fetch(`/api/project_keywords/${projectId}`);
+        if (!keywordsResponse.ok) throw new Error('Failed to fetch keywords');
+        const keywordsData = await keywordsResponse.json();
+        setKeywords(keywordsData); // Save keywords data
+  
+        // Fetch authors for the project
+        const authorsResponse = await fetch(`/api/project_authors/${projectId}`);
+        if (!authorsResponse.ok) throw new Error('Failed to fetch authors');
+        const authorsData = await authorsResponse.json();
+        setAuthors(authorsData); // Save authors data
+  
+        // Fetch categories related to the project
+        const categoriesRes = await fetch(`/api/project_category/${projectId}`);
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          setCategory(categoriesData); // Save all category data
         }
 
-        // Check if keywords are cached
-        let cachedKeywords = localStorage.getItem(`keywords-${projectId}`);
-        if (cachedKeywords) {
-          setKeywords(JSON.parse(cachedKeywords));
-        } else {
-          const keywordsResponse = await fetch(`/api/project_keywords/${projectId}`);
-          if (!keywordsResponse.ok) throw new Error('Failed to fetch keywords');
-          const keywordsData = await keywordsResponse.json();
-          setKeywords(keywordsData);
-          localStorage.setItem(`keywords-${projectId}`, JSON.stringify(keywordsData)); // Cache keywords data
+        // Fetch research area independently
+        const researchAreaRes = await fetch(`/api/researchAreas/researchArea/${projectData.research_area_id}`);
+        if (researchAreaRes.ok) {
+          const researchAreaData = await researchAreaRes.json();
+          setResearchArea(researchAreaData); // Save research area data
         }
-
-        // Check if authors are cached
-        let cachedAuthors = localStorage.getItem(`authors-${projectId}`);
-        if (cachedAuthors) {
-          setAuthors(JSON.parse(cachedAuthors));
-        } else {
-          const authorsResponse = await fetch(`/api/project_authors/${projectId}`);
-          if (!authorsResponse.ok) throw new Error('Failed to fetch authors');
-          const authorsData = await authorsResponse.json();
-          setAuthors(authorsData);
-          localStorage.setItem(`authors-${projectId}`, JSON.stringify(authorsData)); // Cache authors data
+  
+        // Fetch topic independently
+        const topicRes = await fetch(`/api/topics/topics/${projectData.topic_id}`);
+        if (topicRes.ok) {
+          const topicData = await topicRes.json();
+          setTopic(topicData); // Save topic data
         }
-
-        // Check if category is cached
-        let cachedCategory = localStorage.getItem(`category-${projectId}`);
-        if (cachedCategory) {
-          setCategory(JSON.parse(cachedCategory));
-        } else {
-          const categoriesRes = await fetch(`/api/project_category/${projectId}`);
-          if (categoriesRes.ok) {
-            const categoriesData = await categoriesRes.json();
-            setCategory(categoriesData);
-            localStorage.setItem(`category-${projectId}`, JSON.stringify(categoriesData)); // Cache category data
-          }
+  
+        // Fetch research type
+        const researchTypeRes = await fetch(`/api/researchTypes/${projectData.research_type_id}`);
+        if (researchTypeRes.ok) {
+          const researchTypeData = await researchTypeRes.json();
+          setResearchType(researchTypeData); // Save research type data
         }
-
-        // Check if research area is cached
-        let cachedResearchArea = localStorage.getItem(`researchArea-${projectId}`);
-        if (cachedResearchArea) {
-          setResearchArea(JSON.parse(cachedResearchArea));
-        } else {
-          const researchAreaRes = await fetch(`/api/researchAreas/researchArea/${projectId}`);
-          if (researchAreaRes.ok) {
-            const researchAreaData = await researchAreaRes.json();
-            setResearchArea(researchAreaData);
-            localStorage.setItem(`researchArea-${projectId}`, JSON.stringify(researchAreaData)); // Cache research area data
-          }
-        }
-
-        // Check if topic is cached
-        let cachedTopic = localStorage.getItem(`topic-${projectId}`);
-        if (cachedTopic) {
-          setTopic(JSON.parse(cachedTopic));
-        } else {
-          const topicRes = await fetch(`/api/topics/topics/${projectId}`);
-          if (topicRes.ok) {
-            const topicData = await topicRes.json();
-            setTopic(topicData);
-            localStorage.setItem(`topic-${projectId}`, JSON.stringify(topicData)); // Cache topic data
-          }
-        }
-
-        // Check if research type is cached
-        let cachedResearchType = localStorage.getItem(`researchType-${projectId}`);
-        if (cachedResearchType) {
-          setResearchType(JSON.parse(cachedResearchType));
-        } else {
-          const researchTypeRes = await fetch(`/api/researchTypes/${projectId}`);
-          if (researchTypeRes.ok) {
-            const researchTypeData = await researchTypeRes.json();
-            setResearchType(researchTypeData);
-            localStorage.setItem(`researchType-${projectId}`, JSON.stringify(researchTypeData)); // Cache research type data
-          }
-        }
-
+  
       } catch (err) {
         console.error(err);
         setError('Failed to load project or related data');
@@ -117,7 +77,7 @@ function DocumentOverview() {
         setLoading(false); // Finish loading
       }
     };
-
+  
     fetchData(); // Call the fetchData function when the component is mounted or projectId changes
   }, [projectId]); // Dependency array: runs when projectId changes
 
@@ -149,6 +109,7 @@ function DocumentOverview() {
   };
 
   const departmentSlug = departmentSlugMap[category?.name] || 'default';
+
   return (
     <>
       <div className="breadcrumb-container">
@@ -156,7 +117,6 @@ function DocumentOverview() {
           items={[
             { label: 'Home', link: '/' },
             { label: 'Capstone & Thesis', link: '/search' },
-            { label: category?.name || 'Category', link: `/Departments/${departmentSlug}` },
             { label: 'Document Overview', link: '#' }
           ]}
         />
@@ -227,6 +187,12 @@ function DocumentOverview() {
                 <tr>
                   <td><strong>Research Type</strong></td>
                   <td>{researchType.name}</td>
+                </tr>
+              )}
+                            {category && (
+                <tr>
+                  <td><strong>Category</strong></td>
+                  <td>{category.name}</td>
                 </tr>
               )}
               {researchArea && (

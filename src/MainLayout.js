@@ -30,8 +30,9 @@
   import EditFeatured from './pages/user/EditFeatured';
   import Help from './pages/user/Help';
   import NotFound from './pages/user/NotFound';
+  import ArchivedProjects from './pages/admin/ArchivedProjects';
 
-  // Memoize components here
+// Memoize components here
   const MemoizedHome = React.memo(Home);
   const MemoizedSearchPage = React.memo(SearchPage);
   const MemoizedDocumentOverview = React.memo(DocumentOverview);
@@ -68,6 +69,7 @@
         '/admin/EditAuthor',
         '/AddNewAuthor',
         '/admin/Departments',
+        '/Archived_Projects',
       ];
   
       const isAdminRoute = adminRoutes.some(route => location.pathname.startsWith(route));
@@ -139,6 +141,8 @@
               <Route path="/admin/EditProject/:projectId" element={<EditProject />} />
               <Route path="/admin/EditAuthor/:authorId" element={<EditAuthor />} />
               <Route path="/admin/Departments" element={<Departments />} />
+              <Route path="/Archived_Projects" element={<ArchivedProjects />} />
+
             </>
           )}
             <Route path="*" element={<NotFound />} />

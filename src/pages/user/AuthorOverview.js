@@ -9,15 +9,36 @@ function AuthorOverview() {
   const { authorId } = useParams();
   const [author, setAuthor] = useState(null);
   const [works, setWorks] = useState([]);
-  const [filteredWorks, setFilteredWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterYears, setFilterYears] = useState([]);
   const [statistics, setStatistics] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const [totalCount, setTotalCount] = useState(filteredWorks.length);
+  const [totalCount, setTotalCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredWorks, setFilteredWorks] = useState([]); // Initialize as empty array
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  
+  const handleSearchClick = () => {
+    const filtered = works.filter((work) =>
+      work.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredWorks(filtered);
+    setTotalCount(filtered.length);
+    setCurrentPage(1);
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchClick();
+    }
+  };
+  
+  
   // Fetch author details and works
   useEffect(() => {
     const fetchAuthorDetails = async () => {
@@ -27,22 +48,24 @@ function AuthorOverview() {
         if (!authorResponse.ok) throw new Error(`HTTP error! status: ${authorResponse.status}`);
         const authorData = await authorResponse.json();
         setAuthor(authorData);
-
+  
         const worksUrl = `/api/authors/${authorData.author_id}/works`;
         const worksResponse = await fetch(worksUrl);
         if (!worksResponse.ok) throw new Error(`HTTP error! status: ${worksResponse.status}`);
         const worksData = await worksResponse.json();
-
+  
+        // Define formattedWorks within this function
         const formattedWorks = worksData.map((work) => ({
           ...work,
           description: work.abstract,
           year: new Date(work.publication_date).getFullYear(),
         }));
-
+  
+        // Use formattedWorks here
         setWorks(formattedWorks);
         setFilteredWorks(formattedWorks);
         setTotalCount(formattedWorks.length);
-
+  
         const stats = formattedWorks.reduce((acc, work) => {
           acc[work.year] = (acc[work.year] || 0) + 1;
           return acc;
@@ -54,9 +77,10 @@ function AuthorOverview() {
         setLoading(false);
       }
     };
-
+  
     fetchAuthorDetails();
   }, [authorId]);
+  
 
   const handleApplyFilter = () => {
     const newFilteredWorks = filterYears.length > 0
@@ -75,7 +99,6 @@ function AuthorOverview() {
         : [...prevYears, year]
     );
   };
-
   const prepareStatisticsData = () => {
     return Object.entries(statistics).map(([year, count]) => ({
       year: parseInt(year),
@@ -114,70 +137,132 @@ function AuthorOverview() {
             <div className="col-md-3 a-filter-container">
 
 
-              <Form>
-                <h6>Filter by Year</h6>
-                <div className="filter-underline"></div>
+            <Form>
+  {/* Search Functionality */}
+  <div className="filter-title">
+  SEARCH
+  </div>
+  <div className="filter-underline"></div>
+  <div className="search-container mb-3 d-flex">
+  {/* Search Input */}
+  <input
+    type="text"
+    placeholder={`Enter project title here`}
+    value={searchTerm}
+    onChange={handleSearchChange}
+    onKeyPress={(e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();  // Prevent page refresh
+        handleSearchClick();
+      }
+    }}
+    className="form-control"
+    style={{
+      borderRadius: '5px',
+      border: '1px solid #ccc',
+      outline: 'none',
+      flex: 1,
+    }}
+  />
 
-                <div className="dropdown-container d-flex align-items-center justify-content-between flex-wrap" style={{ gap: '10px' }}>
-                  <Dropdown>
-                    <Dropdown.Toggle
-                      id="dropdown-custom-components"
-                      style={{
-                        backgroundColor: '#a33307',
-                        width: '200px',
-                        color: '#f8f9fa',
-                        border: 'none',
-                        borderRadius: '5px',
-                        outline: 'none',
-                      }}
-                    >
-                      Select Year
-                    </Dropdown.Toggle>
+  {/* Search Button */}
+  <Button 
+    onClick={handleSearchClick} 
+    className="btn btn-primary ml-2"
+    style={{
+      backgroundColor: '#a33307',
+      color: 'white',
+      border: 'none',
+      borderRadius: '5px',
+    }}
+  >
+    <i className="fas fa-search"></i>
+  </Button>
+</div>
 
-                    <Dropdown.Menu>
-                      {Object.keys(statistics).map((year) => (
-                        <Form.Check
-                          key={year}
-                          type="checkbox"
-                          label={year}
-                          checked={filterYears.includes(year)}
-                          onChange={() => handleYearCheckboxChange(year)}
-                        />
-                      ))}
-                    </Dropdown.Menu>
-                  </Dropdown>
 
-                  <Button
-                    style={{ backgroundColor: '#a33307', color: 'white', border: 'none', borderRadius: '5px' }}
-                    className="ml-2 mt-2 mt-md-0 btn-filter"
-                    onClick={handleApplyFilter}
-                  >
-                  Filter
-                  </Button>
-                </div>
+  {/* Filter by Year */}
+  <div className="filter-title">
+  FILTER
+  </div>  <div className="filter-underline"></div>
+  <div
+    className="dropdown-container d-flex align-items-center justify-content-between flex-wrap"
+    style={{ gap: '10px' }}
+  >
+    <Dropdown>
+      <Dropdown.Toggle
+        id="dropdown-custom-components"
+        style={{
+          backgroundColor: '#a33307',
+          width: '220px',
+          color: '#f8f9fa',
+          border: 'none',
+          borderRadius: '5px',
+          outline: 'none',
+        }}
+      >
+        Select Year
+      </Dropdown.Toggle>
 
-                <div className="statistics-section mt-4">
-                  <h6>Yearly Distribution</h6>
-                  <div className="filter-underline"></div>
+      <Dropdown.Menu
+              style={{
+                width: '220px',
+                paddingLeft: '10px',
+                paddingRight: '10px',
 
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart
-                      data={prepareStatisticsData()}
-                      margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-                    >
-                      <XAxis dataKey="year" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#8884ff" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                              {/* Display Total Works */}
-                 <div className="total-works mt-2 mb-4 d-flex justify-content-center align-items-center">
-                  <h6><strong>Total Works:</strong> {filteredWorks.length}</h6>
-                </div>
+              }}>
+        {Object.keys(statistics).map((year) => (
+          <Form.Check
+            key={year}
+            type="checkbox"
+            label={year}
+            checked={filterYears.includes(year)}
+            onChange={() => handleYearCheckboxChange(year)}
+          />
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
 
-              </Form>
+    <Button
+      style={{
+        backgroundColor: '#a33307',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+      }}
+      className="ml-2 mt-2 mt-md-0 btn-filter"
+      onClick={handleApplyFilter}
+    >
+      Filter
+    </Button>
+  </div>
+
+  <div className="statistics-section mt-4">
+  <div className="filter-title">
+ YEARLY DISTRIBUTION
+  </div>    <div className="filter-underline"></div>
+
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart
+        data={prepareStatisticsData()}
+        margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+      >
+        <XAxis dataKey="year" />
+        <YAxis />
+        <Tooltip />
+        <Bar dataKey="count" fill="#8884ff" />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+
+  {/* Display Total Works */}
+  <div className="total-works mt-2 mb-4 d-flex justify-content-center align-items-center">
+    <h6>
+      <strong>Total Works:</strong> {filteredWorks.length}
+    </h6>
+  </div>
+</Form>
+
             </div>
 
             {/* Main Content - Works as Cards */}
