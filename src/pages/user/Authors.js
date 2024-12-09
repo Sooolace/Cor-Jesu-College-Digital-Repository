@@ -144,7 +144,6 @@ function Authors() {
         </div>
 
         {/* Loading and Error Messages */}
-        {loading && <Spinner animation="border" role="status" />}
         {error && <Alert variant="danger">{error}</Alert>}
 
         {/* Authors Table */}

@@ -388,5 +388,109 @@ router.get('/departments/:departmentName', async (req, res) => {
     }
 });
 
+// GET - Fetch all projects (excluding archived projects) with featured projects at the top
+router.get('/projects/featured-proj', async (req, res) => {
+    try {
+        const searchQuery = `
+            SELECT p.*, 
+                   STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+                   STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+            FROM projects p
+            LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+            LEFT JOIN authors a ON pa.author_id = a.author_id 
+            LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+            LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+            WHERE p.is_archived = false
+            GROUP BY p.project_id 
+            ORDER BY p.is_featured DESC, p.publication_date DESC;
+        `;
+
+        console.log('Executing query to retrieve featured projects');
+
+        const result = await pool.query(searchQuery);
+
+        console.log('Database query result:', result.rows);
+
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Database query error:', error.message);
+        res.status(500).json({ error: 'Failed to retrieve projects' });
+    }
+});
+
+
+// GET - Fetch all featured projects (excluding archived projects) with featured projects at the top
+router.get('/projects/active-featured', async (req, res) => {
+    try {
+        const searchQuery = `
+        SELECT p.*, 
+               p.abstract, 
+               STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+               STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+        FROM projects p
+        LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+        LEFT JOIN authors a ON pa.author_id = a.author_id 
+        LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+        LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+        WHERE p.is_archived = false AND p.is_featured = true
+        GROUP BY p.project_id 
+        ORDER BY p.publication_date DESC;
+      `;
+          
+
+        console.log('Executing query to retrieve featured projects');
+
+        const result = await pool.query(searchQuery);
+
+        console.log('Database query result:', result.rows);
+
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Database query error:', error.message);
+        res.status(500).json({ error: 'Failed to retrieve featured projects' });
+    }
+});
+
+// PUT - Toggle featured status of a project
+router.put('/:projectId/toggle-featured', async (req, res) => {
+    const { projectId } = req.params;
+    const { is_featured } = req.body;
+
+    if (typeof is_featured !== 'boolean') {
+        return res.status(400).json({ error: 'Invalid value for is_featured. Must be a boolean.' });
+    }
+
+    try {
+        if (is_featured) {
+            // Check if there are already 4 featured projects
+            const countQuery = 'SELECT COUNT(*) FROM projects WHERE is_featured = TRUE';
+            const countResult = await pool.query(countQuery);
+            const featuredCount = parseInt(countResult.rows[0].count, 10);
+
+            if (featuredCount >= 4) {
+                return res.status(400).json({ error: 'Maximum of 4 featured projects allowed. Unfeature another project first.' });
+            }
+        }
+
+        // Proceed to update the project's featured status
+        const updateQuery = `
+            UPDATE projects
+            SET is_featured = $1
+            WHERE project_id = $2
+            RETURNING *;
+        `;
+        const updateResult = await pool.query(updateQuery, [is_featured, projectId]);
+
+        if (updateResult.rowCount === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        res.status(200).json(updateResult.rows[0]);
+    } catch (error) {
+        console.error('Error updating featured status:', error);
+        res.status(500).json({ error: 'Failed to update featured status' });
+    }
+});
+
 
 module.exports = router;

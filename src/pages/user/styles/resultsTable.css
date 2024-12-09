@@ -97,32 +97,6 @@
     background-color: #f9f9f9; /* Highlight on hover */
   }
   
-  /* Pagination Styles */
-  .pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-  }
-  
-  .pagination-button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px; /* Rounded border */
-    background-color: #a33307; /* Button color */
-    color: white; /* White text color */
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .pagination-button:hover {
-    background-color: #d8b908; /* Darker shade on hover */
-  }
-  
-  .pagination-button.active {
-    background-color: #d8b908; /* Active page color */
-    border: none; /* Remove default border */
-  }
-  
   /* Message for no results found */
   .no-results-message {
     text-align: center; /* Center the message */

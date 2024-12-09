@@ -84,8 +84,7 @@ function Keywords() {
           </div>
         </div>
 
-        {/* Loading and Error Messages */}
-        {loading && <Spinner animation="border" role="status" />}
+        {/* Loading and Error Messages */}  
         {error && <Alert variant="danger">{error}</Alert>}
 
         {/* Keywords Table */}

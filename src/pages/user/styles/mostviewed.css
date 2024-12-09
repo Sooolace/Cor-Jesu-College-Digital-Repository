@@ -11,7 +11,7 @@
 .most-viewed-container {
   padding: 20px;
   min-width: 600px;  /* Ensures the width is 48% to align with the other section */
-  min-height: 530px;
+  height: 550px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -123,43 +123,6 @@
   padding-top: 10px;
   padding-bottom: 10px;
 }
-
-/* Pagination controls */
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.pagination-controls .page-number {
-  padding: 8px 12px;
-  background-color: #f7f7f7;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #333;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  margin: 0;
-}
-
-/* Pagination buttons hover state */
-.pagination-controls .page-number:hover {
-  background-color: #ff6600;
-  color: white;
-}
-
-.pagination-controls .page-number.active {
-  background-color: #ff6600;
-  color: white;
-  font-weight: bold;
-}
-
-.pagination-controls .page-number:disabled {
-  background-color: #d3d3d3;
-  cursor: not-allowed;
-}
-
 
 
 

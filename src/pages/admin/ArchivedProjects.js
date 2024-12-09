@@ -10,6 +10,7 @@ import { CiViewList } from "react-icons/ci";
 import { TbArchiveOff } from "react-icons/tb";
 import { FaUnlink } from "react-icons/fa";
 import Breadcrumb from '../../components/BreadCrumb';
+import PaginationComponent from '../../components/PaginationComponent';
 
 function ArchivedProjects() {
   const navigate = useNavigate();
@@ -269,12 +270,11 @@ const handleunarchive = async (projectId) => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      <Pagination>
-        <Pagination.Prev onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} />
-        <Pagination.Item active>{currentPage}</Pagination.Item>
-        <Pagination.Next onClick={handleNext} disabled={currentPage === totalPages} />
-      </Pagination>
+              <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={newPage => setCurrentPage(newPage)}
+              />
     </>
   );
 }

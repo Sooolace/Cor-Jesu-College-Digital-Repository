@@ -1,10 +1,10 @@
 /* Featured Section */
 .featured-section {
   padding: 40px 5px;
-  margin: 0 auto;  /* Center the entire section */
-  width: 100%;  /* Full width */
-  max-width: 1250px; /* Limits the width on large screens */
-  box-sizing: border-box; /* Ensures padding and border don't affect the width */
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1250px;
+  box-sizing: border-box;
   margin-top: -20px;
 }
 
@@ -16,25 +16,24 @@
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  position: relative; /* To allow customization of underline position */
-  padding-bottom: 5px; /* Space between title and underline */
+  position: relative;
+  padding-bottom: 5px;
 }
 
-/* Adding the underline below the title */
 .section-title::after {
-  content: ""; /* Empty content for the pseudo-element */
+  content: "";
   position: absolute;
-  bottom: 0; /* Position the underline at the bottom of the title */
+  bottom: 0;
   left: 0;
-  width: 100%; /* Full width of the title */
-  height: 3px; /* Thickness of the underline */
-  background-color: #ff6600; /* Color of the underline (can be changed) */
+  width: 100%;
+  height: 3px;
+  background-color: #ff6600;
 }
 
-/* Flexbox Layout for Featured Documents */
+/* Wrapper for Featured Documents */
 .featured-documents-wrapper {
-  max-height: 500px; /* Adjust this height as needed */
-  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 500px;
+  overflow-y: auto;
   margin-top: 20px;
   box-sizing: border-box;
 }
@@ -42,10 +41,9 @@
 /* Flexbox Layout for Featured Documents */
 .featured-documents {
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping for items */
-  gap: 20px; /* Adds space between items */
-  width: 100%; /* Let it take full width */
-  justify-content: space-between; /* Distribute items evenly across the row */
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center; /* Center the container cards in rows */
 }
 
 /* Individual Featured Document */
@@ -53,15 +51,16 @@
   background-color: #fff;
   border-radius: 10px;
   padding: 20px;
-  width: calc(25% - 15px); /* 4 items per row (25% width with gap) */
-  max-width: 300px; /* Limit max width of each card */
+  width: calc(25% - 15px);
+  max-width: 300px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  margin-bottom: 20px; /* Space between rows of documents */
-  box-sizing: border-box; /* Include padding and border in the width calculation */
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  text-align: left; /* Align content inside each card to the left */
 }
 
-/* Hover effect for featured document */
+/* Hover effect for the featured document */
 .featured-document:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
@@ -94,36 +93,36 @@
 /* For screens smaller than 1024px (tablets) */
 @media (max-width: 1024px) {
   .featured-documents {
-    gap: 15px; /* Slightly less gap for tablets */
+    gap: 15px;
   }
 
   .featured-document {
-    width: calc(50% - 15px); /* Two items per row for tablets */
+    width: calc(50% - 15px);
   }
 }
 
 /* For screens smaller than 768px (smartphones) */
 @media (max-width: 768px) {
   .featured-documents {
-    flex-direction: column; /* Stack the items vertically */
-    gap: 15px; /* Smaller gap between items */
+    flex-direction: column;
+    gap: 15px;
   }
 
   .featured-document {
-    width: 100%; /* Full width for smaller screens */
-    max-width: 100%; /* Ensure the card doesn't stretch too far */
+    width: 100%;
     padding: 15px;
+    max-width: 100%;
   }
 }
 
-/* For even smaller screens (Optional) */
+/* For very small screens (Optional) */
 @media (max-width: 480px) {
   .featured-documents {
-    gap: 10px; /* Reduce the gap even further */
+    gap: 10px;
   }
 
   .featured-document {
-    width: 100%; /* Full width for very small screens */
+    width: 100%;
     max-width: 100%;
   }
 }

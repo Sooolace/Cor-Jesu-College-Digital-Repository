@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faPlus, faMinus, faUser, faCalendar } from '@fortawesome/free-solid-svg-icons';
 import '../pages/user/styles/mostviewed.css';
+import PaginationComponent from '../components/PaginationComponent';
 
 const MostViewed = ({ searchQuery }) => {
   const [mostViewedDocs, setMostViewedDocs] = useState([]);
@@ -134,18 +135,11 @@ const MostViewed = ({ searchQuery }) => {
                 </table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="pagination-controls">
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index + 1}
-                    className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(index + 1)}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
+              <PaginationComponent
+  currentPage={currentPage}
+  totalPages={totalPages}
+  handlePageChange={newPage => setCurrentPage(newPage)}
+/>
             </>
           ) : (
             <p className="no-results-message">No most viewed documents found.</p>

@@ -7,6 +7,7 @@ import Breadcrumb from '../../components/BreadCrumb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faTags } from '@fortawesome/free-solid-svg-icons';
 import './styles/filter.css';
+import PaginationComponent from '../../components/PaginationComponent';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ function SearchPage() {
   const [selectedResearchAreas, setSelectedResearchAreas] = useState([]);
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage); // Calculate total pages
 
   // Function to fetch data from API
   const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = []) => {
@@ -116,7 +119,6 @@ function SearchPage() {
   useEffect(() => {
     return () => {
       console.log('Cleaning up component state.');
-      // Explicitly clean up state to prevent unintended caching issues
       setSelectedCategories([]);
       setSelectedResearchAreas([]);
       setSelectedTopics([]);
@@ -178,11 +180,7 @@ function SearchPage() {
                       <b>{totalCount}</b>
                       {` results for '`}
                       <b>{searchQuery}</b>
-                      {`'. Showing page `}
-                      <b>{indexOfFirstItem + 1}</b>
-                      {` to `}
-                      <b>{Math.min(indexOfLastItem, totalCount)}</b>
-                      {`.`}
+                      {`'. Showing page `}<b>{indexOfFirstItem + 1}</b> {` to `}<b>{Math.min(indexOfLastItem, totalCount)}</b>.
                     </p>
                   </div>
 
@@ -208,10 +206,7 @@ function SearchPage() {
                         ) : project.authors ? (
                           project.authors.split(', ').map((authorName, index) => (
                             <span key={index}>
-                              <Link
-                                to={`/AuthorOverview/${authorName}`}
-                                className="author-link"
-                              >
+                              <Link to={`/AuthorOverview/${authorName}`} className="author-link">
                                 {authorName}
                               </Link>
                               {index < project.authors.split(', ').length - 1 && ', '}
@@ -228,10 +223,7 @@ function SearchPage() {
                         {Array.isArray(project.keywords) ? (
                           project.keywords.map((keyword, index) => (
                             <span key={keyword.keyword_id || index}>
-                              <Link
-                                to={`/KeywordOverview/${encodeURIComponent(keyword.keyword_id)}`}
-                                className="keyword-link"
-                              >
+                              <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword_id)}`} className="keyword-link">
                                 {keyword.keyword}
                               </Link>
                               {index < project.keywords.length - 1 && ', '}
@@ -240,10 +232,7 @@ function SearchPage() {
                         ) : project.keywords ? (
                           project.keywords.split(', ').map((keyword, index) => (
                             <span key={index}>
-                              <Link
-                                to={`/KeywordOverview/${encodeURIComponent(keyword)}`}
-                                className="keyword-link"
-                              >
+                              <Link to={`/KeywordOverview/${encodeURIComponent(keyword)}`} className="keyword-link">
                                 {keyword}
                               </Link>
                               {index < project.keywords.split(', ').length - 1 && ', '}
@@ -261,30 +250,12 @@ function SearchPage() {
                     </div>
                   ))}
 
-                  {/* Pagination Buttons */}
-                  <div className="pagination">
-                    {currentPage > 1 && (
-                      <button onClick={() => paginate(currentPage - 1)} className="pagination-button">
-                        Previous
-                      </button>
-                    )}
-
-                    {Array.from({ length: Math.ceil(totalCount / itemsPerPage) }, (_, i) => (
-                      <button
-                        key={i + 1}
-                        onClick={() => paginate(i + 1)}
-                        className={`pagination-button ${currentPage === i + 1 ? 'active' : ''}`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-
-                    {currentPage < Math.ceil(totalCount / itemsPerPage) && (
-                      <button onClick={() => paginate(currentPage + 1)} className="pagination-button">
-                        Next
-                      </button>
-                    )}
-                  </div>
+                  {/* Pagination Component */}
+                  <PaginationComponent
+                    currentPage={currentPage}
+                    totalPages={totalPages}  // Correctly passing totalPages
+                    handlePageChange={newPage => setCurrentPage(newPage)}
+                  />
                 </>
               ) : loading ? (
                 <div>Loading...</div>

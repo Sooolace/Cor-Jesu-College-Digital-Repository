@@ -228,8 +228,8 @@ function DepartmentProjects() {
             {/* Statistics Visualization */}
             <div className="mt-4">
             <div className="filter-title">
-  YEARLY DISTRIBUTION
-  </div>  <div className="filter-underline"></div>              <ResponsiveContainer width="100%" height={300}>
+            YEARLY CONTRIBUTION
+            </div>  <div className="filter-underline"></div>              <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={Object.entries(statistics).map(([year, count]) => ({
                     year,

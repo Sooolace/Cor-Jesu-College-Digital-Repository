@@ -98,32 +98,6 @@ h2 {
   font-size: 1.2rem;
 }
 
-/* Pagination styling */
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-  gap: 20px;
-}
-
-.pagination-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.pagination-button:hover {
-  background-color: #0056b3;
-}
-
-.pagination-button:disabled {
-  background-color: #ddd;
-  cursor: not-allowed;
-}
 
 .page-number {
   font-size: 16px;

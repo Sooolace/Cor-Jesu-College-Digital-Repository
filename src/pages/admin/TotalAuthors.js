@@ -10,6 +10,7 @@ import EditAuthor from './EditAuthor';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../admin/styles/TotalAuthors.css';
 import Breadcrumb from '../../components/BreadCrumb';
+import PaginationComponent from '../../components/PaginationComponent';
 
 function TotalAuthors() {
   const [authors, setAuthors] = useState([]);
@@ -20,6 +21,7 @@ function TotalAuthors() {
   const [filterName, setFilterName] = useState('');
   const [filteredAuthors, setFilteredAuthors] = useState([]);
   const [filterDepartment, setFilterDepartment] = useState('');
+  const [filteredProjects, setFilteredProjects] = useState([]);
   const [showModal, setShowModal] = useState(false); 
   const [showEditModal, setShowEditModal] = useState(false); 
   const [editingAuthorId, setEditingAuthorId] = useState(null);
@@ -294,26 +296,11 @@ function TotalAuthors() {
             </Modal.Footer>
           </Modal>
 
-          {/* Pagination */}
-          <Pagination style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Pagination.Prev
-              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            />
-            {[...Array(totalPages)].map((_, index) => (
-              <Pagination.Item
-                key={index + 1}
-                active={index + 1 === currentPage}
-                onClick={() => setCurrentPage(index + 1)}
-              >
-                {index + 1}
-              </Pagination.Item>
-            ))}
-            <Pagination.Next
-              onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            />
-          </Pagination>
+          <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={newPage => setCurrentPage(newPage)}
+              />
         </>
       )}
     </div>

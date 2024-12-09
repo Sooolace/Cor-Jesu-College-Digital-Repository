@@ -239,7 +239,7 @@ function AuthorOverview() {
 
   <div className="statistics-section mt-4">
   <div className="filter-title">
- YEARLY DISTRIBUTION
+ YEARLY CONTRIBUTION
   </div>    <div className="filter-underline"></div>
 
     <ResponsiveContainer width="100%" height={300}>

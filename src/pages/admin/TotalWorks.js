@@ -9,6 +9,7 @@ import { MdEditSquare, MdArchive } from 'react-icons/md';
 import { CiViewList } from "react-icons/ci";
 import Breadcrumb from '../../components/BreadCrumb';
 import Modal from 'react-bootstrap/Modal';
+import PaginationComponent from '../../components/PaginationComponent';
 
 function TotalWorks() {
   const navigate = useNavigate();
@@ -274,18 +275,11 @@ function TotalWorks() {
           </Table>
         )}
 
-        <Pagination>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Pagination.Item
-              key={i + 1}
-              active={i + 1 === currentPage}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </Pagination.Item>
-          ))}
-          <Button disabled={currentPage === totalPages} onClick={handleNext}>Next</Button>
-        </Pagination>
+              <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={newPage => setCurrentPage(newPage)}
+              />
       </div>
 
       <Modal show={showDeleteModal} onHide={handleCancelArchive}>

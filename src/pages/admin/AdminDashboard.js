@@ -115,16 +115,10 @@ function AdminDashboard() {
           {/* Metric for Total Works */}
           <MetricItem title="Total Works" link="/admin/TotalWorks" value={totalProjects} icon={faFolderOpen} />
           <MetricItem title="Total Authors" link="/admin/TotalAuthors" value={totalAuthors} icon={faUserFriends} />
-          <MetricItem title="Departments" link="/admin/Departments" value={totalDepartments} icon={faBuilding} />
+          <MetricItem title="Manage Featured" link="/Featured_Projects" value={totalDepartments} icon={faBuilding} />
           <MetricItem title="Keywords" value={totalKeywords} icon={faTags} />
-          
-          {/* New Metric for Archived Works */}
-          <MetricItem
-            title="Archived Works"
-            link="/Archived_Projects"
-            value={archivedProjectsCount}
-            icon={faTags}
-          />
+          <MetricItem title="Archived Works" link="/Archived_Projects"value={archivedProjectsCount}icon={faTags} />
+
         </div>
 
         <div className="two-column-section">

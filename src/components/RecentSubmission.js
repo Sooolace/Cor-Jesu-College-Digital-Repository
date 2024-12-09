@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCalendar, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import '../pages/user/styles/recentsubmissions.css';
+import PaginationComponent from '../components/PaginationComponent';
 
 const RecentSubmissions = ({ searchQuery }) => {
   const [submissions, setSubmissions] = useState([]);
@@ -134,19 +135,11 @@ const RecentSubmissions = ({ searchQuery }) => {
                   </tbody>
                 </table>
               </div>
-
-              {/* Pagination Controls */}
-              <div className="pagination-controls">
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index + 1}
-                    className={`page-number ${currentPage === index + 1 ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(index + 1)}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
+              <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={newPage => setCurrentPage(newPage)}
+              />
             </>
           ) : (
             <p className="no-results-message">No recent submissions found.</p>
