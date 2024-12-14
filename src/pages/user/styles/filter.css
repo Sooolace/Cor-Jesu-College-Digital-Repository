@@ -55,12 +55,13 @@
 
 /* Abstract Container */
 .abstract-container {
-    height: 120px;  /* Set the height for the abstract section */
+    height: 100px;  /* Set the height for the abstract section */
     overflow: hidden;  /* Hide overflowed content */
     text-overflow: ellipsis;  /* Show ellipsis when text overflows */
     display: -webkit-box;  /* Necessary for truncating text */
     -webkit-line-clamp: 4;  /* Limit to 4 lines */
     -webkit-box-orient: vertical;  /* Set the orientation to vertical */
+    text-align: justify;
 }
 
 /* No results styling */
@@ -84,7 +85,7 @@ a:hover {
 /* Filters Container */
 .filters-container {
     width: 500px; /* Fixed width for filters */
-    height: 1400px; /* Fixed height as requested */
+    height: 1300px; /* Fixed height as requested */
     background-color: #f9f9f9; /* Light background color */
     border: 1px solid #ddd; /* Subtle border */
     border-radius: 8px; /* Rounded corners */
@@ -121,3 +122,39 @@ a:hover {
     }
   }
   
+/* Scrollable Year Filter Container */
+.year-filter-wrapper {
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.year-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  gap: 10px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.year-btn {
+  background-color: #f0f4f8;
+  border: none;
+  padding: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.year-btn:hover {
+  background-color: #e3f2fd;
+}
+
+.year-btn.selected {
+  background-color: #1976d2;
+  color: white;
+  font-weight: bold;
+}

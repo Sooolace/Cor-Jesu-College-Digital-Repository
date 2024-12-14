@@ -43,21 +43,58 @@
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  justify-content: center; /* Center the container cards in rows */
+  justify-content: center;
 }
 
 /* Individual Featured Document */
 .featured-document {
   background-color: #fff;
   border-radius: 10px;
-  padding: 20px;
+  padding: 15px;
   width: calc(25% - 15px);
   max-width: 300px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   margin-bottom: 20px;
   box-sizing: border-box;
-  text-align: left; /* Align content inside each card to the left */
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  height: 300px; /* Set a fixed height for the card */
+  overflow: hidden;
+}
+
+/* Scrollable content inside each card */
+.document-content {
+  overflow-y: auto;
+  height: 100%; /* Ensure it matches the height of the container */
+  padding: 5px; /* Slim padding */
+  box-sizing: border-box;
+}
+
+/* Custom Scrollbar for WebKit Browsers */
+.document-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.document-content::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 10px;
+}
+
+.document-content::-webkit-scrollbar-thumb {
+  background: #a33307;
+  border-radius: 10px;
+}
+
+.document-content::-webkit-scrollbar-thumb:hover {
+  background: #fffefe;
+}
+
+/* For Firefox */
+.document-content {
+  scrollbar-color: #a33307 #e0e0e0;
+  scrollbar-width: thin;
 }
 
 /* Hover effect for the featured document */
@@ -68,7 +105,7 @@
 
 /* Title Link Styling */
 .document-title {
-  font-size: 1.5rem;
+  font-size: 20px;  
   color: #a33307;
   text-decoration: none;
   font-weight: 400;
@@ -86,43 +123,4 @@
   color: #555;
   margin-top: 10px;
   line-height: 1.6;
-}
-
-/* Responsive Design */
-
-/* For screens smaller than 1024px (tablets) */
-@media (max-width: 1024px) {
-  .featured-documents {
-    gap: 15px;
-  }
-
-  .featured-document {
-    width: calc(50% - 15px);
-  }
-}
-
-/* For screens smaller than 768px (smartphones) */
-@media (max-width: 768px) {
-  .featured-documents {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .featured-document {
-    width: 100%;
-    padding: 15px;
-    max-width: 100%;
-  }
-}
-
-/* For very small screens (Optional) */
-@media (max-width: 480px) {
-  .featured-documents {
-    gap: 10px;
-  }
-
-  .featured-document {
-    width: 100%;
-    max-width: 100%;
-  }
 }
