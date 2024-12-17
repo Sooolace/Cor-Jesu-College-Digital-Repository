@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faTags } from '@fortawesome/free-solid-svg-icons';
 import './styles/filter.css';
 import PaginationComponent from '../../components/PaginationComponent';
+import AuthorFilter from '../../components/AuthorFilter';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ function SearchPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedResearchAreas, setSelectedResearchAreas] = useState([]);
@@ -114,6 +116,10 @@ function SearchPage() {
     setCurrentPage(1);
     setSearchTrigger((prev) => prev + 1);
   };
+  const handleApplyAuthorFilters = (authors) => {
+    console.log('Selected Authors:', authors);
+    // Implement further filtering logic here
+  };
 
   // Cleanup effect to ensure no localStorage or cache references
   useEffect(() => {
@@ -167,6 +173,15 @@ function SearchPage() {
                   onApply={handleApplyFilters}
                 />
               </div>
+      {/* Author Filter */}
+      <div className="author-filter-wrapper">
+        <AuthorFilter
+          selectedAuthors={selectedAuthors}
+          setSelectedAuthors={setSelectedAuthors}
+          onApply={handleApplyAuthorFilters}
+        />
+      </div>
+
             </div>
 
             {/* Search Results */}
