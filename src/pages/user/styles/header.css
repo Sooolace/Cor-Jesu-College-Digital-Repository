@@ -1,0 +1,157 @@
+/* Overall header container */
+header {
+  display: flex;
+  justify-content: center;  /* Center the content horizontally */
+  background-color: #a33307;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+/* The container that holds both logo and navigation */
+.header-container {
+  display: flex;
+  justify-content: space-between;  /* Keep logo on the left and nav on the right */
+  align-items: center;
+  width: 100%;                  /* Ensure it takes up the full available width */
+  max-width: 1200px;            /* Align with the home page width */
+  padding: 0 20px;              /* Padding to keep things from touching the edges */
+  box-sizing: border-box;      /* Prevent overflow */
+}
+
+/* Logo styling */
+.logo {
+  width: 300px;
+  height: auto;
+}
+
+/* Navigation styling */
+nav {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 1rem 1.5rem;
+  font-weight: bold;
+  font-family: 'Segoe UI';
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+nav a:hover {
+  background-color: #fff;
+  color: black;
+  text-decoration: underline;
+}
+
+nav .sign-in-btn {
+  padding: 10px 20px;
+  border: 1px solid rgb(223, 223, 223);
+  border-radius: 5px;
+  background-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s;
+}
+
+nav .sign-in-btn:hover {
+  background-color: #fff;
+  color: black;
+}
+
+/* Dropdown styling for Academics menu */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-link {
+  color: #fff;
+  padding: 1rem 1.5rem;
+  font-weight: bold;
+  font-family: 'Segoe UI';
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dropdown-link:hover {
+  background-color: #fff;
+  color: black;
+  text-decoration: underline;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  min-width: 160px;
+  border-radius: 5px;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-menu a:hover {
+  background-color: #ddd;
+}
+
+/* Media Queries for responsiveness */
+
+/* For tablets (width <= 768px) */
+@media (max-width: 768px) {
+  .logo {
+    width: 200px; /* Smaller logo for tablets */
+  }
+
+  nav {
+    gap: 15px; /* Space between links */
+  }
+
+  nav a {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  nav .sign-in-btn {
+    padding: 8px 16px;
+  }
+
+  .dropdown-menu {
+    min-width: 120px;
+  }
+}
+
+/* For mobile phones (width <= 480px) */
+@media (max-width: 480px) {
+  .logo {
+    width: 150px; /* Smaller logo for mobile */
+  }
+
+  nav {
+    gap: 10px;  /* Smaller gap for mobile */
+  }
+
+  nav a {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  nav .sign-in-btn {
+    padding: 8px 12px;
+  }
+
+  .dropdown-menu {
+    min-width: 100px;
+  }
+}

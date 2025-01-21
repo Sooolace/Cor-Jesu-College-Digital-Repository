@@ -1,0 +1,194 @@
+/* General Styles for SubjectFilter */
+.subject-filter {
+  background-color: transparent;
+  padding: 15px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+  margin-top: -30px;
+}
+
+/* Header for Filter Category and Clear Filters */
+.filter-header {
+  display: flex;
+  justify-content: space-between;  /* Space between the elements */
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Filter Category Heading */
+.filter-header h3 {
+  margin: 0; /* Remove default margin */
+  font-size: 18px;
+  font-weight: bold;
+}
+/* Clear Filters Button */
+/* Clear Filters Button */
+.clear-button {
+  background-color: transparent;
+  color: #f44336;  /* Red color for clear button */
+  padding: 5px 10px;  /* Smaller padding for icon size */
+  border-radius: 50%;  /* Make it circular or rounded */
+  border: 2px solid #f44336;  /* Border to match color */
+  font-size: 20px;  /* Icon size */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* Center the icon */
+  max-width: 120px;
+  width: auto;  /* Adjust the width */
+  height: 30px;  /* Adjust the height */
+}
+
+.clear-button:hover {
+  background-color: #f44336;  /* Background color on hover */
+  color: white;  /* Icon color on hover */
+}
+
+.clear-button:focus {
+  outline: none;
+}
+
+.clear-button i {
+  margin: 0;  /* Remove any default margin from icon */
+}
+
+
+/* Category Button */
+.subject-filter button {
+  background-color: #a33307;
+  color: #fff;
+  padding: 12px 15px;
+  border-radius: 5px;
+  border: none;
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.subject-filter button:hover {
+  background-color: #8a300d;
+}
+
+.subject-filter button:focus {
+  outline: none;
+}
+
+/* Category Group */
+.category-group {
+  margin-bottom: 2px;
+}
+
+/* Category Checkbox Styles */
+.category-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.category-checkbox input[type="checkbox"] {
+  flex-shrink: 0; /* Prevent checkbox from resizing */
+  margin: 0; /* Reset default margins */
+}
+
+.category-checkbox label {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+  white-space: normal; /* Allow text to wrap */
+  word-break: break-word; /* Break long words if necessary */
+  line-height: 1.4;
+  flex: 1; /* Let the label take the remaining space */
+}
+
+.category-checkbox:hover label {
+  color: #a33307;
+}
+
+.category-checkbox input[type="checkbox"]:checked {
+  background-color: #a33307;
+  border-color: #a33307;
+}
+
+/* Category Expansion Icons */
+.category-group .form-check .category-checkbox .fa-chevron-right,
+.category-group .form-check .category-checkbox .fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.category-group .form-check .category-checkbox:hover .fa-chevron-right,
+.category-group .form-check .category-checkbox:hover .fa-chevron-down {
+  color: #a33307;
+  transform: rotate(90deg);
+}
+
+/* Subcategory Styles */
+/* Subcategory Styles (Research Areas) */
+.subcategories {
+  margin-top: 10px; /* Controls space from category to research areas */
+  margin-left: 20px; /* Indentation for research areas */
+}
+
+/* Adjusting the space between research areas */
+.subcategories .form-check {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between the checkbox and the label for each research area */
+  margin-bottom: 15px; /* Space between research areas */
+}
+
+/* Adjusting the padding and margins of checkboxes within research areas */
+.subcategories .form-check input[type="checkbox"] {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.subcategories .form-check label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.4;
+  flex: 1;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Hover effect on research area labels */
+.subcategories .form-check label:hover {
+  color: #a33307;
+}
+
+/* Apply Button */
+.apply-button-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.apply-button {
+  background-color: #0066cc;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.apply-button:hover {
+  background-color: #005bb5;
+}
+
+.apply-button:focus {
+  outline: none;
+}

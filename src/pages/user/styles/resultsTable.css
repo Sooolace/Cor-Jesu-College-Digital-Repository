@@ -1,0 +1,106 @@
+/* Right content (results section) */
+.results-content {
+    width: 75%; /* Adjusted width to fill the remaining space */
+    padding: 20px;
+    background-color: #fff;
+    overflow-y: auto;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Breadcrumb and Recent Submissions Container */
+  .breadcrumb-recent-container {
+    display: flex; /* Flexbox to align breadcrumb and recent submissions */
+    justify-content: space-between; /* Space between elements */
+    align-items: center; /* Center vertically */
+    margin-bottom: 20px; /* Space below this section */
+  }
+  
+  /* Breadcrumb Styles */
+  .breadcrumb {
+    display: flex;
+    list-style: none;
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+    font-size: 0.9em; /* Smaller font size for breadcrumb */
+  }
+  
+  .breadcrumb-item {
+    margin-right: 5px; /* Space between breadcrumb items */
+  }
+  
+  .breadcrumb-item a {
+    text-decoration: none;
+    color: #007bff; /* Link color */
+  }
+  
+  .breadcrumb-item span {
+    color: #6c757d; /* Color for the current page */
+  }
+  
+  /* Recent Submissions Container */
+  .recent-submissions-container {
+    margin-top: 20px; /* Optional: space above the container */
+    padding: 10px 0; /* Optional: space below the content */
+    border-bottom: 2px solid #ddd; /* Line below the container */
+  }
+  
+  /* Results Table Container */
+  .results-table-container {
+    margin-top: 20px; /* Space between recent submissions and the table */
+  }
+  
+  /* Fix table size */
+  .results-table {
+    width: 100%; /* Ensure the table takes full width */
+    max-height: 400px; /* Set a maximum height for the table */
+    overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    border-collapse: collapse; /* Maintain border collapse for a cleaner look */
+    margin-top: 20px; /* Space above the table */
+  }
+  
+  /* Fixed column widths */
+  .results-table th,
+  .results-table td {
+    padding: 12px; /* Increased padding for better readability */
+    border-bottom: 1px solid #ddd; /* Line below each row */
+    text-align: left; /* Align text to the left */
+  }
+  
+  /* Header styling */
+  .results-table th {
+    background-color: #f1f1f1; /* Background for header */
+  }
+  
+  /* Example fixed widths for columns */
+  .results-table th:nth-child(1),
+  .results-table td:nth-child(1) {
+    width: 40%; /* 40% of table width for the first column */
+  }
+  
+  .results-table th:nth-child(2),
+  .results-table td:nth-child(2) {
+    width: 25%; /* 25% of table width for the second column */
+  }
+  
+  .results-table th:nth-child(3),
+  .results-table td:nth-child(3) {
+    width: 25%; /* 25% of table width for the third column */
+  }
+  
+  .results-table th:nth-child(4),
+  .results-table td:nth-child(4) {
+    width: 20%; /* 20% of table width for the fourth column */
+  }
+  
+  /* Research row hover effect */
+  .research-row:hover {
+    background-color: #f9f9f9; /* Highlight on hover */
+  }
+  
+  /* Message for no results found */
+  .no-results-message {
+    text-align: center; /* Center the message */
+    color: #888; /* Light gray for no results message */
+    padding: 20px 0; /* Space above and below the message */
+  }
+  

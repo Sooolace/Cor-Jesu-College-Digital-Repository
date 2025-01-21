@@ -1,0 +1,75 @@
+/* styles/StepTracker.css */
+.step-tracker-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    position: sticky; /* Keep it fixed on scroll */
+    top: 20px; /* Offset from the top */
+    margin-right: 20px; /* Add space between tracker and content */
+  }
+  
+  .step-list {
+    list-style: none;
+    padding: 0;
+    
+  }
+  
+  .step-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+
+  }
+  
+  .step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #145799;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+  }
+  
+  .step-label {
+    font-weight: 500;
+    font-size:100%;
+  }
+  
+  .step-item.active .step-number {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .step-number.completed {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+/* Add this to your existing CSS file for DescribeWork */
+
+.describe-work-container {
+    display: flex; /* Use Flexbox for layout */
+    justify-content: center; /* Center items horizontally */
+    align-items: flex-start; /* Align items at the top */
+    gap: 20px; /* Space between StepTracker and Upload container */
+    margin: 20px 0; /* Optional: vertical margin */
+  }
+  
+  /* Specific styles for StepTracker */
+  .step-tracker {
+    width: 200px; /* Set a specific width for the StepTracker */
+    /* Other styles can remain unchanged */
+  }
+  
+  /* Adjust the upload container */
+  .upload-container {
+    flex: 1; /* Allow the upload container to grow and fill available space */
+    max-width: 600px; /* Keep the same max width */
+  }
+  

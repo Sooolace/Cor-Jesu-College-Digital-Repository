@@ -1,0 +1,167 @@
+.document-container {
+  max-width: 1300px;
+  margin-left: 20%;   /* Adjust left margin */
+  margin-right: 20%;  /* Adjust right margin */
+  padding: 20px;
+  box-sizing: border-box;  /* Ensure padding does not overflow */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .document-container {
+    margin-left: 4%;   /* Adjust left margin for medium screens */
+    margin-right: 4%;  /* Adjust right margin for medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .document-container {
+    margin-left: 0;  /* Remove margins for smaller screens */
+    margin-right: 0;
+  }
+}
+
+.document-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.left-side {
+  flex-grow: 1;
+  width: 120%; /* Adjust the width to fit better with the right-side */
+  margin-right: 30px; /* Reduce the right margin to reduce space */
+}
+
+.left-side h1 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.left-side p.abstract {
+  text-align: justify;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.right-side {
+  margin-left: 20px; /* Reduce the left margin to decrease the gap */
+  width: 28%; /* Adjust width for the right-side */
+  text-align: left;
+}
+
+
+.project-thumbnail {
+  width: 200px;  /* Set width to a smaller value, like a book's width */
+  height: 250px; /* Set a height to resemble a book's height */
+  object-fit: contain; /* Ensures the image covers the area without distortion */
+  border-radius: 2px; /* Rounded corners for a smoother look */
+  margin-bottom: 20px; /* Space below the image */
+  border: 2px solid #a33307; /* Adds a border with the specified color */
+}
+
+
+.project-details p {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center; /* Align buttons in the center */
+  margin-top: 80px; /* Optional: space above the buttons */
+}
+
+.print-button button,
+.bookmark-button button {
+  padding: 8px 16px;
+  width: 100px; /* Fixed width */
+  height: 40px; /* Fixed height */
+}
+
+.print-button button {
+  background-color: #a33307;
+  border-color: #a33307;
+}
+
+.print-button button:hover {
+  opacity: 0.8;
+}
+
+.bookmark-button button {
+  padding: 8px 16px;
+  width: 200px;
+  height: 40px;
+}
+
+.bookmark-button button:hover {
+  opacity: 0.8;
+}
+
+
+/* Add margin between title and content */
+.project-detail-item {
+  margin-bottom: 20px;
+}
+
+.detail-title {
+  font-weight: bold;
+}
+
+.detail-content {
+  margin-top: 5px;
+}
+
+/* Styling for the author and keyword links */
+.project-details a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.project-details a:hover {
+  text-decoration: underline;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.text-danger {
+  color: #dc3545;
+}
+
+/* styles/documentoverview.css */
+
+/* Hide unnecessary elements during printing */
+@media print {
+  body * {
+    visibility: hidden; /* Hide everything by default */
+  }
+
+  .document-container {
+    visibility: visible; /* Show the main content */
+  }
+
+  .document-container * {
+    visibility: visible; /* Ensure all content inside is visible */
+  }
+
+  .breadcrumb-container,
+  .buttons-container,
+  .project-thumbnail {
+    display: none; /* Hide these specific elements */
+  }
+
+  /* Optional: Adjust layout for printing */
+  .document-container {
+    margin: 0;
+    padding: 20px;
+    width: 100%;
+  }
+}

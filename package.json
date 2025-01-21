@@ -1,0 +1,77 @@
+{
+  "name": "cjcresearchrepo",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:5000",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
+    "bootstrap": "^5.3.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "express-validator": "^7.2.0",
+    "font-awesome": "^4.7.0",
+    "html2canvas": "^1.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "jspdf": "^2.5.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cache": "^5.1.2",
+    "path": "^0.12.7",
+    "pg": "^8.13.0",
+    "react": "^18.3.1",
+    "react-bootstrap": "^2.10.5",
+    "react-circular-progressbar": "^2.1.0",
+    "react-dom": "^18.3.1",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^5.3.0",
+    "react-router-dom": "^6.26.2",
+    "react-scripts": "5.0.1",
+    "react-select": "^5.8.2",
+    "recharts": "^2.14.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start:main": "cross-env PORT=3000 react-app-rewired start --entry ./src/App.js",
+    "start:admin": "cross-env PORT=3001 react-app-rewired start --entry ./src/AdminApp.js",
+    "build:main": "react-app-rewired build --entry ./src/App.js",
+    "build:admin": "react-app-rewired build --entry ./src/AdminApp.js",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.7",
+    "react-app-rewired": "^2.2.1",
+    "webpack-dev-server": "^5.1.0"
+  }
+}

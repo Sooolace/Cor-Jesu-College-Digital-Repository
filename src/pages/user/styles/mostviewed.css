@@ -1,0 +1,169 @@
+/* Parent container for both sections */
+.sections-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 auto;
+  flex-wrap: wrap; /* Allow sections to wrap on smaller screens */
+}
+
+/* Shared container styling for sections */
+.most-viewed-container {
+  padding: 20px;
+  min-width: 600px;  /* Ensures the width is 48% to align with the other section */
+  height: 550px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;  /* Allow container to expand */
+}
+
+/* Links styling */
+.most-viewed-container a {
+  text-decoration: none;
+}
+
+.most-viewed-container a:hover {
+  text-decoration: underline;
+  color: #ff6600;
+}
+
+/* Section titles */
+.most-viewed-container h3 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 400;
+}
+
+/* Table container for horizontal scrolling */
+.table-container {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+/* Styling the Table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: 'Roboto', sans-serif;
+}
+
+.results-table th,
+.results-table td {
+  padding: 12px;
+  text-align: left;
+  font-size: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.results-table th {
+  background-color: #f7f7f7;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Column-specific widths */
+.results-table th:nth-child(1),
+.results-table td:nth-child(1) {
+  width: 60%;
+}
+
+.results-table th:nth-child(2),
+.results-table td:nth-child(2) {
+  width: 10%;
+  text-align: center;
+}
+
+.results-table th:nth-child(3),
+.results-table td:nth-child(3) {
+  width: 15%;
+}
+
+.results-table th:nth-child(4),
+.results-table td:nth-child(4) {
+  width: 15%;
+}
+
+/* Expand icon button */
+.expand-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #ff6600;
+}
+
+/* Details row transition */
+.details-row {
+  background-color: #f9f9f9;
+  transition: all 0.3s ease-in-out;
+  height: 0;
+  overflow: hidden;
+}
+
+.details-content {
+  padding: 15px;
+  font-size: 1rem;
+}
+
+.details-row p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.details-row td {
+  padding-left: 20px;
+}
+
+.details-row.expanded {
+  height: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+
+
+@media (max-width: 768px) {
+  /* For smaller devices like mobile */
+  .sections-container {
+    flex-direction: column;
+    gap: 10px;  /* Reduce the gap even more */
+  }
+
+  .most-viewed-container,
+  .recent-submissions-container {
+    width: 0%;  /* Make the sections full width on smaller screens */
+  }
+
+  .results-table {
+    font-size: 0.85rem; /* Reduce font size on smaller screens */
+  }
+
+  /* Adjust column widths for small screens */
+  .results-table th:nth-child(1), /* Title column */
+  .results-table td:nth-child(1) {
+    width: 50%;  /* Title column takes 50% width */
+  }
+
+  .results-table th:nth-child(2), /* Expand button */
+  .results-table td:nth-child(2) {
+    width: 20%;  /* Expand button takes 20% width */
+  }
+
+  .results-table th:nth-child(3), /* Authors column */
+  .results-table td:nth-child(3) {
+    width: 15%;  /* Authors column still 15% */
+  }
+
+  .results-table th:nth-child(4), /* Date column */
+  .results-table td:nth-child(4) {
+    width: 15%;  /* Date column still 15% */
+  }
+
+  .expand-icon {
+    font-size: 1.5rem; /* Make expand icon slightly bigger for easy tapping */
+  }
+}

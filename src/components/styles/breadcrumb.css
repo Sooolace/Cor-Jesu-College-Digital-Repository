@@ -1,0 +1,141 @@
+/* Wrapper around the breadcrumb component */
+.breadcrumb-page {
+  display: flex;
+  justify-content: center; /* Centers the content horizontally */
+  background-color: rgb(242, 243, 237);
+  height: 70px;
+}
+
+/* Centered content for breadcrumb, mimicking homepage layout */
+.centered-content {
+  max-width: 1200px; /* Maximum width of the breadcrumb container */
+  width: 90%; /* Ensures it adapts to smaller screen sizes */
+  padding: 0 20px; /* Padding on left and right sides */
+  box-sizing: border-box;
+}
+
+/* Breadcrumb wrapper to contain both back button and breadcrumb navigation */
+.breadcrumb-wrapper {
+  display: flex;
+  justify-content: space-between; /* Space between back button and breadcrumb list */
+  align-items: center; /* Vertically aligns the items */
+  width: 100%; /* Full width of the container */
+  padding: 5px 0; /* Reduced padding to decrease height */
+  box-sizing: border-box; /* Includes padding in total width */
+}
+
+/* Back button styling */
+.back-button {
+  background-color: transparent;
+  border: none;
+  font-size: 20px; /* Reduced font size */
+  font-weight: bold;
+  color: #a33307;
+  cursor: pointer;
+  padding: 6px 10px; /* Reduced padding */
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+/* Remove background color on hover for the back button */
+.back-button:hover {
+  text-decoration: underline; /* Only underline on hover */
+  background-color: transparent;
+}
+
+/* Breadcrumb navigation container */
+.breadcrumb-nav-container {
+  display: flex;
+  justify-content: flex-end; /* Align breadcrumb items to the right */
+  align-items: center; /* Vertically align breadcrumb items */
+  flex-grow: 1; /* Allow breadcrumb to take up remaining space */
+}
+
+/* Breadcrumb list */
+.breadcrumb {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 3px; /* Space between breadcrumb items */
+  align-items: center; /* Align items vertically */
+  justify-content: flex-end; /* Ensure items are aligned to the right */
+}
+
+/* Breadcrumb items */
+.breadcrumb li {
+  font-weight: bold;
+  color: #555;
+  font-size: 16px; /* Reduced font size for smaller height */
+}
+
+/* Breadcrumb links */
+.breadcrumb a {
+  color: #a33307;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Remove background color on hover for breadcrumb links */
+.breadcrumb a:hover {
+  text-decoration: underline; /* Only underline on hover */
+  background-color: transparent;
+}
+
+/* Styling for the > separator */
+.breadcrumb li span:not(.breadcrumb-current) {
+  margin: 0 3px;
+  display: inline-block;
+  color: #555;
+}
+
+/* Style for the current breadcrumb item */
+.breadcrumb-current {
+  color: #555; /* Different color for the current page */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .breadcrumb-page {
+    padding: 5px 0; /* Reduced outer padding for smaller screens */
+  }
+
+  .breadcrumb-wrapper {
+    flex-direction: column; /* Stack back button and breadcrumb vertically */
+    align-items: flex-start; /* Align items to the start (left) */
+    padding: 5px 0; /* Reduced padding for smaller screens */
+  }
+
+  .back-button {
+    font-size: 12px; /* Slightly smaller font size for the back button */
+    padding: 6px; /* Reduced padding */
+    margin-bottom: 8px; /* Reduced space below the back button when stacked */
+  }
+
+  .breadcrumb {
+    gap: 4px; /* Slightly smaller gap between breadcrumb items */
+  }
+
+  .breadcrumb li {
+    font-size: 12px; /* Smaller font size for breadcrumb items */
+  }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb-wrapper {
+    padding: 5px; /* Reduced padding on mobile */
+  }
+
+  .back-button {
+    font-size: 11px; /* Smaller font size for mobile */
+    padding: 5px; /* Further reduced padding */
+  }
+
+  .breadcrumb {
+    gap: 2px; /* Slightly smaller gap between breadcrumb items */
+  }
+
+  .breadcrumb li {
+    font-size: 11px; /* Reduced font size for better readability */
+  }
+}

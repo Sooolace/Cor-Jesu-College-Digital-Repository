@@ -1,0 +1,44 @@
+/* Custom button styling */
+.s-custom-btn {
+    border-color: #a33307 !important;  /* Set border color */
+    background-color: #a33307 !important;         /* Set the color of the icon and text */
+    padding: 0 !important;  /* Remove extra padding */
+  }
+
+  .s-custom-btn:hover,
+  .s-custom-btn:focus {
+    background-color: #802704 !important;  /* Set background color on hover or focus */
+    color: white !important;                /* Set icon color to white when hovered */
+    border-color: #a33307 !important;      /* Keep the border color same on hover */
+  }
+  
+  .g-custom-btn:hover,
+  .g-custom-btn:focus {
+    background-color: #a33307 !important;  /* Set background color on hover or focus */
+    color: white !important;                /* Set icon color to white when hovered */
+    border-color: #a33307 !important;      /* Keep the border color same on hover */
+  }
+
+.g-custom-btn {
+    border-color: #a33307 !important;  /* Set border color */
+    color: #a33307 !important;         /* Set the color of the icon and text */
+    padding: 0 !important;  /* Remove extra padding */
+  }
+  
+  .custom-btn i {
+    font-size: 18px !important;   /* Adjust icon size if necessary */
+  }
+  
+/* Make sure the input elements within the form control get the styles */
+.form-control:focus {
+  border-color: #a33307 !important;  /* Custom border color */
+  box-shadow: 0 0 0 0.2rem rgba(163, 51, 7, 0.25) !important;  /* Custom shadow around the input field */
+  outline: none !important;  /* Remove the default blue outline */
+}
+
+/* Optional: A more prominent shadow */
+.form-control:focus {
+  border-color: #a33307 !important;  /* Custom border color */
+  box-shadow: 0 0 5px rgba(163, 51, 7, 0.5) !important;  /* A more subtle custom shadow */
+}
+

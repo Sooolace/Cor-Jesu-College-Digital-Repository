@@ -1,0 +1,28 @@
+.categories-container {
+    max-height: 300px; /* Adjust height as needed */
+    overflow-y: auto; /* Enable scroll for long content */
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .categories-container h4 {
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  
+  .categories-container ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .categories-container li {
+    margin: 5px 0;
+  }
+  
+  .categories-container ul ul {
+    margin-left: 15px; /* Indent nested lists */
+  }
+  

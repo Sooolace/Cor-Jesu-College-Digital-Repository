@@ -1,0 +1,61 @@
+/* Left sidebar (filter section) */
+.filter-sidebar {
+  width: 25%;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Subject Filter styles */
+.subject-filter .dropdown-content {
+  padding: 10px;
+  max-height: 250px; /* Make subject filter scrollable */
+  overflow-y: auto; /* Allow vertical scrolling */
+  background-color: #fff; /* Ensure background is white */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for dropdown */
+}
+
+.subject-filter button {
+  width: 15%; /* Full width for better usability */
+  padding: 10px; /* Added padding for better touch targets */
+  background-color: #a33307; /* Button background */
+  border: 1px solid #ccc; /* Button border */
+  cursor: pointer; /* Pointer cursor for button */
+}
+
+/* Style for categories and subcategories */
+.subject-filter .category-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.subject-filter .subcategories {
+  margin-left: 20px; /* Indent for subcategories */
+}
+
+/* Apply Button container below the dropdown */
+.apply-button-container {
+  background-color: #fff; /* White background for contrast */
+  border-top: 1px solid #ddd; /* Optional: border separating the apply button */
+  text-align: center; /* Center the button */
+  padding: 10px 0; /* Padding for better touch targets */
+}
+
+/* Apply Button styling */
+.apply-button {
+  width: 15%; /* Slightly less than full width for padding */
+  padding: 12px; /* Increased padding for better touch target */
+  border-radius: 8px; /* Rounded corners for a softer look */
+  background-color: #a33307; /* Change to a red color */
+  color: white; /* Text color for contrast */
+  border: none; /* Remove default border */
+  font-size: 16px; /* Increase font size for better readability */
+  transition: background-color 0.3s; /* Transition effect */
+}
+
+.apply-button:hover {
+  background-color: #c2481f; /* Darken on hover */
+}

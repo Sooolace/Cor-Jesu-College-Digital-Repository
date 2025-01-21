@@ -1,0 +1,77 @@
+.author-filter {
+  padding: 20px;
+}
+
+.author-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.author-item {
+  display: flex;
+  align-items: center;  /* Align items vertically to the center */
+  justify-content: flex-start;  /* Align items horizontally to the left */
+}
+
+.author-item input {
+  margin-right: 10px; /* Adds space between the checkbox and the label */
+}
+
+.see-all-button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-align: left;  /* Ensures button text is aligned to the left */
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80%;
+  overflow-y: auto;
+  text-align: left;  /* Ensures all text within the modal is aligned left */
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  margin-top: 10px;
+  text-align: left;  /* Aligns the modal body text to the left */
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  text-align: left;  /* Ensures button is aligned to the left */
+}
+
+.author-category {
+  font-style: italic;
+  color: gray;
+  text-align: left;  /* Ensures the author category is aligned to the left */
+}

@@ -1,0 +1,11 @@
+.dropdown-menu {
+    z-index: 1050; /* Higher than other elements */
+    position: absolute;
+    overflow: visible;
+    background-color: white; /* Ensures menu is visible */
+  }
+  
+  .dropdown-toggle {
+    z-index: 1000; /* Ensure toggle stays above */
+  }
+  

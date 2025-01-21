@@ -1,0 +1,98 @@
+/* Center content */
+.home-page {
+  display: flex;
+  justify-content: center;
+}
+
+.centered-content {
+  max-width: 1200px;
+  width: 90%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Departments Container */
+.departments-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Title Styling */
+.departments-container h2 {
+  font-size: 32px;
+  color: rgb(180, 62, 26);
+  font-weight: 600;
+  margin-bottom: 30px;
+  text-decoration: underline;
+}
+
+/* Grid Styling */
+.departments-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns layout */
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Grid Item Styling */
+.departments-grid-item {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  transition: transform 0.3s ease-in-out;
+  text-align: center;
+}
+
+.departments-grid-item:hover {
+  transform: translateY(-5px);
+}
+
+/* Link Styling */
+.department-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+}
+
+/* Image Styling */
+.department-image {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+
+/* Text Styling */
+.department-link p {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  padding: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .departments-grid-container {
+    grid-template-columns: repeat(2, 1fr); /* Adjusts to 2 columns on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .departments-grid-container {
+    grid-template-columns: 1fr; /* Stacks items in a single column on very small screens */
+  }
+}

@@ -1,0 +1,104 @@
+/* searchbar.css */
+
+/* Main container for the search section */
+.search-section {
+  padding: 20px;
+}
+
+/* Search container wrapping all elements */
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between search elements */
+  max-width: 100%; /* Ensure it scales with the parent container */
+  width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  margin-top: 5px;
+}
+
+/* Search input field */
+.searchBar {
+  flex: 1; /* Allow the input field to grow and take available space */
+  min-width: 80px; /* Ensure a minimum size */
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.searchBar:focus {
+  border-color: #007bff; /* Highlight border on focus */
+}
+
+/* Search button */
+.btn-search {
+  display: flex;
+  justify-content: center;
+  height: 45px;
+  align-items: center;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  background-color: #a33307; /* Button color */
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.btn-search:hover {
+  background-color: #99320a; /* Darker button color on hover */
+}
+
+/* Dropdown menu for search options */
+.search-options {
+  flex-shrink: 0; /* Prevent it from shrinking */
+  min-width: 100px; /* Set a minimum width */
+  padding: 10px;
+  font-size: 13px;
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-options:focus {
+  border-color: #007bff; /* Highlight border on focus */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-container {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: stretch; /* Make items take full width */
+    gap: 15px; /* Increase gap for vertical layout */
+  }
+
+  .btn-search,
+  .search-options {
+    width: 100%; /* Buttons and dropdowns take full width */
+  }
+}
+
+/* Additional fine-tuning for very small screens */
+@media (max-width: 480px) {
+  .searchBar {
+    font-size: 14px; /* Reduce font size for smaller screens */
+    padding: 8px 10px; /* Adjust padding */
+  }
+
+  .btn-search {
+    font-size: 14px; /* Adjust button font size */
+    padding: 8px 10px; /* Adjust button padding */
+  }
+
+  .search-options {
+    font-size: 12px; /* Smaller font for dropdown */
+  }
+}

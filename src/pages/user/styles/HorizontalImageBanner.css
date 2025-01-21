@@ -1,0 +1,16 @@
+/* HorizontalImageBanner.css */
+.horizontal-image-banner {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 10px 0; /* Adjust vertical spacing as needed */
+  }
+  
+  .banner-image {
+    width: 100%;
+    max-width: 2000px; /* Set a max width if desired */
+    height: 250px;
+    object-fit: cover; /* Ensures the image maintains aspect ratio */
+    border-radius: 5px; /* Optional: Adds a slight border radius */
+  }
+  

@@ -1,0 +1,129 @@
+.author-underline {
+  width: 100%;
+  height: 2px;
+  background-color: #a33307;
+  margin: 10px auto;
+  margin-bottom: 30px;
+}
+
+.filter-underline {
+  width: 100%;
+  height: 1px;
+  background-color: #b1b0af;
+  margin: 10px auto;
+}
+
+.filter-title{
+  font-size: 16px;
+  font-weight: bold;
+  color: #a33307;
+}
+.a-filter-container {
+  background-color: rgb(242, 243, 237);
+  padding: 20px;
+  outline: 1px solid #f1f1f1;
+  width: 300px;
+  max-width: 300px;
+  box-sizing: border-box;
+  margin: 0;
+  padding-left: 10px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+}
+
+.statistics-section {
+  padding-top: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.filter-section Form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dropdown-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.dropdown-toggle {
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+
+.dropdown-menu {
+  background-color: #ffffff;
+  color: #9b2828;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.form-check {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-menu .form-check:hover {
+  background-color: #f1f1f1;
+}
+
+.btn-primary:hover {
+  background-color: #8a2c00;
+}
+
+.research-card {
+  max-height: 300px;
+  overflow: hidden;
+  padding: 15px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.research-card .description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Pagination Button Styles */
+.btn.btn-secondary {
+  background-color: #e9ecef;
+  color: #000;
+  border: none;
+  padding: 8px 12px;
+  font-weight: bold;
+  margin-right: 5px; /* Adjust spacing between buttons */
+}
+
+.btn.btn-secondary:hover {
+  background-color: #d6d6d6;
+}
+
+/* Active Page Button */
+.btn.btn-secondary.active {
+  background-color: #a33307;
+  color: white;
+  font-weight: bold;
+}
+

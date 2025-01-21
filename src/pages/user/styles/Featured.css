@@ -1,0 +1,126 @@
+/* Featured Section */
+.featured-section {
+  padding: 40px 5px;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1250px;
+  box-sizing: border-box;
+  margin-top: -20px;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 250;
+  color: #333;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #ff6600;
+}
+
+/* Wrapper for Featured Documents */
+.featured-documents-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  margin-top: 20px;
+  box-sizing: border-box;
+}
+
+/* Flexbox Layout for Featured Documents */
+.featured-documents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Individual Featured Document */
+.featured-document {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  width: calc(25% - 15px);
+  max-width: 300px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  height: 300px; /* Set a fixed height for the card */
+  overflow: hidden;
+}
+
+/* Scrollable content inside each card */
+.document-content {
+  overflow-y: auto;
+  height: 100%; /* Ensure it matches the height of the container */
+  padding: 5px; /* Slim padding */
+  box-sizing: border-box;
+}
+
+/* Custom Scrollbar for WebKit Browsers */
+.document-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.document-content::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 10px;
+}
+
+.document-content::-webkit-scrollbar-thumb {
+  background: #a33307;
+  border-radius: 10px;
+}
+
+.document-content::-webkit-scrollbar-thumb:hover {
+  background: #fffefe;
+}
+
+/* For Firefox */
+.document-content {
+  scrollbar-color: #a33307 #e0e0e0;
+  scrollbar-width: thin;
+}
+
+/* Hover effect for the featured document */
+.featured-document:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Title Link Styling */
+.document-title {
+  font-size: 20px;  
+  color: #a33307;
+  text-decoration: none;
+  font-weight: 400;
+  transition: color 0.3s ease-in-out;
+}
+
+.document-title:hover {
+  color: #ff6600;
+  text-decoration: underline;
+}
+
+/* Description */
+.document-description {
+  font-size: 1.1rem;
+  color: #555;
+  margin-top: 10px;
+  line-height: 1.6;
+}
