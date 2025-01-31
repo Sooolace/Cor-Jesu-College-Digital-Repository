@@ -31,8 +31,12 @@
   import Help from './pages/user/Help';
   import NotFound from './pages/user/NotFound';
   import ArchivedProjects from './pages/admin/ArchivedProjects';
+<<<<<<< HEAD
   import FeaturedProjects from './pages/admin/FeaturedProjects';
   import ActivityLog from './pages/user/ActivityLog';
+=======
+import FeaturedProjects from './pages/admin/FeaturedProjects';
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
 // Memoize components here
   const MemoizedHome = React.memo(Home);
@@ -130,7 +134,10 @@
           <Route path="/AllWorks" element={<AllWorks />} />
           <Route path="/EditFeatured" element={<EditFeatured />} />
           <Route path="/help" element={<Help />} />
+<<<<<<< HEAD
           <Route path="/activity-log" element={<ActivityLog />} />
+=======
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
   
           {isAdmin && (
             <>

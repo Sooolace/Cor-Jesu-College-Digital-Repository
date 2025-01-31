@@ -1,5 +1,6 @@
 /* Center and style pagination items */
 .pagination {
+<<<<<<< HEAD
   list-style: none;
   display: flex;
   justify-content: center; /* Center pagination items horizontally */
@@ -65,3 +66,63 @@
   padding: 0;
   font-weight: normal;
 }
+=======
+    list-style: none;
+    display: flex;
+    justify-content: center; /* Center pagination items horizontally */
+    align-items: center;     /* Center pagination items vertically if needed */
+    padding: 0;
+    margin: 0;
+    outline: none; /* Remove the focus outline */
+  }
+  
+  .page-item {
+    margin: 0 5px;
+    cursor: pointer;
+  }
+  
+  .page-link {
+    display: inline-block;
+    padding: 10px 15px;
+    color: #fff;
+    background-color: #c0392b;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    text-transform: uppercase;
+    outline: none; /* Remove the focus outline */
+  }
+  
+  .page-link:hover {
+    background-color: #e74c3c;
+  }
+  
+  .page-item.disabled .page-link {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    outline: none; /* Remove the focus outline */
+  }
+  
+  .page-item.active .page-link {
+    font-weight: bold;
+    background-color: #e74c3c;
+    border: none;
+  }
+  
+  /* Ensure the container aligns pagination to center */
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0;
+  }
+  
+  /* Remove the default browser focus outline */
+  .page-link:focus {
+    outline: none;
+  }
+  
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137

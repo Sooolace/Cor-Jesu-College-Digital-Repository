@@ -84,5 +84,8 @@ router.get('/:project_id', async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 module.exports = router;

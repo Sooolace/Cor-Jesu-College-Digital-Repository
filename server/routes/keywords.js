@@ -3,6 +3,7 @@
 const express = require('express');
 const pool = require('../db');
 const router = express.Router();
+<<<<<<< HEAD
 const logActivity = require('../middlewares/logActivity'); // Import log activity middleware
 
 // Route Example: Fetch all keywords
@@ -26,6 +27,8 @@ router.get(
 
 
 
+=======
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
 // POST - Add a new keyword
 router.post('/', async (req, res) => {
@@ -47,6 +50,20 @@ router.post('/', async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
+=======
+// GET - Fetch all keywords
+router.get('/', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM keywords ORDER BY keyword');
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error retrieving keywords:', error.stack);
+        res.status(500).json({ error: 'Failed to retrieve keywords' });
+    }
+});
+
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 // GET - Fetch a single keyword by keyword_id
 router.get('/:keyword_id', async (req, res) => {
     const { keyword_id } = req.params;

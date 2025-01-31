@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .document-container {
   max-width: 1300px;
   margin-left: 20%;   /* Adjust left margin */
@@ -165,3 +166,46 @@
     width: 100%;
   }
 }
+=======
+/* DocumentOverview.css */
+.d-table-container {
+    max-width: 1000px; /* Limit table width for better readability */
+    margin: auto; /* Center container */
+    padding: 20px; /* Add padding */
+  }
+  
+  .d-table {
+    width: 100%; /* Full width table */
+    border-collapse: collapse; /* Collapsed borders */
+  }
+  
+  .d-table th,
+  .d-table td {
+    padding: 12px; /* Padding inside cells */
+    text-align: left; /* Left-align text */
+  }
+  
+  .d-table th {
+    background-color: #d0cece; /* Bootstrap primary color */
+    color: rgb(0, 0, 0); /* White text for headers */
+  }
+  
+  .d-table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa; /* Light background for odd rows */
+  }
+  
+  .loader-container {
+    display: flex;
+    flex-direction: column; /* Center loader vertically */
+    align-items: center; /* Center loader horizontally */
+    justify-content: center;
+    height: 100vh; /* Full height */
+  }
+  
+  .text-danger {
+    color: #dc3545; /* Bootstrap danger color */
+  }
+
+  
+  
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137

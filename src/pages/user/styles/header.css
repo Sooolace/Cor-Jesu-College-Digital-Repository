@@ -5,7 +5,10 @@ header {
   background-color: #a33307;
   color: #fff;
   box-sizing: border-box;
+<<<<<<< HEAD
   padding: 10px 0; /* Add padding for a more consistent look */
+=======
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 }
 
 /* The container that holds both logo and navigation */
@@ -23,7 +26,10 @@ header {
 .logo {
   width: 300px;
   height: auto;
+<<<<<<< HEAD
   max-width: 100%;  /* Ensure logo is responsive and doesn't exceed container width */
+=======
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 }
 
 /* Navigation styling */
@@ -141,8 +147,11 @@ nav .sign-in-btn:hover {
   }
 
   nav {
+<<<<<<< HEAD
     flex-direction: column;  /* Stack nav items vertically */
     align-items: center;     /* Center the nav items */
+=======
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     gap: 10px;  /* Smaller gap for mobile */
   }
 
@@ -158,6 +167,7 @@ nav .sign-in-btn:hover {
   .dropdown-menu {
     min-width: 100px;
   }
+<<<<<<< HEAD
 
   /* Toggle dropdown on click for mobile */
   .dropdown-menu {
@@ -177,4 +187,6 @@ nav .sign-in-btn:hover {
     display: block;  /* Make the dropdown link a block element */
     text-align: center;
   }
+=======
+>>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 }
