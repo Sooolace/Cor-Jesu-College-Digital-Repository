@@ -45,6 +45,7 @@ const AuthorFilter = ({ selectedAuthors, setSelectedAuthors, onApply }) => {
   // Trigger apply filters
   const handleApplyFilters = () => {
     if (onApply) {
+      // Pass the selectedAuthors back to parent component
       onApply(selectedAuthors);
     }
   };
@@ -69,6 +70,11 @@ const AuthorFilter = ({ selectedAuthors, setSelectedAuthors, onApply }) => {
           </div>
         ))}
       </div>
+
+      {/* Apply Filters Button outside the modal */}
+      <button className="apply-button" onClick={handleApplyFilters}>
+        Apply Filters
+      </button>
 
       {/* See All Button */}
       {authors.length > 10 && (

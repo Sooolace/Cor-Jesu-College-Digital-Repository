@@ -3,7 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const pool = require('./db');  // Import your PostgreSQL connection
+const pool = require('./db'); 
 const authorsRouter = require('./routes/authors');
 const projectsRouter = require('./routes/projects');
 const projectAuthorsRouter = require('./routes/project_authors');
@@ -14,8 +14,9 @@ const researchTypesRouter = require('./routes/researchTypes');
 const keywordsRouter = require('./routes/keywords');
 const projectKeywordsRouter = require('./routes/project_keywords');
 const featuredDocumentsRouter = require('./routes/featureddocuments');
-const searchRouter = require('./routes/search');  // Import search route
-const projectsCategoryRouter = require('./routes/project_category'); // Import the new projects_category route
+const searchRouter = require('./routes/search');
+const projectsCategoryRouter = require('./routes/project_category'); 
+const activityLogRouter = require('./routes/activitylog');
 
 require('dotenv').config();
 
@@ -25,6 +26,9 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// **Serve static files from the downloads directory**
+app.use('/downloads', express.static(path.join(__dirname, '../downloads')));
 
 // Public Routes
 app.use('/api/projects', projectsRouter);
@@ -36,7 +40,7 @@ app.use('/api/topics', topicsRouter);
 app.use('/api/researchTypes', researchTypesRouter);
 app.use('/api/keywords', keywordsRouter);
 app.use('/api/project_keywords', projectKeywordsRouter);
-
+app.use('/api/activitylog', activityLogRouter);
 // New route for projects_category
 app.use('/api/project_category', projectsCategoryRouter);
 
@@ -60,33 +64,43 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     try {
-        // Query the database for the user by username
-        const query = 'SELECT * FROM admin WHERE username = $1'; // Modify 'admin' to your actual table name
+        const query = 'SELECT * FROM admin WHERE username = $1';
         const result = await pool.query(query, [username]);
 
         if (result.rows.length === 0) {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        const user = result.rows[0]; // User data from the database
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);  // Compare hashed password
+        const user = result.rows[0];
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
         if (!isPasswordCorrect) {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // Generate JWT token
         const token = jwt.sign(
-            { userId: user.id, username: user.username },  // Include relevant user data
-            process.env.JWT_SECRET || 'your_secret_key',  // Secret key for JWT (use environment variables for security)
+            { userId: user.id, username: user.username },
+            process.env.JWT_SECRET || 'your_default_secret', // Ensure the secret is available
             { expiresIn: '1h' }
         );
 
-        // Send the token back to the client
+        // Set req.user
+        req.user = {
+            id: user.id,
+            username: user.username,
+            role: user.role // Assuming you have a role field in your user table
+        };
+
+        // Log the login activity (this is handled by logActivity middleware)
+        req.activity = 'User logged in';
+        req.additionalInfo = { username: user.username };
+
+        // Proceed with sending the response after logging activity
         return res.json({ token });
 
     } catch (err) {
-        console.error('Error during login:', err);
+        console.error('Error during login:', err.message);
+        console.error(err.stack);
         return res.status(500).json({ message: 'Server error. Please try again later.' });
     }
 });
@@ -108,6 +122,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on http://0.0.0.0:${PORT}`);
 });

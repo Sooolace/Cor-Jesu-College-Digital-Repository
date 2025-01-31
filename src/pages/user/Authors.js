@@ -18,18 +18,20 @@ function Authors() {
 
   const navigate = useNavigate();
 
+  // Fetch authors only once
   useEffect(() => {
     fetchAuthors();
-  }, []);
+  }, []);  // Empty dependency array ensures this runs once
 
   const fetchAuthors = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/authors');
+      const response = await fetch('/api/authors/logauthor');
       const data = await response.json();
-      setAuthors(data);
-      setFilteredAuthors(data);
+      setAuthors(data);  // Set the authors only once
+      setFilteredAuthors(data); // Initially display all authors
 
+      // Get unique departments
       const uniqueDepartments = [
         ...new Set(data.map((author) => author.category_name).filter(Boolean)),
       ];
@@ -42,8 +44,9 @@ function Authors() {
     }
   };
 
+  // Apply filters on the fetched data
   const handleFilter = () => {
-    let filtered = authors;
+    let filtered = [...authors];  // Work with the original authors array
 
     if (filterName) {
       filtered = filtered.filter((author) =>
@@ -58,7 +61,7 @@ function Authors() {
     }
 
     setFilteredAuthors(filtered);
-    setCurrentPage(1);
+    setCurrentPage(1);  // Reset to first page after filtering
   };
 
   const handleViewClick = (authorName) => {
@@ -103,9 +106,7 @@ function Authors() {
               </Dropdown.Toggle>
 
               <Dropdown.Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                <Dropdown.Item onClick={() => setFilterDepartment('')}>
-                  All Departments
-                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setFilterDepartment('')}>All Departments</Dropdown.Item>
                 {departments.map((department) => (
                   <Dropdown.Item
                     key={department}
@@ -151,8 +152,8 @@ function Authors() {
           <Table striped bordered hover style={{ width: '75%', margin: '0 auto' }}>
             <thead>
               <tr>
-                <th style={{ width: '30%' }}>Name</th>
-                <th style={{ width: '50%' }}>Department</th>
+                <th style={{ width: '40%' }}>Name</th>
+                <th style={{ width: '40%' }}>Department</th>
                 <th style={{ width: '3%' }}>View</th>
               </tr>
             </thead>

@@ -31,7 +31,8 @@
   import Help from './pages/user/Help';
   import NotFound from './pages/user/NotFound';
   import ArchivedProjects from './pages/admin/ArchivedProjects';
-import FeaturedProjects from './pages/admin/FeaturedProjects';
+  import FeaturedProjects from './pages/admin/FeaturedProjects';
+  import ActivityLog from './pages/user/ActivityLog';
 
 // Memoize components here
   const MemoizedHome = React.memo(Home);
@@ -129,6 +130,7 @@ import FeaturedProjects from './pages/admin/FeaturedProjects';
           <Route path="/AllWorks" element={<AllWorks />} />
           <Route path="/EditFeatured" element={<EditFeatured />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/activity-log" element={<ActivityLog />} />
   
           {isAdmin && (
             <>

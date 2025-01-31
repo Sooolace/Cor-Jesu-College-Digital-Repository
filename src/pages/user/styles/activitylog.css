@@ -1,0 +1,34 @@
+.activity-log-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.activity-log-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.activity-log-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.activity-log-table th, .activity-log-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.activity-log-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.activity-log-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.activity-log-table tr:hover {
+    background-color: #f1f1f1;
+}

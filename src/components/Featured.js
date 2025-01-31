@@ -19,7 +19,7 @@ function Featured() {
                 setFeaturedDocuments(data);
             } catch (error) {
                 setError('Failed to fetch featured documents');
-                console.error('API call error:', error);
+                // console.error('API call error:', error); // Remove or comment out this line
             } finally {
                 setLoading(false);
             }

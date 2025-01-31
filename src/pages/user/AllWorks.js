@@ -7,6 +7,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import Form from 'react-bootstrap/Form';
 import { CiViewList } from "react-icons/ci";
 import Breadcrumb from '../../components/BreadCrumb';
+import PaginationComponent from '../../components/PaginationComponent';
+
 
 function AllWorks() {
   const navigate = useNavigate();
@@ -140,11 +142,10 @@ function AllWorks() {
         />
       </div>
       <div className="total-works-container container mt-4">
-        <div className="text-center mb-4">
-          <h2 className="display-8">Projects Overview</h2>
-          <div className="author-underline"></div>
+      <div className="text-center mb-4">
+          <h3 className="display-8">Studies</h3>
         </div>
-
+        <div className="author-underline"></div>
         <div className="d-flex justify-content-center mb-3">
           <Form.Control
             type="text"
@@ -183,15 +184,15 @@ function AllWorks() {
             <Table striped bordered hover className="mt-3">
               <thead>
                 <tr>
-                  <th style={{ width: '34%' }}>Title</th>
+                  <th style={{ width: '50%' }}>Title</th>
                   <th style={{ width: '20%' }}>Authors</th>
                   <th
-                    style={{ width: '15%', cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
+                    style={{ width: '20%', cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
                     onClick={toggleSortOrder}
                   >
                     Date Published {sortOrder === 'latest' ? '(Newest)' : '(Oldest)'}
                   </th>
-                  <th style={{ width: '9%' }}>View</th>
+                  <th style={{ width: '2%' }}>View</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,12 +222,12 @@ function AllWorks() {
                 ))}
               </tbody>
             </Table>
-
-            <Pagination className="d-flex justify-content-center">
-              <Pagination.Prev onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} />
-              <Pagination.Item active>{currentPage}</Pagination.Item>
-              <Pagination.Next onClick={handleNext} disabled={currentPage === totalPages} />
-            </Pagination>
+                  {/* Pagination Component */}
+                  <PaginationComponent
+                    currentPage={currentPage}
+                    totalPages={totalPages}  // Correctly passing totalPages
+                    handlePageChange={newPage => setCurrentPage(newPage)}
+                  />
           </>
         )}
       </div>

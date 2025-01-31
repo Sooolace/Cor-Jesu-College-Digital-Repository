@@ -16,7 +16,7 @@ const RecentSubmissions = ({ searchQuery }) => {
   const fetchSubmissions = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/projects');
+      const response = await fetch('/api/projects/projects/recent');
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }

@@ -5,6 +5,7 @@ header {
   background-color: #a33307;
   color: #fff;
   box-sizing: border-box;
+  padding: 10px 0; /* Add padding for a more consistent look */
 }
 
 /* The container that holds both logo and navigation */
@@ -22,6 +23,7 @@ header {
 .logo {
   width: 300px;
   height: auto;
+  max-width: 100%;  /* Ensure logo is responsive and doesn't exceed container width */
 }
 
 /* Navigation styling */
@@ -139,6 +141,8 @@ nav .sign-in-btn:hover {
   }
 
   nav {
+    flex-direction: column;  /* Stack nav items vertically */
+    align-items: center;     /* Center the nav items */
     gap: 10px;  /* Smaller gap for mobile */
   }
 
@@ -153,5 +157,24 @@ nav .sign-in-btn:hover {
 
   .dropdown-menu {
     min-width: 100px;
+  }
+
+  /* Toggle dropdown on click for mobile */
+  .dropdown-menu {
+    display: none;  /* Hide menu by default */
+    position: static; /* Position it relative to the container */
+    background-color: #fff;
+    box-shadow: none;
+    width: 100%; /* Take full width */
+  }
+
+  .dropdown.open .dropdown-menu {
+    display: block;  /* Show dropdown when open class is added */
+  }
+  
+  /* Add a toggle button for the dropdown menu */
+  .dropdown-link {
+    display: block;  /* Make the dropdown link a block element */
+    text-align: center;
   }
 }

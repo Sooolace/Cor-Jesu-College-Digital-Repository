@@ -84,11 +84,12 @@ function Keywords() {
           </div>
         </div>
 
-        {/* Loading and Error Messages */}  
+        {/* Loading and Error Messages */}
+        {loading && <Spinner animation="border" />}
         {error && <Alert variant="danger">{error}</Alert>}
 
         {/* Keywords Table */}
-        {filteredKeywords.length > 0 && (
+        {!loading && filteredKeywords.length > 0 && (
           <Table striped bordered hover style={{ width: '50%', margin: '0 auto' }}>
             <thead>
               <tr>
@@ -124,25 +125,27 @@ function Keywords() {
         )}
 
         {/* Pagination */}
-        <Pagination style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-          <Pagination.Prev
-            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-          />
-          {[...Array(totalPages)].map((_, index) => (
-            <Pagination.Item
-              key={index + 1}
-              active={index + 1 === currentPage}
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </Pagination.Item>
-          ))}
-          <Pagination.Next
-            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          />
-        </Pagination>
+        {!loading && totalPages > 0 && (
+          <Pagination style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+            <Pagination.Prev
+              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            />
+            {[...Array(totalPages)].map((_, index) => (
+              <Pagination.Item
+                key={index + 1}
+                active={index + 1 === currentPage}
+                onClick={() => setCurrentPage(index + 1)}
+              >
+                {index + 1}
+              </Pagination.Item>
+            ))}
+            <Pagination.Next
+              onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            />
+          </Pagination>
+        )}
       </div>
     </>
   );

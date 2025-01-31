@@ -1,7 +1,7 @@
 const express = require('express');
 const pool = require('../db');
 const router = express.Router();
-
+const logActivity = require('../middlewares/logActivity');
 // POST - Add a new author
 router.post('/', async (req, res) => {
     const { name, category_id } = req.body;
@@ -34,7 +34,6 @@ router.post('/', async (req, res) => {
 });
 
 
-
 // PUT - Update an existing author with category_id
 router.put('/authwcatid/:authorId', async (req, res) => {
     const { authorId } = req.params;
@@ -60,7 +59,6 @@ router.put('/authwcatid/:authorId', async (req, res) => {
     }
 });
 
-
 // GET - Fetch all authors with category (if exists)
 router.get('/', async (req, res) => {
     try {
@@ -70,14 +68,43 @@ router.get('/', async (req, res) => {
             LEFT JOIN categories c ON a.category_id = c.category_id
             ORDER BY a.name
         `);
+
+        // Respond with the fetched data
         res.status(200).json(result.rows);
+
     } catch (error) {
         console.error('Error retrieving authors:', error.stack);
         res.status(500).json({ error: 'Failed to retrieve authors' });
     }
 });
 
+// GET - Fetch all authors
+router.get('/logauthor', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT a.*, c.name AS category_name
+            FROM authors a
+            LEFT JOIN categories c ON a.category_id = c.category_id
+            ORDER BY a.name
+        `);
 
+        // Log the activity (User fetched all authors)
+        req.activity = 'User fetched all authors';
+
+        // Ensure req.user is set for logging
+        req.user = req.user || { id: 0, role: 'guest' };
+
+        // Proceed with the logActivity middleware
+        logActivity(req, res, () => {
+            // Send response after logging the activity
+            res.status(200).json(result.rows);
+        });
+
+    } catch (error) {
+        console.error('Error retrieving authors:', error.stack);
+        res.status(500).json({ error: 'Failed to retrieve authors' });
+    }
+});
 
 // GET - Fetch a single author by author_id
 router.get('/:author_id', async (req, res) => {
@@ -134,24 +161,44 @@ router.get('/:author_id/details', async (req, res) => {
 });
 
 
-
-// GET - Fetch works by a specific author
+// GET - Fetch works by a specific author (with logging)
 router.get('/:author_id/works', async (req, res) => {
     const { author_id } = req.params;
+
     try {
-        const works = await pool.query(
-            `SELECT p.* FROM projects p 
+        // Fetch the author's works
+        const worksResult = await pool.query(
+            `SELECT p.* 
+             FROM projects p 
              JOIN project_authors pa ON p.project_id = pa.project_id 
-             WHERE pa.author_id = $1`, 
-             [author_id]
+             WHERE pa.author_id = $1`,
+            [author_id]
         );
-        
-        res.status(200).json(works.rows);
+
+        // Set activity and additional info for logging
+        req.activity = 'User fetched works by author';
+        req.additionalInfo = JSON.stringify({ authorId: author_id });
+        req.user = req.user || { id: 0, role: 'normal' };
+
+        // Log activity and respond with the works
+        return logActivity(req, res, () => {
+            res.status(200).json(worksResult.rows); // Send the works data
+        });
+
     } catch (error) {
         console.error('Error retrieving works:', error.stack);
-        res.status(500).json({ error: 'Failed to retrieve works' });
+
+        // Log the error
+        req.activity = 'Error fetching works for author';
+        req.additionalInfo = JSON.stringify({ error: error.message, authorId: author_id });
+        req.user = req.user || { id: 0, role: 'normal' };
+
+        logActivity(req, res, () => {
+            res.status(500).json({ error: 'Failed to retrieve works' });
+        });
     }
 });
+
 
 // PUT - Update an author by author_id (with category_id)
 router.put('/:author_id', async (req, res) => {

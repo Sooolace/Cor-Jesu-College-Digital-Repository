@@ -2,6 +2,8 @@ const express = require('express');
 const pool = require('../db'); // Database connection
 const multer = require('multer'); // For handling file uploads
 const NodeCache = require('node-cache'); // In-memory cache
+const logActivity = require('../middlewares/logActivity'); // Import log activity middleware
+const path = require('path');
 
 const router = express.Router();
 
@@ -78,10 +80,46 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
 });
 
 
-
-
-// GET - Fetch all projects (excluding archived projects)
+// GET - Fetch all projects (excluding archived projects) without cache
 router.get('/', async (req, res) => {
+    const searchQuery = `
+        SELECT p.*, 
+               STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+               STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+        FROM projects p
+        LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+        LEFT JOIN authors a ON pa.author_id = a.author_id 
+        LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+        LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+        WHERE p.is_archived = false
+        GROUP BY p.project_id 
+        ORDER BY p.publication_date DESC;
+    `;
+
+    try {
+        // Execute the query to retrieve all projects
+        const result = await pool.query(searchQuery);
+
+        // Log the activity (User fetched all projects)
+        req.activity = 'User fetched all projects';
+
+        // Ensure req.user is set for logging
+        req.user = req.user || { id: 0, role: 'normal' };
+
+        // Proceed with the logActivity middleware
+        logActivity(req, res, () => {
+            // Send response after logging the activity
+            res.status(200).json(result.rows);
+        });
+
+    } catch (error) {
+        console.error('Error retrieving projects:', error);
+        res.status(500).json({ error: 'Failed to retrieve projects' });
+    }
+});
+
+// GET - Fetch all project by recent
+router.get('/projects/recent', async (req, res) => {
     const cachedProjects = cache.get('allProjectsCache');
     if (cachedProjects) {
         console.log('Serving from cache');
@@ -114,6 +152,36 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET - Fetch most-viewed projects (excluding archived projects) without cache
+router.get('/mostviewed', async (req, res) => {
+    const searchQuery = `
+        SELECT p.*, 
+               STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+               STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+        FROM projects p
+        LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+        LEFT JOIN authors a ON pa.author_id = a.author_id 
+        LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+        LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+        WHERE p.is_archived = false
+        GROUP BY p.project_id 
+        ORDER BY p.view_count DESC;
+    `;
+
+    try {
+        // Execute the query to retrieve most-viewed projects
+        const result = await pool.query(searchQuery);
+
+        // Return the fetched data without caching
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error retrieving most-viewed projects:', error);
+        res.status(500).json({ error: 'Failed to retrieve most-viewed projects' });
+    }
+});
+
+
+//GET ARCHIVED PROJECTS
 router.get('/archived-projects', async (req, res) => {
     try {
         const query = `
@@ -154,18 +222,34 @@ GROUP BY
 });
 
 // GET - Fetch a single project by project_id
-router.get('/:project_id', async (req, res) => {
+router.get('/:project_id', async (req, res, next) => {
     const { project_id } = req.params;
+    
     try {
+        // Fetch the project data from the database
         const result = await pool.query('SELECT * FROM projects WHERE project_id = $1', [project_id]);
-        if (!result.rows.length) return res.status(404).json({ error: 'Project not found' });
-        res.status(200).json(result.rows[0]);
+
+        if (!result.rows.length) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        // Get the project's title for the additional info in logging
+        const project = result.rows[0];
+
+        // Set activity and additional info for logging before proceeding with the request
+        req.activity = 'User viewed project';  // Activity description
+        req.additionalInfo = JSON.stringify({ projectTitle: project.title });  // Additional info with project title
+
+        // Proceed to the logging middleware and then send the response
+        return logActivity(req, res, () => {
+            res.status(200).json(project);  // Send the project data as a response
+        });
+
     } catch (error) {
         console.error('Error retrieving project:', error);
         res.status(500).json({ error: 'Failed to retrieve project' });
     }
 });
-
 // PUT - Archive project by project_id
 router.put('/:project_id/archive', async (req, res) => {
     const { project_id } = req.params;
@@ -291,15 +375,15 @@ router.post('/:project_id/authors', async (req, res) => {
     }
 });
 
-// GET - Fetch top-viewed projects with caching
-router.get('/top-viewed', async (req, res) => {
-    const cachedTopViewed = cache.get('topViewedCache');
-    if (cachedTopViewed) {
+// GET - Fetch all projects (excluding archived projects)
+router.get('/', async (req, res) => {
+    const cachedProjects = cache.get('allProjectsCache');
+    if (cachedProjects) {
         console.log('Serving from cache');
-        return res.status(200).json(cachedTopViewed); // Return cached data if available
+        return res.status(200).json(cachedProjects);
     }
 
-    const topViewedQuery = `
+    const searchQuery = `
         SELECT p.*, 
                STRING_AGG(DISTINCT a.name, ', ') AS authors, 
                STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
@@ -308,24 +392,49 @@ router.get('/top-viewed', async (req, res) => {
         LEFT JOIN authors a ON pa.author_id = a.author_id 
         LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
         LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+        WHERE p.is_archived = false
         GROUP BY p.project_id 
-        ORDER BY p.view_count DESC
-        LIMIT 10
+        ORDER BY p.publication_date DESC;
     `;
 
     try {
-        // Execute the query to retrieve top-viewed projects
-        const result = await pool.query(topViewedQuery);
+        const result = await pool.query(searchQuery);
 
-        // Cache the result for future requests
-        cache.set('topViewedCache', result.rows);
+        cache.set('allProjectsCache', result.rows);
 
         res.status(200).json(result.rows);
     } catch (error) {
-        console.error('Error fetching top-viewed projects:', error);
-        res.status(500).json({ error: 'Failed to retrieve top-viewed projects' });
+        console.error('Error retrieving projects:', error);
+        res.status(500).json({ error: 'Failed to retrieve projects' });
     }
 });
+
+
+router.get('/most_viewed', async (req, res) => {
+    const query = `
+        SELECT p.*, 
+               STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+               STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+        FROM projects p
+        LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+        LEFT JOIN authors a ON pa.author_id = a.author_id 
+        LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+        LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+        WHERE p.is_archived = false
+        GROUP BY p.project_id 
+        ORDER BY p.view_count DESC
+        LIMIT 10;
+    `;
+
+    try {
+        const result = await pool.query(query);
+        res.json(result.rows); // Send the rows as JSON response
+    } catch (error) {
+        console.error('Error executing query', error.stack);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 // DELETE - Delete project by project_id
 router.delete('/:project_id', async (req, res) => {
@@ -393,12 +502,25 @@ router.get('/departments/:departmentName', async (req, res) => {
         `;
         
         const result = await pool.query(query, [fullDepartmentName]);
-        res.status(200).json(result.rows);
+
+        // Log the activity (User fetched projects for the department)
+        req.activity = `User fetched projects for ${fullDepartmentName}`;
+
+        // Ensure req.user is set for logging
+        req.user = req.user || { id: 0, role: 'normal' };
+
+        // Proceed with the logActivity middleware
+        logActivity(req, res, () => {
+            // Send response after logging the activity
+            res.status(200).json(result.rows);
+        });
+
     } catch (error) {
         console.error('Error retrieving projects by department:', error);
         res.status(500).json({ error: 'Failed to retrieve projects' });
     }
 });
+
 
 // GET - Fetch all projects (excluding archived projects) with featured projects at the top
 router.get('/projects/featured-proj', async (req, res) => {
@@ -421,7 +543,6 @@ router.get('/projects/featured-proj', async (req, res) => {
 
         const result = await pool.query(searchQuery);
 
-        console.log('Database query result:', result.rows);
 
         res.status(200).json(result.rows);
     } catch (error) {
@@ -453,8 +574,6 @@ router.get('/projects/active-featured', async (req, res) => {
         console.log('Executing query to retrieve featured projects');
 
         const result = await pool.query(searchQuery);
-
-        console.log('Database query result:', result.rows);
 
         res.status(200).json(result.rows);
     } catch (error) {

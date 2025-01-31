@@ -191,20 +191,24 @@ function DocumentOverview() {
                           {project.study_url ? <a href={project.study_url} target="_blank" rel="noopener noreferrer">{project.study_url}</a> : 'No Link Available'}
                         </p>
             </div>
-            <div className="project-detail-item">
-              <p className="detail-title"><strong>Downloadable File:</strong></p>
-              <p className="detail-content">
-                {project.file_path ? (
-                  <a href={project.file_path} target="_blank" rel="noopener noreferrer" download>
-                    {project.file_path.split('/').pop()} {/* Display the file name */}
-                  </a>
-                ) : (
-                  'No Document Available'
-                )}
-              </p>
-            </div>
-
-
+                      <div className="project-detail-item">
+            <p className="detail-title"><strong>Downloadable File:</strong></p>
+            <p className="detail-content">
+              {project.file_path ? (
+                // Make sure the file_path is a correct URL
+                <a 
+                  href={project.file_path} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  download // This triggers the download behavior
+                >
+                  {project.file_path.split('/').pop()} {/* Display the file name, e.g. 'researchdocu.pdf' */}
+                </a>
+              ) : (
+                'No Document Available'
+              )}
+            </p>
+          </div>
             <div className="buttons-container">
               <div className="print-button">
                 <Button onClick={handlePrintSummary}>
@@ -228,37 +232,37 @@ function DocumentOverview() {
             />
 
             <div className="project-details">
-{/* Authors */}
-<div className="project-detail-item">
-  <p className="detail-title">
-    <strong>{authors.length === 1 ? 'Author:' : 'Authors:'}</strong>
-  </p>
-  <p className="detail-content">
-    {authors.length > 0 ? authors.map((author, index) => (
-      <span key={author.author_id}>
-        <Link to={`/AuthorOverview/${encodeURIComponent(author.name)}`} className="author-link">
-          {author.name}
-        </Link>
-        {index < authors.length - 1 && ', '}
-      </span>
-    )) : 'N/A'}
-  </p>
-</div>
+              {/* Authors */}
+              <div className="project-detail-item">
+                <p className="detail-title">
+                  <strong>{authors.length === 1 ? 'Author:' : 'Authors:'}</strong>
+                </p>
+                <p className="detail-content">
+                  {authors.length > 0 ? authors.map((author, index) => (
+                    <span key={author.author_id}>
+                      <Link to={`/AuthorOverview/${encodeURIComponent(author.name)}`} className="author-link">
+                        {author.name}
+                      </Link>
+                      {index < authors.length - 1 && ', '}
+                    </span>
+                  )) : 'N/A'}
+                </p>
+              </div>
 
 
-{/* Published Date */}
-<div className="project-detail-item">
-  <p className="detail-title"><strong>Published Date:</strong></p>
-  <p className="detail-content">
-    {project.publication_date 
-      ? new Date(project.publication_date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }) 
-      : 'N/A'}
-  </p>
-</div>
+              {/* Published Date */}
+              <div className="project-detail-item">
+                <p className="detail-title"><strong>Published Date:</strong></p>
+                <p className="detail-content">
+                  {project.publication_date 
+                    ? new Date(project.publication_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      }) 
+                    : 'N/A'}
+                </p>
+              </div>
 
 
               {/* Research Type */}

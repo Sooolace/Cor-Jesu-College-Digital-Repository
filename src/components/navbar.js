@@ -23,22 +23,20 @@ function Navbar() {
     
                 <div className="dropdown" onMouseEnter={toggleDropdown} onMouseLeave={toggleDropdown}>
                     <Link to="#" className="dropdown-link">
-                        Academics
+                        Research Resources
                     </Link>
                     {isDropdownOpen && (
                         <div className="dropdown-menu">
-                            
+                            <Link to="/AllWorks">Theses & Disserations</Link>
                             <Link to="/Authors">Authors</Link>
                             <Link to="/Keywords">Keywords</Link>
                             <Link to="/Departments">Departments</Link>
-                            <Link to="/AllWorks">Capstone & Thesis</Link>
                             <Link to="/resources">Resources</Link>
                         </div>
                     )}
                 </div>
     
                 <Link to="/help">Help</Link>
-                <Link to="/login" className="sign-in-btn">Admin Access</Link>
             </nav>
         </div>
     </header>

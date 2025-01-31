@@ -1,5 +1,6 @@
 .author-filter {
   padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
 .author-list {
@@ -16,16 +17,46 @@
 
 .author-item input {
   margin-right: 10px; /* Adds space between the checkbox and the label */
+  transform: scale(1.2); /* Slightly increases the checkbox size for better visibility */
+}
+
+.author-item label {
+  font-size: 16px; /* Adjust the label font size for better readability */
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;  /* Ensures there is space between the buttons */
+  margin-top: 10px;  /* Adds space above the buttons */
+  gap: 15px;  /* Adds a fixed gap between the buttons */
 }
 
 .see-all-button {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #007bff;
+  padding: 8px 12px;
+  background-color: #d3d3d3;  /* Light gray color */
+  color: black;
+  border: none;
+  cursor: pointer;
+  text-align: center;  /* Ensures the button text is centered */
+  border-radius: 4px;  /* Rounded corners for a smoother look */
+}
+
+.see-all-button:hover {
+  background-color: #a9a9a9;  /* Darker gray on hover */
+}
+
+.apply-button {
+  padding: 8px 12px;
+  background-color: #a33307;  /* Red color */
   color: white;
   border: none;
   cursor: pointer;
-  text-align: left;  /* Ensures button text is aligned to the left */
+  text-align: center;
+  border-radius: 4px;
+}
+
+.apply-button:hover {
+  background-color: #c0392b;  /* Darker red on hover */
 }
 
 .modal-overlay {
@@ -48,7 +79,7 @@
   max-width: 600px;
   max-height: 80%;
   overflow-y: auto;
-  text-align: left;  /* Ensures all text within the modal is aligned left */
+  text-align: left;
 }
 
 .modal-header {
@@ -59,7 +90,7 @@
 
 .modal-body {
   margin-top: 10px;
-  text-align: left;  /* Aligns the modal body text to the left */
+  text-align: left;
 }
 
 .close-button {
@@ -67,11 +98,34 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  text-align: left;  /* Ensures button is aligned to the left */
+  color: #007bff;  /* Set color to blue for consistency */
+  text-align: right;
+}
+
+.close-button:hover {
+  color: #0056b3; /* Darker blue on hover */
 }
 
 .author-category {
   font-style: italic;
   color: gray;
-  text-align: left;  /* Ensures the author category is aligned to the left */
+}
+
+@media (max-width: 768px) {
+  .author-item label {
+    font-size: 14px;  /* Slightly smaller label for mobile devices */
+  }
+
+  .see-all-button, .apply-button {
+    padding: 6px 10px;  /* Adjust padding for smaller screens */
+  }
+
+  .modal-content {
+    width: 90%;  /* Modal takes up more width on small screens */
+    padding: 15px; /* Less padding for smaller screens */
+  }
+
+  .close-button {
+    font-size: 1.3rem;  /* Smaller close button on mobile */
+  }
 }
