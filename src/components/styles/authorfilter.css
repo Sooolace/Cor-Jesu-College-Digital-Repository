@@ -1,5 +1,4 @@
 .author-filter {
-<<<<<<< HEAD
   padding: 20px;
   font-family: Arial, sans-serif;
 }
@@ -130,9 +129,6 @@
     font-size: 1.3rem;  /* Smaller close button on mobile */
   }
 }
-=======
-    padding: 20px;
-  }
   
   .author-list {
     display: flex;
@@ -198,4 +194,3 @@
     color: gray;
   }
   
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
