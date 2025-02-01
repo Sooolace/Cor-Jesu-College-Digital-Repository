@@ -19,11 +19,7 @@ function Featured() {
                 setFeaturedDocuments(data);
             } catch (error) {
                 setError('Failed to fetch featured documents');
-<<<<<<< HEAD
                 // console.error('API call error:', error); // Remove or comment out this line
-=======
-                console.error('API call error:', error);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
             } finally {
                 setLoading(false);
             }
@@ -123,8 +119,4 @@ function Featured() {
     );
 }
 
-<<<<<<< HEAD
 export default React.memo(Featured);
-=======
-export default React.memo(Featured);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137

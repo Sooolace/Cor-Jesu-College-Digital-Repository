@@ -23,7 +23,6 @@ function Navbar() {
     
                 <div className="dropdown" onMouseEnter={toggleDropdown} onMouseLeave={toggleDropdown}>
                     <Link to="#" className="dropdown-link">
-<<<<<<< HEAD
                         Research Resources
                     </Link>
                     {isDropdownOpen && (
@@ -32,27 +31,12 @@ function Navbar() {
                             <Link to="/Authors">Authors</Link>
                             <Link to="/Keywords">Keywords</Link>
                             <Link to="/Departments">Departments</Link>
-=======
-                        Academics
-                    </Link>
-                    {isDropdownOpen && (
-                        <div className="dropdown-menu">
-                            
-                            <Link to="/Authors">Authors</Link>
-                            <Link to="/Keywords">Keywords</Link>
-                            <Link to="/Departments">Departments</Link>
-                            <Link to="/AllWorks">Capstone & Thesis</Link>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                             <Link to="/resources">Resources</Link>
                         </div>
                     )}
                 </div>
     
                 <Link to="/help">Help</Link>
-<<<<<<< HEAD
-=======
-                <Link to="/login" className="sign-in-btn">Admin Access</Link>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
             </nav>
         </div>
     </header>

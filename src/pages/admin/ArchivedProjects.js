@@ -110,24 +110,6 @@ function ArchivedProjects() {
     setCurrentPage(1);
   };
 
-<<<<<<< HEAD
-=======
-  const toggleSortOrder = () => {
-    const newSortOrder = sortOrder === 'latest' ? 'oldest' : 'latest';
-    setSortOrder(newSortOrder);
-
-    const sortedFilteredProjects = [...filteredProjects].sort((a, b) => {
-      if (newSortOrder === 'latest') {
-        return new Date(b.publication_date) - new Date(a.publication_date);
-      } else {
-        return new Date(a.publication_date) - new Date(b.publication_date);
-      }
-    });
-
-    setFilteredProjects(sortedFilteredProjects);
-  };
-
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
   const indexOfLastProject = currentPage * itemsPerPage;
   const indexOfFirstProject = indexOfLastProject - itemsPerPage;
   const currentProjects = Array.isArray(filteredProjects)
@@ -210,10 +192,7 @@ const handleunarchive = async (projectId) => {
         <div className="text-center mb-4">
           <h2>Archived Projects</h2>
         </div>
-<<<<<<< HEAD
         <div className="author-underline mb-4"></div>
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
         {loading && (
           <div className="text-center mt-4">

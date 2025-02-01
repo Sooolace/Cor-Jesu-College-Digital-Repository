@@ -4,11 +4,8 @@ import { Form, Button, Dropdown, Spinner, Alert } from 'react-bootstrap';
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Bar } from 'recharts';
 import '../user/styles/departmentprojects.css';
 import Breadcrumb from '../../components/BreadCrumb';
-<<<<<<< HEAD
 import PaginationComponent from '../../components/PaginationComponent';
 
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
 function DepartmentProjects() {
   const { departmentName } = useParams();
@@ -280,26 +277,12 @@ function DepartmentProjects() {
                 ))}
               </div>
             )}
-<<<<<<< HEAD
                   {/* Pagination Component */}
                   <PaginationComponent
                     currentPage={currentPage}
                     totalPages={totalPages}  // Correctly passing totalPages
                     handlePageChange={newPage => setCurrentPage(newPage)}
                   />
-=======
-            <div className="pagination mt-3 d-flex justify-content-center">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
-                <Button
-                  key={pageNumber}
-                  onClick={() => paginate(pageNumber)}
-                  className={`btn btn-secondary mx-1 ${currentPage === pageNumber ? 'active' : ''}`}
-                >
-                  {pageNumber}
-                </Button>
-              ))}
-            </div>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
           </div>
         </div>
       </div>

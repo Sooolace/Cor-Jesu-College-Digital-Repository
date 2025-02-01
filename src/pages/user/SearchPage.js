@@ -28,10 +28,6 @@ function SearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [selectedAuthors, setSelectedAuthors] = useState([]);
-<<<<<<< HEAD
-=======
-
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedResearchAreas, setSelectedResearchAreas] = useState([]);
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -40,11 +36,7 @@ function SearchPage() {
   const totalPages = Math.ceil(totalCount / itemsPerPage); // Calculate total pages
 
   // Function to fetch data from API
-<<<<<<< HEAD
   const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = []) => {
-=======
-  const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = []) => {
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     setLoading(true);
     try {
       const endpointMap = {
@@ -65,10 +57,7 @@ function SearchPage() {
         ...(categories.length > 0 && { categories }),
         ...(researchAreas.length > 0 && { researchAreas }),
         ...(topics.length > 0 && { topics }),
-<<<<<<< HEAD
         ...(authors.length > 0 && { authors }), // Include authors in params if any are selected
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
       };
 
       const response = await axios.get(endpoint, { params });
@@ -89,7 +78,6 @@ function SearchPage() {
       searchQuery,
       selectedCategories,
       selectedResearchAreas,
-<<<<<<< HEAD
       selectedTopics,
       selectedAuthors, // Include selected authors
     });
@@ -104,13 +92,6 @@ function SearchPage() {
       selectedAuthors // Pass selected authors to the API call
     );
   }, [searchTrigger, currentPage, selectedAuthors]); // Add selectedAuthors to the dependency array
-=======
-      selectedTopics
-    });
-
-    fetchProjects(searchQuery, searchOption, currentPage, selectedCategories, selectedResearchAreas, selectedTopics);
-  }, [searchTrigger, currentPage]);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
   const handleSearchChange = (query) => {
     setTypedQuery(query);
@@ -144,17 +125,11 @@ function SearchPage() {
     setCurrentPage(1);
     setSearchTrigger((prev) => prev + 1);
   };
-<<<<<<< HEAD
 
   const handleApplyAuthorFilters = (authors) => {
     console.log('Selected Authors:', authors);
     setSelectedAuthors(authors); // Update the selected authors state
     setSearchTrigger((prev) => prev + 1); // Trigger a search update
-=======
-  const handleApplyAuthorFilters = (authors) => {
-    console.log('Selected Authors:', authors);
-    // Implement further filtering logic here
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
   };
 
   // Cleanup effect to ensure no localStorage or cache references
@@ -209,17 +184,6 @@ function SearchPage() {
                   onApply={handleApplyFilters}
                 />
               </div>
-<<<<<<< HEAD
-
-              {/* Author Filter */}
-              <div className="author-filter-wrapper">
-                <AuthorFilter
-                  selectedAuthors={selectedAuthors}
-                  setSelectedAuthors={setSelectedAuthors}
-                  onApply={handleApplyAuthorFilters}
-                />
-              </div>
-=======
       {/* Author Filter */}
       <div className="author-filter-wrapper">
         <AuthorFilter
@@ -228,7 +192,6 @@ function SearchPage() {
           onApply={handleApplyAuthorFilters}
         />
       </div>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
             </div>
 

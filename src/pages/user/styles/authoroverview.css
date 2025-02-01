@@ -104,16 +104,11 @@
 .research-card .description {
   overflow: hidden;
   text-overflow: ellipsis;
-<<<<<<< HEAD
   display: -webkit-box;
   -webkit-line-clamp: 3; /* Change this number to set the number of lines */
   -webkit-box-orient: vertical;
 }
 
-=======
-  white-space: nowrap;
-}
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 /* Pagination Button Styles */
 .btn.btn-secondary {
   background-color: #e9ecef;

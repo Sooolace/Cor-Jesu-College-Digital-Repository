@@ -295,10 +295,6 @@ function EditProject() {
         name="category_id"
         value={formData.category_id}
         onChange={handleCategoryChange}
-<<<<<<< HEAD
-=======
-        required // Make the category field required
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     >
         <option value="">Select a category</option>
         {categories.map(category => (
@@ -318,10 +314,6 @@ function EditProject() {
         name="research_area_id"
         value={formData.research_area_id}
         onChange={handleResearchAreaChange}
-<<<<<<< HEAD
-=======
-        required // Make the research area field required
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     >
         <option value="">Select a research area</option>
         {researchAreas.map(area => (
@@ -341,10 +333,6 @@ function EditProject() {
         name="topic_id"
         value={formData.topic_id}
         onChange={handleChange}
-<<<<<<< HEAD
-=======
-        required // Make the topic field required
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     >
         <option value="">Select a topic</option>
         {topics.map(topic => (

@@ -84,20 +84,12 @@ function Keywords() {
           </div>
         </div>
 
-<<<<<<< HEAD
         {/* Loading and Error Messages */}
         {loading && <Spinner animation="border" />}
         {error && <Alert variant="danger">{error}</Alert>}
 
         {/* Keywords Table */}
         {!loading && filteredKeywords.length > 0 && (
-=======
-        {/* Loading and Error Messages */}  
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        {/* Keywords Table */}
-        {filteredKeywords.length > 0 && (
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
           <Table striped bordered hover style={{ width: '50%', margin: '0 auto' }}>
             <thead>
               <tr>
@@ -133,7 +125,6 @@ function Keywords() {
         )}
 
         {/* Pagination */}
-<<<<<<< HEAD
         {!loading && totalPages > 0 && (
           <Pagination style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
             <Pagination.Prev
@@ -155,34 +146,9 @@ function Keywords() {
             />
           </Pagination>
         )}
-=======
-        <Pagination style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-          <Pagination.Prev
-            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-          />
-          {[...Array(totalPages)].map((_, index) => (
-            <Pagination.Item
-              key={index + 1}
-              active={index + 1 === currentPage}
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </Pagination.Item>
-          ))}
-          <Pagination.Next
-            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          />
-        </Pagination>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
       </div>
     </>
   );
 }
 
-<<<<<<< HEAD
 export default Keywords;
-=======
-export default Keywords;
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137

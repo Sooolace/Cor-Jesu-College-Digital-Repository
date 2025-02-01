@@ -12,7 +12,6 @@ const RecentSubmissions = ({ searchQuery }) => {
   const [expandedIndex, setExpandedIndex] = useState(null); // To track which item is expanded
   const itemsPerPage = 5; // Set the limit for items per page
 
-<<<<<<< HEAD
   // Function to fetch submissions from the API
   const fetchSubmissions = async () => {
     try {
@@ -31,50 +30,12 @@ const RecentSubmissions = ({ searchQuery }) => {
       console.error('Error fetching submissions:', error);
     } finally {
       setIsLoading(false);
-=======
-  // Function to load from localStorage or fetch from the API
-  const loadData = async () => {
-    const cachedData = localStorage.getItem('recentSubmissions');
-    const cacheTimestamp = localStorage.getItem('recentSubmissionsTimestamp');
-
-    // If data is available in cache and it's not expired
-    if (cachedData && cacheTimestamp && new Date().getTime() - cacheTimestamp < 3600000) {
-      // Use cached data if it's less than 1 hour old
-      setSubmissions(JSON.parse(cachedData));
-      setIsLoading(false);
-    } else {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/projects'); // Replace with your actual API endpoint
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-        const data = await response.json();
-
-        // Sort submissions by created_at (timestamp) in descending order
-        const sortedData = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        // Save to localStorage
-        localStorage.setItem('recentSubmissions', JSON.stringify(sortedData));
-        localStorage.setItem('recentSubmissionsTimestamp', new Date().getTime());
-
-        setSubmissions(sortedData);
-      } catch (error) {
-        console.error('Error fetching submissions:', error);
-      } finally {
-        setIsLoading(false);
-      }
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     }
   };
 
   // Fetch data when the component is mounted
   useEffect(() => {
-<<<<<<< HEAD
     fetchSubmissions();
-=======
-    loadData();
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
   }, []); // Empty dependency array to fetch data on initial render
 
   // Pagination Logic

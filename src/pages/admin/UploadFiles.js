@@ -12,7 +12,6 @@ function UploadFiles() {
   const [newUrl, setNewUrl] = useState(''); // State for new URL input
 
   const handleFileChange = (e) => {
-<<<<<<< HEAD
     const uploadedFile = e.target.files[0];
     if (uploadedFile && uploadedFile.type === 'application/pdf') {
       setFile(uploadedFile); // Save the file if it's a PDF
@@ -21,10 +20,6 @@ function UploadFiles() {
     }
   };
   
-=======
-    setFile(e.target.files[0]);
-  };
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
   const handleUrlChange = (e) => {
     setNewUrl(e.target.value);
@@ -61,10 +56,7 @@ function UploadFiles() {
       <div className="upload-container">
         <section id="uploadSection">
           <h2 className="text-center mb-4">Upload Files</h2>
-<<<<<<< HEAD
           <div className="author-underline mb-4"></div>
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
           <form onSubmit={handleConfirmSubmission} className="form-style">
             {/* File Upload */}
             <div className="form-group mb-3">
@@ -73,11 +65,7 @@ function UploadFiles() {
                 type="file"
                 id="file"
                 className="form-control"
-<<<<<<< HEAD
                 accept=".pdf"
-=======
-                accept=".pdf, .doc, .docx"
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                 onChange={handleFileChange}
               />
             </div>

@@ -68,12 +68,8 @@ function DescribeWork() {
       <StepTracker className="step-tracker" />
       <div className="upload-container">
         <section id="uploadSection">
-<<<<<<< HEAD
           <h2 className="text-center mb-4">Describe Work</h2>
           <div className="author-underline mb-4"></div>
-=======
-          <h2 className="text-center mb-4">Describe Item</h2>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
           <form onSubmit={handleSubmit}>
             {/* Project Title */}
             <div className="form-group mb-3">
@@ -221,7 +217,6 @@ function DescribeWork() {
             </div>
 
             {/* Keywords */}
-<<<<<<< HEAD
 <div className="form-group mb-3">
   <label className="form-label">Keywords:</label>
   <div id="keywordsList">
@@ -263,48 +258,6 @@ function DescribeWork() {
   </button>
 </div>
 
-=======
-            <div className="form-group mb-3">
-              <label className="form-label">Keywords:</label>
-              <div className="d-flex gap-2">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter keyword"
-                  value={newKeyword}
-                  onChange={(e) => setNewKeyword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={addKeyword}
-                >
-                  Add
-                </button>
-              </div>
-              {keywordsList.length > 0 && (
-                <div className="keywords-list">
-                  {keywordsList.map((keyword, index) => (
-                    <div key={index} className="input-group mb-2">
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={keyword}
-                        readOnly
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => removeKeyword(index)}
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
             {/* Button Container */}
             <div className="button-container d-flex justify-content-between">

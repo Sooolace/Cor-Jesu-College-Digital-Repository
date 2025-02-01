@@ -18,34 +18,20 @@ function Authors() {
 
   const navigate = useNavigate();
 
-<<<<<<< HEAD
   // Fetch authors only once
   useEffect(() => {
     fetchAuthors();
   }, []);  // Empty dependency array ensures this runs once
-=======
-  useEffect(() => {
-    fetchAuthors();
-  }, []);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
   const fetchAuthors = async () => {
     setLoading(true);
     try {
-<<<<<<< HEAD
       const response = await fetch('/api/authors/logauthor');
       const data = await response.json();
       setAuthors(data);  // Set the authors only once
       setFilteredAuthors(data); // Initially display all authors
 
       // Get unique departments
-=======
-      const response = await fetch('/api/authors');
-      const data = await response.json();
-      setAuthors(data);
-      setFilteredAuthors(data);
-
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
       const uniqueDepartments = [
         ...new Set(data.map((author) => author.category_name).filter(Boolean)),
       ];
@@ -58,14 +44,9 @@ function Authors() {
     }
   };
 
-<<<<<<< HEAD
   // Apply filters on the fetched data
   const handleFilter = () => {
     let filtered = [...authors];  // Work with the original authors array
-=======
-  const handleFilter = () => {
-    let filtered = authors;
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
     if (filterName) {
       filtered = filtered.filter((author) =>
@@ -80,11 +61,7 @@ function Authors() {
     }
 
     setFilteredAuthors(filtered);
-<<<<<<< HEAD
     setCurrentPage(1);  // Reset to first page after filtering
-=======
-    setCurrentPage(1);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
   };
 
   const handleViewClick = (authorName) => {
@@ -129,13 +106,7 @@ function Authors() {
               </Dropdown.Toggle>
 
               <Dropdown.Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
-<<<<<<< HEAD
                 <Dropdown.Item onClick={() => setFilterDepartment('')}>All Departments</Dropdown.Item>
-=======
-                <Dropdown.Item onClick={() => setFilterDepartment('')}>
-                  All Departments
-                </Dropdown.Item>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                 {departments.map((department) => (
                   <Dropdown.Item
                     key={department}
@@ -181,13 +152,8 @@ function Authors() {
           <Table striped bordered hover style={{ width: '75%', margin: '0 auto' }}>
             <thead>
               <tr>
-<<<<<<< HEAD
                 <th style={{ width: '40%' }}>Name</th>
                 <th style={{ width: '40%' }}>Department</th>
-=======
-                <th style={{ width: '30%' }}>Name</th>
-                <th style={{ width: '50%' }}>Department</th>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                 <th style={{ width: '3%' }}>View</th>
               </tr>
             </thead>

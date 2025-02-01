@@ -8,7 +8,6 @@ const MostViewed = ({ searchQuery }) => {
   const [mostViewedDocs, setMostViewedDocs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-<<<<<<< HEAD
   const [error, setError] = useState(null);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const itemsPerPage = 5; // Set the limit for items per page
@@ -34,47 +33,6 @@ const MostViewed = ({ searchQuery }) => {
 
     fetchMostViewed();
   }, []);
-=======
-  const [expandedIndex, setExpandedIndex] = useState(null); // Track which document is expanded
-  const itemsPerPage = 5; // Set the limit for items per page
-
-  // Fetch most viewed documents from your API
-  useEffect(() => { 
-    // Check if data is already stored in localStorage
-    const cachedData = localStorage.getItem('mostViewedDocs');
-    if (cachedData) {
-      // If cached data is found, use it
-      setMostViewedDocs(JSON.parse(cachedData));
-      setIsLoading(false); // No need to load data again
-    } else {
-      // If no cached data, fetch it from the API
-      const fetchMostViewed = async () => {
-        try {
-          setIsLoading(true);
-          const response = await fetch('/api/projects'); // Replace with your actual API endpoint
-          const data = await response.json();
-
-          // Ensure the data is an array and contains the necessary properties
-          if (Array.isArray(data)) {
-            // Sort by view_count in descending order
-            const sortedData = data.sort((a, b) => b.view_count - a.view_count);
-            setMostViewedDocs(sortedData);
-            // Cache the data in localStorage for subsequent visits
-            localStorage.setItem('mostViewedDocs', JSON.stringify(sortedData));
-          } else {
-            console.error('Invalid data format:', data);
-          }
-        } catch (error) {
-          console.error('Error fetching most viewed projects:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      fetchMostViewed();
-    }
-  }, []); // Empty dependency array ensures this effect runs only once when the component mounts
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
   // Pagination Logic
   const totalPages = Math.ceil(mostViewedDocs.length / itemsPerPage);
@@ -82,15 +40,9 @@ const MostViewed = ({ searchQuery }) => {
 
   const handlePagination = (direction) => {
     if (direction === 'next' && currentPage < totalPages) {
-<<<<<<< HEAD
       setCurrentPage((prevPage) => prevPage + 1);
     } else if (direction === 'prev' && currentPage > 1) {
       setCurrentPage((prevPage) => prevPage - 1);
-=======
-      setCurrentPage(prevPage => prevPage + 1);
-    } else if (direction === 'prev' && currentPage > 1) {
-      setCurrentPage(prevPage => prevPage - 1);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     }
   };
 
@@ -109,11 +61,8 @@ const MostViewed = ({ searchQuery }) => {
 
       {isLoading ? (
         <p className="loading-message">Loading...</p>
-<<<<<<< HEAD
       ) : error ? (
         <p className="error-message">{error}</p>
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
       ) : (
         <>
           {mostViewedDocs.length > 0 ? (
@@ -122,11 +71,7 @@ const MostViewed = ({ searchQuery }) => {
                 <table className="results-table">
                   <tbody>
                     {displayedDocs.map((doc, index) => (
-<<<<<<< HEAD
                       <React.Fragment key={doc.project_id}>
-=======
-                      <React.Fragment key={index}>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                         <tr>
                           <td>
                             <a href={`/DocumentOverview/${doc.project_id}`}>
@@ -142,11 +87,7 @@ const MostViewed = ({ searchQuery }) => {
                             </button>
                           </td>
                           <td>
-<<<<<<< HEAD
                             <FontAwesomeIcon icon={faEye} /> {doc.view_count}
-=======
-                            <FontAwesomeIcon icon={faEye} /> {doc.view_count} Views
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                           </td>
                         </tr>
 
@@ -157,11 +98,7 @@ const MostViewed = ({ searchQuery }) => {
                               <div className="details-content">
                                 <p>
                                   <FontAwesomeIcon icon={faUser} />
-<<<<<<< HEAD
                                   {doc.authors ? (
-=======
-                                  {doc.authors && doc.authors.length > 0 ? (
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                                     doc.authors.split(',').map((author, index) => (
                                       <span key={index}>
                                         <a href={`/AuthorOverview/${encodeURIComponent(author.trim())}`} className="author-link">
@@ -187,17 +124,10 @@ const MostViewed = ({ searchQuery }) => {
               </div>
 
               <PaginationComponent
-<<<<<<< HEAD
                 currentPage={currentPage}
                 totalPages={totalPages}
                 handlePageChange={(newPage) => setCurrentPage(newPage)}
               />
-=======
-  currentPage={currentPage}
-  totalPages={totalPages}
-  handlePageChange={newPage => setCurrentPage(newPage)}
-/>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
             </>
           ) : (
             <p className="no-results-message">No most viewed documents found.</p>

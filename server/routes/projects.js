@@ -2,11 +2,8 @@ const express = require('express');
 const pool = require('../db'); // Database connection
 const multer = require('multer'); // For handling file uploads
 const NodeCache = require('node-cache'); // In-memory cache
-<<<<<<< HEAD
 const logActivity = require('../middlewares/logActivity'); // Import log activity middleware
 const path = require('path');
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
 const router = express.Router();
 
@@ -31,7 +28,6 @@ const parseStudyUrl = (study_url) => {
 };
 
 // POST - Add a new project
-<<<<<<< HEAD
 router.post('/upload', upload.single('file_path'), async (req, res) => { 
     const { title, description_type, abstract, publication_date, study_url, category_id, keywords } = req.body;
     const { file } = req;
@@ -43,27 +39,14 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
 
     try {
         // Ensure a file was uploaded
-=======
-router.post('/', upload.single('file_path'), async (req, res) => {
-    const { title, description_type, abstract, publication_date, study_url, category_id, keywords } = req.body;
-    const { file } = req;
-
-    try {
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
         if (!file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-<<<<<<< HEAD
         const filePath = file.path; // Path to the uploaded file
         const studyUrlString = parseStudyUrl(study_url); // Parse study URL if provided
 
         // Insert project into the database
-=======
-        const filePath = file.path;
-        const studyUrlString = parseStudyUrl(study_url);
-
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
         const query = `
             INSERT INTO projects (title, description_type, abstract, publication_date, file_path, study_url, category_id)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -73,7 +56,6 @@ router.post('/', upload.single('file_path'), async (req, res) => {
 
         const projectId = result.rows[0].project_id;
 
-<<<<<<< HEAD
         // Insert keywords if provided
         if (keywords && Array.isArray(keywords) && keywords.length > 0) {
             const insertKeywordsQuery = `
@@ -81,25 +63,16 @@ router.post('/', upload.single('file_path'), async (req, res) => {
                 VALUES ($1, $2)
             `;
             const keywordInsertPromises = keywords.map((keyword) => 
-=======
-        if (keywords && Array.isArray(keywords) && keywords.length > 0) {
-            const insertKeywordsQuery = `INSERT INTO keywords (project_id, keyword) VALUES ($1, $2)`;
-            const keywordInsertPromises = keywords.map((keyword) =>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
                 pool.query(insertKeywordsQuery, [projectId, keyword])
             );
             await Promise.all(keywordInsertPromises);
         }
 
-<<<<<<< HEAD
         // Respond with the newly created project, including the file_path
         res.status(201).json({
             ...result.rows[0],
             file_path: filePath,  // Add file_path to the response
         });
-=======
-        res.status(201).json(result.rows[0]);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     } catch (error) {
         console.error('Error adding project:', error.message);
         res.status(500).json({ error: 'Server error' });
@@ -107,7 +80,6 @@ router.post('/', upload.single('file_path'), async (req, res) => {
 });
 
 
-<<<<<<< HEAD
 // GET - Fetch all projects (excluding archived projects) without cache
 router.get('/', async (req, res) => {
     const searchQuery = `
@@ -148,10 +120,6 @@ router.get('/', async (req, res) => {
 
 // GET - Fetch all project by recent
 router.get('/projects/recent', async (req, res) => {
-=======
-// GET - Fetch all projects (excluding archived projects)
-router.get('/', async (req, res) => {
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     const cachedProjects = cache.get('allProjectsCache');
     if (cachedProjects) {
         console.log('Serving from cache');
@@ -184,7 +152,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 // GET - Fetch most-viewed projects (excluding archived projects) without cache
 router.get('/mostviewed', async (req, res) => {
     const searchQuery = `
@@ -215,8 +182,6 @@ router.get('/mostviewed', async (req, res) => {
 
 
 //GET ARCHIVED PROJECTS
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 router.get('/archived-projects', async (req, res) => {
     try {
         const query = `
@@ -256,7 +221,6 @@ GROUP BY
     }
 });
 
-<<<<<<< HEAD
 // GET - Fetch a single project by project_id
 router.get('/:project_id', async (req, res, next) => {
     const { project_id } = req.params;
@@ -281,29 +245,11 @@ router.get('/:project_id', async (req, res, next) => {
             res.status(200).json(project);  // Send the project data as a response
         });
 
-=======
-
-
-
-
-
-// GET - Fetch a single project by project_id
-router.get('/:project_id', async (req, res) => {
-    const { project_id } = req.params;
-    try {
-        const result = await pool.query('SELECT * FROM projects WHERE project_id = $1', [project_id]);
-        if (!result.rows.length) return res.status(404).json({ error: 'Project not found' });
-        res.status(200).json(result.rows[0]);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     } catch (error) {
         console.error('Error retrieving project:', error);
         res.status(500).json({ error: 'Failed to retrieve project' });
     }
 });
-<<<<<<< HEAD
-=======
-
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 // PUT - Archive project by project_id
 router.put('/:project_id/archive', async (req, res) => {
     const { project_id } = req.params;
@@ -429,7 +375,6 @@ router.post('/:project_id/authors', async (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 // GET - Fetch all projects (excluding archived projects)
 router.get('/', async (req, res) => {
     const cachedProjects = cache.get('allProjectsCache');
@@ -439,17 +384,6 @@ router.get('/', async (req, res) => {
     }
 
     const searchQuery = `
-=======
-// GET - Fetch top-viewed projects with caching
-router.get('/top-viewed', async (req, res) => {
-    const cachedTopViewed = cache.get('topViewedCache');
-    if (cachedTopViewed) {
-        console.log('Serving from cache');
-        return res.status(200).json(cachedTopViewed); // Return cached data if available
-    }
-
-    const topViewedQuery = `
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
         SELECT p.*, 
                STRING_AGG(DISTINCT a.name, ', ') AS authors, 
                STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
@@ -458,7 +392,6 @@ router.get('/top-viewed', async (req, res) => {
         LEFT JOIN authors a ON pa.author_id = a.author_id 
         LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
         LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
-<<<<<<< HEAD
         WHERE p.is_archived = false
         GROUP BY p.project_id 
         ORDER BY p.publication_date DESC;
@@ -503,27 +436,6 @@ router.get('/most_viewed', async (req, res) => {
 });
 
 
-=======
-        GROUP BY p.project_id 
-        ORDER BY p.view_count DESC
-        LIMIT 10
-    `;
-
-    try {
-        // Execute the query to retrieve top-viewed projects
-        const result = await pool.query(topViewedQuery);
-
-        // Cache the result for future requests
-        cache.set('topViewedCache', result.rows);
-
-        res.status(200).json(result.rows);
-    } catch (error) {
-        console.error('Error fetching top-viewed projects:', error);
-        res.status(500).json({ error: 'Failed to retrieve top-viewed projects' });
-    }
-});
-
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 // DELETE - Delete project by project_id
 router.delete('/:project_id', async (req, res) => {
     const { project_id } = req.params;
@@ -590,7 +502,6 @@ router.get('/departments/:departmentName', async (req, res) => {
         `;
         
         const result = await pool.query(query, [fullDepartmentName]);
-<<<<<<< HEAD
 
         // Log the activity (User fetched projects for the department)
         req.activity = `User fetched projects for ${fullDepartmentName}`;
@@ -604,19 +515,13 @@ router.get('/departments/:departmentName', async (req, res) => {
             res.status(200).json(result.rows);
         });
 
-=======
-        res.status(200).json(result.rows);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     } catch (error) {
         console.error('Error retrieving projects by department:', error);
         res.status(500).json({ error: 'Failed to retrieve projects' });
     }
 });
 
-<<<<<<< HEAD
 
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 // GET - Fetch all projects (excluding archived projects) with featured projects at the top
 router.get('/projects/featured-proj', async (req, res) => {
     try {
@@ -638,10 +543,6 @@ router.get('/projects/featured-proj', async (req, res) => {
 
         const result = await pool.query(searchQuery);
 
-<<<<<<< HEAD
-=======
-        console.log('Database query result:', result.rows);
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
 
         res.status(200).json(result.rows);
     } catch (error) {
@@ -674,11 +575,6 @@ router.get('/projects/active-featured', async (req, res) => {
 
         const result = await pool.query(searchQuery);
 
-<<<<<<< HEAD
-=======
-        console.log('Database query result:', result.rows);
-
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Database query error:', error.message);

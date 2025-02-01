@@ -2,7 +2,6 @@ import React from 'react';
 import './styles/PaginationComponent.css';
 
 const PaginationComponent = ({ currentPage, totalPages, handlePageChange }) => {
-<<<<<<< HEAD
   
   // Function to generate page items with ellipses
   const renderPageItems = () => {
@@ -48,12 +47,6 @@ const PaginationComponent = ({ currentPage, totalPages, handlePageChange }) => {
 
     // Loop through and add page numbers
     for (let i = startPage; i <= endPage; i++) {
-=======
-
-  const renderPageItems = () => {
-    const items = [];
-    for (let i = 1; i <= totalPages; i++) {
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
       items.push(
         <li
           key={i}
@@ -64,7 +57,6 @@ const PaginationComponent = ({ currentPage, totalPages, handlePageChange }) => {
         </li>
       );
     }
-<<<<<<< HEAD
 
     // Add ellipsis if there are more pages after the range
     if (endPage < totalPages - 1) {
@@ -98,8 +90,6 @@ const PaginationComponent = ({ currentPage, totalPages, handlePageChange }) => {
       );
     }
 
-=======
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
     return items;
   };
 
@@ -107,31 +97,7 @@ const PaginationComponent = ({ currentPage, totalPages, handlePageChange }) => {
     <div className="pagination-container">
       <nav aria-label="Page navigation example">
         <ul className="pagination">
-<<<<<<< HEAD
           {renderPageItems()}
-=======
-          {/* Previous Button */}
-          <li
-            className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}
-            onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-          >
-            <span className="page-link" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </span>
-          </li>
-
-          {renderPageItems()}
-
-          {/* Next Button */}
-          <li
-            className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
-            onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-          >
-            <span className="page-link" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </span>
-          </li>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
         </ul>
       </nav>
     </div>

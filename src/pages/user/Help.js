@@ -4,11 +4,7 @@ import './styles/help.css'; // You can add your CSS for styling the page
 function Help() {
   return (
     <div className="help-container">
-<<<<<<< HEAD
       <h3>Welcome to the Campus Digital Repository Help Page</h3>
-=======
-      <h2>Welcome to the Campus Digital Repository Help Page</h2>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
       <div className="author-underline"></div>
       <section>
         <h3>What is the Campus Digital Repository?</h3>
@@ -24,10 +20,6 @@ function Help() {
         <h3>User Roles</h3>
         <ul>
           <li><strong>Users:</strong> Can search, view, and download documents.</li>
-<<<<<<< HEAD
-=======
-          <li><strong>Alumni:</strong> Can search, view, and download documents. Alumni have the same access as students.</li>
->>>>>>> dc92e3ca00b33cf3b6ff8dc3d822cdef96c45137
           <li><strong>Research Publication Office (RPO):</strong> The only group with permission to upload new research papers, projects, and scholarly content. RPO staff are responsible for reviewing and adding submissions to the repository.</li>
         </ul>
       </section>
