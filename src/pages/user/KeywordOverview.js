@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import Table from 'react-bootstrap/Table';
+import { useParams, useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 import Breadcrumb from '../../components/BreadCrumb';
+import PaginationComponent from '../../components/PaginationComponent';
 import './styles/keywordoverview.css';
 
 function KeywordOverview() {
-  const { keywordId } = useParams();  // Extract keyword name from the URL
+  const { keywordId } = useParams();
   const [keyword, setKeyword] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +25,6 @@ function KeywordOverview() {
       }
 
       try {
-        // Step 1: Fetch keyword by name
         const keywordResponse = await fetch(`/api/keywords/by-name/${encodeURIComponent(keywordId)}`);
         if (!keywordResponse.ok) {
           throw new Error(`HTTP error! status: ${keywordResponse.status}`);
@@ -31,7 +32,6 @@ function KeywordOverview() {
         const keywordData = await keywordResponse.json();
         setKeyword(keywordData);
 
-        // Step 2: Fetch projects associated with the keyword
         const projectsResponse = await fetch(`/api/keywords/${keywordData.keyword_id}/projects`);
         if (!projectsResponse.ok) {
           throw new Error(`HTTP error! status: ${projectsResponse.status}`);
@@ -54,7 +54,9 @@ function KeywordOverview() {
     };
 
     fetchKeywordDetails();
-  }, [keywordId]);  // This will rerun when `keywordName` changes
+  }, [keywordId]);
+
+  const totalPages = Math.ceil(projects.length / itemsPerPage);
 
   return (
     <>
@@ -63,60 +65,64 @@ function KeywordOverview() {
           items={[
             { label: 'Home', link: '/' },
             { label: 'Keywords', link: '/keywords' },
-            { label: keyword?.keyword || 'Loading...', link: `/Departments/Keywords` } // Fallback while loading
+            { label: keyword?.keyword || 'Loading...', link: `/Departments/Keywords` }
           ]}
         />
       </div>
 
       <div className="keyword-overview-container container mt-4">
-        
-        {error && <Alert variant="danger">{error}</Alert>} {/* Display error message if any */}
-
-        {keyword && (
-          <>
-          <h4 className="text-center">
-            Projects tagged with "{keyword.keyword}"
-          </h4>
-          
-          <div className="author-underline"></div>
-          {loading && (
+        {error && <Alert variant="danger">{error}</Alert>}
+        {loading && (
           <div className="text-center mt-4">
             <Spinner animation="border" role="status" />
-            <span className="visually-hidden">Loading...</span>
             <p>Loading keyword details...</p>
           </div>
         )}
-            <div className="table-with-back-button">
-              {projects.length > 0 ? (
-                <Table striped bordered hover responsive className="mt-3">
-  <thead>
-    <tr>
-      <th style={{ width: '30%' }}>Project Title</th>
-      <th style={{ width: '50%' }}>Description</th>
-      <th style={{ width: '5%' }}>Year</th>
-    </tr>
-  </thead>
-  <tbody>
-    {projects.map((project) => (
-      <tr key={project.project_id}>
-        <td>
-          <Link to={`/DocumentOverview/${project.project_id}`}>
-            {project.title}
-          </Link>
-        </td>
-        <td className="table-column table-column-description">
-          {project.description}
-        </td>
-        <td>{project.year}</td>
-      </tr>
-    ))}
-  </tbody>
-</Table>
 
+        {keyword && (
+          <>
+            <h4 className="text-center">Studies tagged with "{keyword.keyword}"</h4>
+            <div className="author-underline"></div>
+            <div className="search-results">
+              {projects.length > 0 ? (
+                projects
+                  .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                  .map((project) => (
+                    <div key={project.project_id} className="search-result-item mb-4">
+                      <div className="d-flex align-items-start">
+                        <div>
+                          <a
+                            href="#"
+                            onClick={() => navigate(`/DocumentOverview/${project.project_id}`)}
+                            style={{ fontSize: '18px', fontWeight: 'bold', color: '#007bff' }}
+                          >
+                            {project.title}
+                          </a>
+                          <div style={{ fontStyle: 'italic', color: '#6c757d' }}>{project.year}</div>
+                          <p
+                            style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 3,
+                            }}
+                          >
+                            {project.description || 'No description available.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
               ) : (
-                <p>No projects found for this keyword.</p>
+                <p className="text-center">No projects found for this keyword.</p>
               )}
             </div>
+            <PaginationComponent
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handlePageChange={newPage => setCurrentPage(newPage)}
+            />
           </>
         )}
       </div>

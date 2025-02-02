@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Pagination, Spinner, Form, Alert, Button } from 'react-bootstrap';
-import { CiViewList } from "react-icons/ci";
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/BreadCrumb';
+import PaginationComponent from '../../components/PaginationComponent';
 
 function Keywords() {
   const [keywords, setKeywords] = useState([]);
@@ -12,6 +12,7 @@ function Keywords() {
   const itemsPerPage = 10;
   const [filterName, setFilterName] = useState('');
   const [filteredKeywords, setFilteredKeywords] = useState([]);
+  const [selectedLetter, setSelectedLetter] = useState('');
 
   const navigate = useNavigate();
 
@@ -44,6 +45,21 @@ function Keywords() {
     setCurrentPage(1);
   };
 
+  const handleLetterClick = (letter) => {
+    setSelectedLetter(letter);
+    const filteredByLetter = keywords.filter((keyword) =>
+      keyword.keyword.toLowerCase().startsWith(letter.toLowerCase())
+    );
+    setFilteredKeywords(filteredByLetter);
+    setCurrentPage(1);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleFilter();
+    }
+  };
+
   const handleViewClick = (keywordName) => {
     // Use encodeURIComponent to handle special characters in keyword names
     navigate(`/KeywordOverview/${encodeURIComponent(keywordName)}`);
@@ -64,21 +80,48 @@ function Keywords() {
         </div>
         <div className="author-underline"></div>
 
+{/* A-Z Filter */}
+<div className="text-center mb-3">
+  <div>
+    {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'].map((letter) => (
+      <span
+        key={letter}
+        onClick={() => handleLetterClick(letter)}
+        style={{
+          margin: '10px',
+          fontWeight: selectedLetter === letter ? 'bold' : 'normal',
+          color: '#a33307',  // Color for the letters
+          cursor: 'pointer', // Make it clickable
+          textDecoration: selectedLetter === letter ? 'underline' : 'none', // Underline selected letter
+        }}
+      >
+        {letter}
+      </span>
+    ))}
+  </div>
+</div>
+
+
         {/* Search Bar */}
         <div
-          className="d-flex justify-content-between align-items-center mb-3"
+          className="d-flex justify-content-center mb-3"
           style={{ width: '50%', margin: '0 auto' }}
         >
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center" style={{ width: '60%' }}>
             <Form.Control
               type="text"
-              style={{ width: '400px' }}
+              style={{ width: 'calc(100% - 120px)' }}
               className="me-2"
               placeholder="Search by Keyword"
               value={filterName}
               onChange={(e) => setFilterName(e.target.value)}
+              onKeyPress={handleKeyPress} // Trigger search on Enter key press
             />
-            <Button className="btn-primary" onClick={handleFilter}>
+            <Button
+              className="btn-primary"
+              onClick={handleFilter}
+              style={{ backgroundColor: '#a33307', borderColor: '#a33307' }} // Change button color
+            >
               Filter
             </Button>
           </div>
@@ -88,13 +131,23 @@ function Keywords() {
         {loading && <Spinner animation="border" />}
         {error && <Alert variant="danger">{error}</Alert>}
 
-        {/* Keywords Table */}
+        {/* Display Keywords */}
         {!loading && filteredKeywords.length > 0 && (
-          <Table striped bordered hover style={{ width: '50%', margin: '0 auto' }}>
+          <Table
+            striped
+            hover
+            style={{
+              width: '60%',
+              margin: '0 auto',
+              borderLeft: 'none',
+              borderRight: 'none',
+              borderTop: '1px solid #dee2e6',
+              borderBottom: '1px solid #dee2e6',
+            }}
+          >
             <thead>
               <tr>
-                <th style={{ width: '30%' }}>Keyword</th>
-                <th style={{ width: '1%' }}>Action</th>
+                <th style={{ textAlign: 'left' }}>Keyword</th>
               </tr>
             </thead>
             <tbody>
@@ -102,50 +155,25 @@ function Keywords() {
                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                 .map((keyword) => (
                   <tr key={keyword.keyword_id}>
-                    <td>{keyword.keyword}</td>
                     <td>
-                      {/* View Button */}
-                      <CiViewList
-                        size={30}
-                        title="View"
-                        style={{
-                          cursor: 'pointer',
-                          color: 'white',
-                          backgroundColor: '#007bff',
-                          borderRadius: '5px',
-                          padding: '2px',
-                        }}
-                        onClick={() => handleViewClick(keyword.keyword)} 
-                      />
+                      <a
+                        href="#"
+                        onClick={() => handleViewClick(keyword.keyword)}
+                        style={{ color: '#007bff', textDecoration: 'underline' }}
+                      >
+                        {keyword.keyword} [{keyword.count}]
+                      </a>
                     </td>
                   </tr>
                 ))}
             </tbody>
           </Table>
         )}
-
-        {/* Pagination */}
-        {!loading && totalPages > 0 && (
-          <Pagination style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Pagination.Prev
-              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            />
-            {[...Array(totalPages)].map((_, index) => (
-              <Pagination.Item
-                key={index + 1}
-                active={index + 1 === currentPage}
-                onClick={() => setCurrentPage(index + 1)}
-              >
-                {index + 1}
-              </Pagination.Item>
-            ))}
-            <Pagination.Next
-              onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            />
-          </Pagination>
-        )}
+        <PaginationComponent
+          currentPage={currentPage}
+          totalPages={totalPages}
+          handlePageChange={newPage => setCurrentPage(newPage)}
+        />
       </div>
     </>
   );

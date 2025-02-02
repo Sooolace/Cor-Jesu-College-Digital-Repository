@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Pagination from 'react-bootstrap/Pagination';
 import Spinner from 'react-bootstrap/Spinner';
@@ -8,7 +7,6 @@ import Form from 'react-bootstrap/Form';
 import { CiViewList } from "react-icons/ci";
 import Breadcrumb from '../../components/BreadCrumb';
 import PaginationComponent from '../../components/PaginationComponent';
-
 
 function AllWorks() {
   const navigate = useNavigate();
@@ -131,18 +129,22 @@ function AllWorks() {
     navigate(`/DocumentOverview/${projectId}`);
   };
 
+  // Trigger handleFilter when 'Enter' is pressed
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleFilter();
+    }
+  };
+
   return (
     <>
       <div className="breadcrumb-container">
         <Breadcrumb
-          items={[
-            { label: 'Home', link: '/' },
-            { label: 'Theses & Disserations', link: '/allworks' },
-          ]}
+          items={[{ label: 'Home', link: '/' }, { label: 'Theses & Disserations', link: '/allworks' }]}
         />
       </div>
       <div className="total-works-container container mt-4">
-      <div className="text-center mb-4">
+        <div className="text-center mb-4">
           <h3 className="display-8">Studies</h3>
         </div>
         <div className="author-underline"></div>
@@ -153,6 +155,7 @@ function AllWorks() {
             placeholder="Search by Title"
             value={filterTitle}
             onChange={(e) => setFilterTitle(e.target.value)}
+            onKeyDown={handleKeyPress} // Listen for Enter key press
           />
           <Form.Select
             className="w-25 me-2"
@@ -167,7 +170,13 @@ function AllWorks() {
             ))}
           </Form.Select>
 
-          <Button variant="primary" onClick={handleFilter}>Filter</Button>
+          <Button
+            variant="primary"
+            onClick={handleFilter}
+            style={{ backgroundColor: '#a33307', borderColor: '#a33307' }} // Change color here
+          >
+            Filter
+          </Button>
         </div>
 
         {loading && (
@@ -181,53 +190,70 @@ function AllWorks() {
 
         {currentProjects.length > 0 && (
           <>
-            <Table striped bordered hover className="mt-3">
-              <thead>
-                <tr>
-                  <th style={{ width: '50%' }}>Title</th>
-                  <th style={{ width: '20%' }}>Authors</th>
-                  <th
-                    style={{ width: '20%', cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
-                    onClick={toggleSortOrder}
-                  >
-                    Date Published {sortOrder === 'latest' ? '(Newest)' : '(Oldest)'}
-                  </th>
-                  <th style={{ width: '2%' }}>View</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentProjects.map((project) => (
-                  <tr key={project.project_id}>
-                    <td>{project.title}</td>
-                    <td>{removeDuplicateAuthors(project.authors).join(", ") || 'N/A'}</td>
-                    <td>{new Date(project.publication_date).toLocaleDateString() || 'N/A'}</td>
-                    <td>
-                      <span
-                        onClick={() => goToDocumentOverview(project.project_id)}
+            <div className="search-results">
+              {currentProjects.map((project) => (
+                <div key={project.project_id} className="search-result-item mb-4">
+                  <div className="d-flex align-items-start" style={{ flexWrap: 'nowrap' }}>
+                    {project.cover_image ? (
+                      <img
+                        src={project.cover_image}
+                        alt="Cover"
                         style={{
-                          cursor: 'pointer',
-                          color: 'white',
-                          backgroundColor: '#007bff',
-                          borderRadius: '5px',
-                          padding: '3px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                          maxWidth: '80px', // Limit max width
+                          height: '120px',  // Set a fixed height
+                          objectFit: 'cover', // Ensure the image covers the area without stretching
+                          marginRight: '20px',
                         }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100px',
+                          height: '150px',
+                          backgroundColor: '#f4f4f4',
+                          marginRight: '20px',
+                        }}
+                      ></div>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <a
+                        href="#"
+                        onClick={() => goToDocumentOverview(project.project_id)}
+                        style={{ fontSize: '18px', fontWeight: 'bold', color: '#007bff' }}
                       >
-                        <CiViewList size={25} title="View" />
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-                  {/* Pagination Component */}
-                  <PaginationComponent
-                    currentPage={currentPage}
-                    totalPages={totalPages}  // Correctly passing totalPages
-                    handlePageChange={newPage => setCurrentPage(newPage)}
-                  />
+                        {project.title}
+                      </a>
+                      <div style={{ fontStyle: 'italic', color: '#6c757d' }}>
+                        {removeDuplicateAuthors(project.authors).join(', ') || 'N/A'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                        {new Date(project.publication_date).toLocaleDateString() || 'N/A'}
+                      </div>
+                      <div style={{ marginTop: '10px', color: '#333' }}>
+                        <p
+                          style={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitBoxOrient: 'vertical',
+                            WebkitLineClamp: 3, // Limits to 3 lines of text
+                            marginBottom: '0px',
+                          }}
+                        >
+                          {project.abstract || 'No abstract available.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <PaginationComponent
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handlePageChange={(newPage) => setCurrentPage(newPage)}
+            />
           </>
         )}
       </div>

@@ -20,6 +20,7 @@ const AuthorFilter = ({ selectedAuthors, setSelectedAuthors, onApply }) => {
       })
       .catch((error) => {
         console.error('Error fetching authors:', error);
+        // Consider adding user feedback here, like a message or alert
       });
   }, []);
 
@@ -71,7 +72,7 @@ const AuthorFilter = ({ selectedAuthors, setSelectedAuthors, onApply }) => {
         ))}
       </div>
 
-      {/* Apply Filters Button outside the modal */}
+      {/* Apply Filters Button */}
       <button className="apply-button" onClick={handleApplyFilters}>
         Apply Filters
       </button>

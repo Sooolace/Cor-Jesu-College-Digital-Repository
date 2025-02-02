@@ -39,9 +39,10 @@ function Departments() {
         <div className="home-page">
             {/* Main content */}
             <div className="centered-content departments-container">
-                <h3>Research Departments</h3>
-                <div className="author-underline"></div>
-
+            <div className="text-center mb-4">
+            <h3 className="display-8">Departments</h3>
+            </div>
+            <div className="author-underline"></div>
                 <div className="departments-grid-container">
                     {departments.map((department) => (
                         <div className="departments-grid-item" key={department.id}>

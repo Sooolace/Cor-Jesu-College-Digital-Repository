@@ -213,9 +213,9 @@ function SearchPage() {
                   {/* Mapping through search results */}
                   {filteredData.map((project) => (
                     <div key={project.project_id} className="research-card">
-                      <Link to={`/DocumentOverview/${project.project_id}`} className="title-link">
-                        <h4>{project.title}</h4>
-                      </Link>
+  <Link to={`/DocumentOverview/${project.project_id}`} className="title-link">
+    <h4 style={{ color: '#007bff' }}>{project.title}</h4>
+  </Link>
 
                       {/* Display Authors */}
                       <p className="category">

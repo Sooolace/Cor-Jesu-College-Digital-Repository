@@ -71,16 +71,19 @@ router.get('/:project_id', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT keywords.* FROM keywords ' +
+            'SELECT keywords.*, COUNT(project_keywords.keyword_id) AS count ' + // Add the count
+            'FROM keywords ' +
             'INNER JOIN project_keywords ON keywords.keyword_id = project_keywords.keyword_id ' +
-            'WHERE project_keywords.project_id = $1',
+            'WHERE project_keywords.project_id = $1 ' +
+            'GROUP BY keywords.keyword_id', // Group by keyword_id to get the count
             [projectId]
         );
-        res.json(result.rows); // Return the list of keywords
+        res.json(result.rows); // Return the list of keywords with count
     } catch (error) {
         console.error('Error executing query', error.stack);
         res.status(500).send('Server error');
     }
 });
+
 
 module.exports = router;

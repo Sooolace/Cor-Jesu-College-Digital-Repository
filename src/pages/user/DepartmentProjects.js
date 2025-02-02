@@ -6,7 +6,6 @@ import '../user/styles/departmentprojects.css';
 import Breadcrumb from '../../components/BreadCrumb';
 import PaginationComponent from '../../components/PaginationComponent';
 
-
 function DepartmentProjects() {
   const { departmentName } = useParams();
   const navigate = useNavigate();
@@ -109,6 +108,27 @@ function DepartmentProjects() {
 
   if (loading) return <div className="loading-message">Loading...</div>;
   if (error) return <Alert variant="danger">{error}</Alert>;
+
+  const removeDuplicateAuthors = (authors) => {
+    if (!Array.isArray(authors)) {
+      if (typeof authors === 'string') {
+        authors = authors.split(',').map(name => name.trim());
+      } else {
+        return [];
+      }
+    }
+
+    const normalizedAuthors = authors
+      .map(name => name.trim().toLowerCase())
+      .filter((value, index, self) => self.indexOf(value) === index)
+      .map(name =>
+        name.split(' ')
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(' ')
+      );
+
+    return normalizedAuthors;
+  };
 
   return (
     <>
@@ -257,21 +277,58 @@ function DepartmentProjects() {
             ) : (
               <div className="projects-list">
                 {currentProjects.map((project) => (
-                  <div key={project.project_id} className="project-card">
-                    <h3
-                      className="project-title"
-                      onClick={() => navigate(`/DocumentOverview/${project.project_id}`)}
-                    >
-                      {project.title}
-                    </h3>
-                    <div className="project-meta">
-                      <p className="project-authors">
-                        <i className="fas fa-users"></i> {project.authors}
-                      </p>
-                      <p className="project-date">
-                        <i className="fas fa-calendar-alt"></i>{' '}
-                        {new Date(project.publication_date).toLocaleDateString()}
-                      </p>
+                  <div key={project.project_id} className="search-result-item mb-4">
+                    <div className="d-flex align-items-start" style={{ flexWrap: 'nowrap' }}>
+                      {project.cover_image ? (
+                        <img
+                          src={project.cover_image}
+                          alt="Cover"
+                          style={{
+                            maxWidth: '80px', // Limit max width
+                            height: '120px',  // Set a fixed height
+                            objectFit: 'cover', // Ensure the image covers the area without stretching
+                            marginRight: '20px',
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '100px',
+                            height: '150px',
+                            backgroundColor: '#f4f4f4',
+                            marginRight: '20px',
+                          }}
+                        ></div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <a
+                          href="#"
+                          onClick={() => navigate(`/DocumentOverview/${project.project_id}`)}
+                          style={{ fontSize: '18px', fontWeight: 'bold', color: '#007bff' }}
+                        >
+                          {project.title}
+                        </a>
+                        <div style={{ fontStyle: 'italic', color: '#6c757d' }}>
+                          {removeDuplicateAuthors(project.authors).join(', ') || 'N/A'}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                          {new Date(project.publication_date).toLocaleDateString() || 'N/A'}
+                        </div>
+                        <div style={{ marginTop: '10px', color: '#333' }}>
+                          <p
+                            style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 3, // Limits to 3 lines of text
+                              marginBottom: '0px',
+                            }}
+                          >
+                            {project.abstract || 'No abstract available.'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
