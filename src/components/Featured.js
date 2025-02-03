@@ -32,7 +32,7 @@ function Featured() {
         return (
             <section className="featured-section">
                 <h2 className="section-title">Featured Documents</h2>
-                <p>Loading...</p>
+                <div className="loading-placeholder">Loading...</div> {/* Add loading placeholder */}
             </section>
         );
     }

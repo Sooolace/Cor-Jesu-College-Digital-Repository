@@ -83,6 +83,11 @@ nav .sign-in-btn:hover {
   text-decoration: underline;
 }
 
+.dropdown-arrow {
+  margin-left: 5px;
+  font-size: 0.8em;
+}
+
 .dropdown-menu {
   display: none;
   position: absolute;

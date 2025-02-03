@@ -31,14 +31,14 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
 
         {/* Input field with onKeyPress event */}
         <input
-  type="text"
-  id="searchBar"
-  className="searchBar"
-  placeholder="Search for..."
-  value={query}
-  onChange={(e) => onChange(e.target.value)}
-  onKeyPress={handleKeyPressInput}
-/>
+          type="text"
+          id="searchBar"
+          className="searchBar"
+          placeholder="Search for..."
+          value={query}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyPress={handleKeyPressInput}
+        />
 
         {/* Search button */}
         <button className="btn-search" onClick={onSearch}>

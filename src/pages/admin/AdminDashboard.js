@@ -113,12 +113,11 @@ function AdminDashboard() {
       <div className="centered-content">
         <div className="metrics">
           {/* Metric for Total Works */}
-          <MetricItem title="Total Works" link="/admin/TotalWorks" value={totalProjects} icon={faFolderOpen} />
-          <MetricItem title="Total Authors" link="/admin/TotalAuthors" value={totalAuthors} icon={faUserFriends} />
+          <MetricItem title="Manage Works" link="/admin/TotalWorks" value={totalProjects} icon={faFolderOpen} />
+          <MetricItem title="Manage Authors" link="/admin/TotalAuthors" value={totalAuthors} icon={faUserFriends} />
           <MetricItem title="Manage Featured" link="/Featured_Projects" value={totalDepartments} icon={faBuilding} />
-          <MetricItem title="Keywords" value={totalKeywords} icon={faTags} />
+          <MetricItem title="Manage Keywords" link="/admin/TotalKeywords" value={totalKeywords} icon={faTags} />
           <MetricItem title="Archived Works" link="/Archived_Projects"value={archivedProjectsCount}icon={faTags} />
-
         </div>
 
         <div className="two-column-section">

@@ -4,6 +4,8 @@ import { Table, Spinner, Alert, Form, Button, Dropdown } from 'react-bootstrap';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import './styles/authoroverview.css';
 import Breadcrumb from '../../components/BreadCrumb';
+import PaginationComponent from '../../components/PaginationComponent';
+
 
 function AuthorOverview() {
   const { authorId } = useParams();
@@ -278,30 +280,59 @@ function AuthorOverview() {
         )}
 
 {currentWorks.length > 0 && currentWorks.map((work) => (
-  <div key={work.project_id} className="research-card">
-    <Link to={`/DocumentOverview/${work.project_id}`} className="title-link">
-      <h4>{work.title}</h4>
-    </Link>
-    <p className="description truncate">
-      {work.description}
-    </p>
-    <p><strong>Year:</strong> {work.year}</p>
+  <div key={work.project_id} className="search-result-item mb-4">
+    <div className="d-flex align-items-start" style={{ flexWrap: 'nowrap' }}>
+      {work.cover_image ? (
+        <img
+          src={work.cover_image}
+          alt="Cover"
+          style={{
+            maxWidth: '80px', // Limit max width
+            height: '120px',  // Set a fixed height
+            objectFit: 'cover', // Ensure the image covers the area without stretching
+            marginRight: '20px',
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: '100px',
+            height: '150px',
+            backgroundColor: '#f4f4f4',
+            marginRight: '20px',
+          }}
+        ></div>
+      )}
+      <div style={{ flex: 1 }}>
+        <Link to={`/DocumentOverview/${work.project_id}`} className="title-link" style={{ fontSize: '18px', fontWeight: 'bold', color: '#007bff' }}>
+          {work.title}
+        </Link>
+        <div style={{ fontSize: '12px', color: '#6c757d' }}>
+          {new Date(work.publication_date).toLocaleDateString() || 'N/A'}
+        </div>
+        <div style={{ marginTop: '10px', color: '#333' }}>
+          <p
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 3, // Limits to 3 lines of text
+              marginBottom: '0px',
+            }}
+          >
+            {work.description || 'No abstract available.'}
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 ))}
-
-
-{/* Pagination Buttons */}
-<div className="pagination mt-3 d-flex justify-content-center align-items-center flex-wrap">
-  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-    <Button
-      key={pageNumber}
-      onClick={() => paginate(pageNumber)}
-      className={`btn btn-secondary mx-1 ${currentPage === pageNumber ? 'active' : ''}`}
-    >
-      {pageNumber}
-    </Button>
-  ))}
-</div>
+            <PaginationComponent
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handlePageChange={(newPage) => setCurrentPage(newPage)}
+            />
 
             </div>
           </div>

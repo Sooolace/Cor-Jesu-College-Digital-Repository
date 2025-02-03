@@ -10,6 +10,7 @@ import { CiViewList } from "react-icons/ci";
 import Breadcrumb from '../../components/BreadCrumb';
 import Modal from 'react-bootstrap/Modal';
 import PaginationComponent from '../../components/PaginationComponent';
+import EditProjectForm from './components/EditProjectForm'; // Import the new component
 
 function TotalWorks() {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ function TotalWorks() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [projectIdToDelete, setProjectIdToDelete] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false); // State to control edit modal visibility
+  const [projectIdToEdit, setProjectIdToEdit] = useState(null); // State to store the project ID to edit
 
   // Fetch projects from the API
   useEffect(() => {
@@ -186,6 +189,16 @@ function TotalWorks() {
 
   const handleCancelArchive = () => setShowDeleteModal(false);
 
+  const handleShowEditModal = (projectId) => {
+    setProjectIdToEdit(projectId);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setProjectIdToEdit(null);
+  };
+
   return (
     <>
       <div className="breadcrumb-container">
@@ -258,7 +271,7 @@ function TotalWorks() {
                 <CiViewList size={35} title="View" style={{ color: 'blue' }} />
               </span>
 
-              <span onClick={() => goToEditAuthor(project.project_id)}
+              <span onClick={() => handleShowEditModal(project.project_id)}
                     style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
                 <MdEditSquare size={35} title="Edit" style={{ color: 'green' }} />
               </span>
@@ -282,7 +295,7 @@ function TotalWorks() {
               />
       </div>
 
-      <Modal show={showDeleteModal} onHide={handleCancelArchive}>
+      <Modal show={showDeleteModal} onHide={handleCancelArchive} centered>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Archive</Modal.Title>
         </Modal.Header>
@@ -295,6 +308,15 @@ function TotalWorks() {
             Confirm
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal show={showEditModal} onHide={handleCloseEditModal} dialogClassName="modal-custom-width" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Project Details</Modal.Title> {/* Update the title here */}
+        </Modal.Header>
+        <Modal.Body>
+          <EditProjectForm projectId={projectIdToEdit} onClose={handleCloseEditModal} />
+        </Modal.Body>
       </Modal>
     </>
   );

@@ -23,16 +23,12 @@ const HorizontalImageBanner = React.memo(() => {
 
   return (
     <div className="horizontal-image-banner">
-      {!imageLoaded ? (
-        <img
-          src={bannerImage}
-          alt="Decorative banner"
-          className="banner-image"
-          onLoad={handleImageLoad} // Set to true when image loads
-        />
-      ) : (
-        <img src={bannerImage} alt="Decorative banner" className="banner-image" />
-      )}
+      <img
+        src={bannerImage}
+        alt="Decorative banner"
+        className="banner-image"
+        onLoad={handleImageLoad} // Set to true when image loads
+      />
     </div>
   );
 });

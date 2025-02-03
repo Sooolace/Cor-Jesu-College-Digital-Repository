@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/subjectfilter.css';
 
-const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, handleClearFilters }) => {
+const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply }) => {
   const [categories, setCategories] = useState([]);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [expandedResearchArea, setExpandedResearchArea] = useState(null);
@@ -126,24 +126,12 @@ const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, han
     }
   };
 
-  const handleClearData = () => {
-    setSelectedCategories([]);
-    setSelectedResearchAreas([]);
-    setSelectedTopics([]);
-    if (handleClearFilters) {
-      handleClearFilters();  // Trigger the parent's clear filter function if provided
-    }
-  };
-
   return (
     <div className="subject-filter">
-  <div className="filter-header">
-    <h3>Filter by Category</h3>
-    <button className="clear-button" onClick={handleClearData}>Clear Filters</button>
-  </div>    
-    <div className="dropdown-content">
+      <h3>Filter by Category</h3>
+      <div className="dropdown-content">
         {categories.map(category => (
-          <div key={category.category_id} className="category-group">
+          <div key={category.category_id} className="category-group filter-item">
             <div className="category-checkbox">
               <input
                 type="checkbox"
@@ -158,7 +146,7 @@ const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, han
             {expandedCategory === category.category_id && category.research_areas && (
               <div className="subcategories">
                 {category.research_areas.map(researchArea => (
-                  <div key={researchArea.research_area_id}>
+                  <div key={researchArea.research_area_id} className="filter-item">
                     <div className="category-checkbox">
                       <input
                         type="checkbox"
@@ -173,7 +161,7 @@ const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, han
                     {expandedResearchArea === researchArea.research_area_id && researchArea.topics && (
                       <div className="topic-list">
                         {researchArea.topics.map(topic => (
-                          <div key={topic.topic_id} className="form-check">
+                          <div key={topic.topic_id} className="form-check filter-item">
                             <input
                               type="checkbox"
                               checked={isTopicSelected(topic.topic_id) || isResearchAreaSelected(researchArea.research_area_id) || isCategorySelected(category.category_id)}
@@ -192,7 +180,7 @@ const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply, han
         ))}
       </div>
 
-      {/* Apply and Clear Filters Button Section */}
+      {/* Apply Filters Button Section */}
       <div className="apply-button-container">
         <button className="apply-button" onClick={handleApplyFilters}>Apply</button>
       </div>

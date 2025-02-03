@@ -1,0 +1,6 @@
+.modal-custom-width {
+  max-width: 40% !important; /* Adjust the width as needed */
+  margin: auto; /* Ensure the modal is centered */
+  border-radius: 10px; /* Add border radius for rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add box shadow for better look */
+}

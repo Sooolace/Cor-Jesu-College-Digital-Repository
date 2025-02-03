@@ -18,6 +18,7 @@
 .featured-section {
     margin-bottom: -10px;
     position: relative;
+    min-height: 300px; /* Adjust based on your design */
 }
 
 .featured-document {
@@ -37,7 +38,9 @@
     white-space: normal;
 }
 
-
+.horizontal-banner-container {
+  position: relative;
+}
 
 h2 {
     color: #333;
@@ -147,4 +150,28 @@ h2 {
   .search-bar, .featured, .most-downloaded, .recent-submissions, .statistics, .call-to-action {
     margin-bottom: 20px;    /* Adds space between sections for mobile readability */
   }
+}
+
+/* Ensure sections remain in a fixed position while loading */
+.recent-submissions,
+.most-viewed {
+  min-height: 300px; /* Adjust based on your design */
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.transition-left-to-right {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.transition-right-to-left {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }

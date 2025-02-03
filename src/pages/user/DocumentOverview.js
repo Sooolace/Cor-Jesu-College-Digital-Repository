@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
 import { FaArrowLeft, FaBookmark, FaPrint, FaDownload } from 'react-icons/fa';  // Add FaDownload for the download icon
@@ -11,6 +11,8 @@ import cjclogo from '../../../src/assets/cjclogo.PNG';
 
 function DocumentOverview() {
   const { projectId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [project, setProject] = useState(null);
   const [keywords, setKeywords] = useState([]);
   const [authors, setAuthors] = useState([]);
@@ -22,7 +24,6 @@ function DocumentOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -132,6 +133,14 @@ function DocumentOverview() {
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked); 
+  };
+
+  const handleBackToSearch = () => {
+    if (location.state?.fromSearch) {
+      navigate(-1);
+    } else {
+      navigate('/search');
+    }
   };
 
   if (loading) {

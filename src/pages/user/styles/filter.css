@@ -10,6 +10,27 @@
     gap: 30px;  /* Space between search bar and results */
 }
 
+.photo-container {
+  max-width: 200px;
+  margin-top: 20px; /* Adjust the spacing */
+  flex-shrink: 0;
+}
+
+.research-card-image {
+  max-width: 150px;
+  max-height: 150px;
+  margin-right: 20px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.research-card-placeholder {
+  width: 150px;
+  height: 150px;
+  background-color: #f4f4f4;
+  margin-right: 20px;
+  border-radius: 8px;
+}
 
 /* Search bar styling */
 .fsearch-bar {
@@ -29,6 +50,8 @@
 }
 /* Research Card */
 .research-card {
+    display: flex; /* Ensure the card uses flexbox */
+    align-items: flex-start; /* Align items to the start */
     padding: 20px;
     background-color: transparent;  /* Remove individual background color */
     border-bottom: 2px solid #ddd;  /* Add a line under each result */
@@ -85,33 +108,88 @@ a:hover {
 /* Filters Container */
 .filters-container {
     width: 500px; /* Fixed width for filters */
-    height: 1300px; /* Fixed height as requested */
+    height: auto; /* Adjust height to auto */
     background-color: #f9f9f9; /* Light background color */
     border: 1px solid #ddd; /* Subtle border */
     border-radius: 8px; /* Rounded corners */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Slight shadow */
     box-sizing: border-box;
-  }
-  
-  /* Search Bar Wrapper */
-  .search-bar-wrapper {
+    padding: 10px; /* Smaller padding */
+    margin-bottom: 20px; /* Space between filters */
+}
+
+/* Add border between filters */
+.filters-container .filter-section {
+    background-color: white; /* White background for each filter section */
+    border: 1px solid #ddd; /* Border for each filter section */
+    border-radius: 8px; /* Rounded corners */
+    padding: 10px; /* Smaller padding inside each filter section */
+    margin-bottom: 5px; /* Minimal space between filter sections */
+}
+
+.filters-container .filter-section:first-child {
+    margin-top: 10px; /* Add margin above the first filter section */
+}
+
+.filters-container .filter-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Add border below each item in the filters */
+.filter-section .filter-item {
+    padding: 5px 0; /* Reduce padding for each item */
+    border-bottom: 1px solid #ddd; /* Border below each item */
+}
+
+.filter-section .filter-item:last-child {
+    border-bottom: none; /* Remove border for the last item */
+}
+
+/* Ensure consistent spacing above the filter by category */
+.subject-filter-wrapper {
+    margin-top: 10px; /* Add margin above the filter by category */
+}
+
+/* Center the apply button and make it smaller */
+.apply-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.apply-button {
+    padding: 5px 10px; /* Smaller padding */
+    background-color: #007bff; /* Blue color */
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 4px;
+}
+
+.apply-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Search Bar Wrapper */
+.search-bar-wrapper {
     margin-bottom: 20px; /* Space for additional filters later */
-  }
-  
-  .filters-container h3 {
+}
+
+.filters-container h3 {
     font-size: 18px;
     color: #333;
     margin-bottom: 15px;
-  }
+}
   
-  /* Adjust search-results-wrapper for new layout */
-  .search-results-wrapper {
+/* Adjust search-results-wrapper for new layout */
+.search-results-wrapper {
     display: flex;
     gap: 20px; /* Space between filters and results */
-  }
+}
   
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .search-results-wrapper {
       flex-direction: column; /* Stack filters above results on smaller screens */
     }
@@ -120,7 +198,7 @@ a:hover {
       width: 80%;
       height: auto;
     }
-  }
+}
   
 /* Scrollable Year Filter Container */
 .year-filter-wrapper {
@@ -157,4 +235,30 @@ a:hover {
   background-color: #1976d2;
   color: white;
   font-weight: bold;
+}
+
+/* Ensure consistent spacing above the filter by category */
+.subject-filter-wrapper {
+    margin-top: 10px; /* Add margin above the filter by category */
+}
+
+/* Center the apply button and make it smaller */
+.apply-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.apply-button {
+    padding: 5px 10px; /* Smaller padding */
+    background-color: #007bff; /* Blue color */
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 4px;
+}
+
+.apply-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
 }

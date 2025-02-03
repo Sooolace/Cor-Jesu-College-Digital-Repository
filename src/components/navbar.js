@@ -23,7 +23,7 @@ function Navbar() {
     
                 <div className="dropdown" onMouseEnter={toggleDropdown} onMouseLeave={toggleDropdown}>
                     <Link to="#" className="dropdown-link">
-                        Research Resources
+                        Research Resources <span className="dropdown-arrow">&#9660;</span> {/* Downward arrow */}
                     </Link>
                     {isDropdownOpen && (
                         <div className="dropdown-menu">

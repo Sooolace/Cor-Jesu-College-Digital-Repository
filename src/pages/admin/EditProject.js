@@ -153,6 +153,7 @@ function EditProject() {
                 </Button>
                 <form onSubmit={handleFormSubmit} className="bg-light p-4 rounded shadow-sm">
                     <h1 className="mb-4 text-center">Edit Project</h1>
+                    <div className="author-underline"></div>
 
                     {/* Title */}
                     <div className="mb-3">

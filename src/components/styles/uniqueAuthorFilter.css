@@ -1,0 +1,161 @@
+.unique-author-filter {
+  padding: 10px; /* Smaller padding */
+  font-family: Arial, sans-serif;
+  max-width: 350px; /* Smaller max-width */
+  margin-bottom: 10px; /* Smaller margin bottom */
+}
+
+.unique-author-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Smaller gap */
+}
+
+.unique-author-item {
+  display: flex;
+  align-items: center;  /* Align items vertically to the center */
+  justify-content: flex-start;  /* Align items horizontally to the left */
+}
+
+.unique-author-item input {
+  margin-right: 8px; /* Smaller space between the checkbox and the label */
+  transform: scale(1.2); /* Slightly increases the checkbox size for better visibility */
+}
+
+.unique-author-item label {
+  font-size: 14px; /* Smaller font size */
+  color: #333; /* Match color with subject filter */
+  font-weight: normal; /* Match font weight with subject filter */
+}
+
+.unique-button-container {
+  display: flex;
+  justify-content: space-between;  /* Ensures there is space between the buttons */
+  margin-top: 10px;  /* Adds space above the buttons */
+  gap: 10px;  /* Smaller gap between the buttons */
+}
+
+.unique-see-all-button, .unique-apply-button {
+  padding: 8px 12px;
+  background-color: #a33307;  /* Red color */
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 4px;
+  flex: 1;  /* Make buttons the same size */
+}
+
+.unique-see-all-button:hover, .unique-apply-button:hover {
+  background-color: #c0392b;  /* Darker red on hover */
+}
+
+.unique-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);  /* Darker background for better visibility */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.unique-modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;  /* More rounded corners for a modern look */
+  width: 80%;
+  max-width: 600px;
+  max-height: 80%;
+  overflow-y: auto;
+  text-align: left;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Add shadow for depth */
+}
+
+.unique-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccc;  /* Add bottom border for separation */
+  padding-bottom: 10px;
+}
+
+.unique-modal-body {
+  margin-top: 10px;
+  text-align: left;
+  position: relative;
+}
+
+.unique-close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #007bff;  /* Set color to blue for consistency */
+  text-align: right;
+}
+
+.unique-close-button:hover {
+  color: #0056b3; /* Darker blue on hover */
+}
+
+.unique-author-category {
+  font-style: italic;
+  color: gray;
+}
+
+.unique-search-form {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 10px 0;
+  z-index: 10;
+}
+
+.unique-search-input {
+  width: 80%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.unique-search-button {
+  padding: 8px 12px;
+  background-color: #007bff;  /* Blue color */
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.unique-search-button:hover {
+  background-color: #0056b3;  /* Darker blue on hover */
+}
+
+.unique-author-list-scrollable {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .unique-author-item label {
+    font-size: 12px;  /* Slightly smaller label for mobile devices */
+  }
+
+  .unique-see-all-button, .unique-apply-button {
+    padding: 6px 10px;  /* Adjust padding for smaller screens */
+  }
+
+  .unique-modal-content {
+    width: 90%;  /* Modal takes up more width on small screens */
+    padding: 15px; /* Less padding for smaller screens */
+  }
+
+  .unique-close-button {
+    font-size: 1.3rem;  /* Smaller close button on mobile */
+  }
+}

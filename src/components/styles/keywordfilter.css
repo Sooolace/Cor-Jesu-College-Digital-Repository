@@ -1,26 +1,26 @@
-.author-filter {
+.keyword-filter {
   padding: 20px;
   font-family: Arial, sans-serif;
 }
 
-.author-list {
+.keyword-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.author-item {
+.keyword-item {
   display: flex;
   align-items: center;
   justify-content: flex-start;
 }
 
-.author-item input {
+.keyword-item input {
   margin-right: 10px;
   transform: scale(1.2);
 }
 
-.author-item label {
+.keyword-item label {
   font-size: 16px;
 }
 
@@ -108,13 +108,8 @@
   color: #0056b3;
 }
 
-.author-category {
-  font-style: italic;
-  color: gray;
-}
-
 @media (max-width: 768px) {
-  .author-item label {
+  .keyword-item label {
     font-size: 14px;
   }
 
@@ -131,4 +126,3 @@
     font-size: 1.3rem;
   }
 }
-

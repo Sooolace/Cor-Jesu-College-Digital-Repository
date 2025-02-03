@@ -1,4 +1,4 @@
-  import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
   import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
   import AdminNavbar from './pages/admin/components/AdminNavbar';
   import Navbar from './components/navbar';
@@ -33,6 +33,7 @@
   import ArchivedProjects from './pages/admin/ArchivedProjects';
   import FeaturedProjects from './pages/admin/FeaturedProjects';
   import ActivityLog from './pages/user/ActivityLog';
+  import TotalKeywords from './pages/admin/TotalKeywords';
 
 // Memoize components here
   const MemoizedHome = React.memo(Home);
@@ -147,6 +148,7 @@
               <Route path="/admin/Departments" element={<Departments />} />
               <Route path="/Archived_Projects" element={<ArchivedProjects />} />
               <Route path="/Featured_Projects" element={<FeaturedProjects />} />
+              <Route path="/admin/TotalKeywords" element={<TotalKeywords />} />
             </>
           )}
             <Route path="*" element={<NotFound />} />

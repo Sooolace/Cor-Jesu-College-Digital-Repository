@@ -1,12 +1,12 @@
 /* General Styles for SubjectFilter */
 .subject-filter {
   background-color: transparent;
-  padding: 15px;
+  padding: 10px; /* Smaller padding */
   border-radius: 8px;
   width: 100%;
-  max-width: 400px;
-  margin-bottom: 20px;
-  margin-top: -30px;
+  max-width: 350px; /* Smaller max-width */
+  margin-bottom: 10px; /* Smaller margin bottom */
+  margin-top: 5px; /* Add margin top */
 }
 
 /* Header for Filter Category and Clear Filters */
@@ -14,13 +14,13 @@
   display: flex;
   justify-content: space-between;  /* Space between the elements */
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px; /* Smaller margin bottom */
 }
 
 /* Filter Category Heading */
 .filter-header h3 {
   margin: 0; /* Remove default margin */
-  font-size: 18px;
+  font-size: 16px; /* Adjust font size to match author filter */
   font-weight: bold;
 }
 /* Clear Filters Button */
@@ -61,12 +61,11 @@
 .subject-filter button {
   background-color: #a33307;
   color: #fff;
-  padding: 12px 15px;
+  padding: 10px 12px; /* Smaller padding */
   border-radius: 5px;
   border: none;
   width: 100%;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 14px; /* Smaller font size */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -91,9 +90,9 @@
 .category-checkbox {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px; /* Smaller gap */
   cursor: pointer;
-  padding: 8px 0;
+  padding: 5px 0; /* Smaller padding */
 }
 
 .category-checkbox input[type="checkbox"] {
@@ -102,9 +101,9 @@
 }
 
 .category-checkbox label {
-  font-size: 15px;
+  font-size: 14px; /* Smaller font size */
   color: #333;
-  font-weight: 500;
+  font-weight: normal; /* Remove bold */
   white-space: normal; /* Allow text to wrap */
   word-break: break-word; /* Break long words if necessary */
   line-height: 1.4;
@@ -135,16 +134,16 @@
 /* Subcategory Styles */
 /* Subcategory Styles (Research Areas) */
 .subcategories {
-  margin-top: 10px; /* Controls space from category to research areas */
-  margin-left: 20px; /* Indentation for research areas */
+  margin-top: 5px; /* Smaller margin top */
+  margin-left: 15px; /* Smaller indentation */
 }
 
 /* Adjusting the space between research areas */
 .subcategories .form-check {
   display: flex;
   align-items: center;
-  gap: 15px; /* Space between the checkbox and the label for each research area */
-  margin-bottom: 15px; /* Space between research areas */
+  gap: 10px; /* Smaller gap */
+  margin-bottom: 10px; /* Smaller margin bottom */
 }
 
 /* Adjusting the padding and margins of checkboxes within research areas */
@@ -154,9 +153,9 @@
 }
 
 .subcategories .form-check label {
-  font-size: 14px;
+  font-size: 14px; /* Smaller font size */
   color: #333;
-  font-weight: 500;
+  font-weight: normal; /* Remove bold */
   line-height: 1.4;
   flex: 1;
   white-space: normal;
@@ -170,15 +169,15 @@
 
 /* Apply Button */
 .apply-button-container {
-  margin-top: 20px;
+  margin-top: 10px; /* Smaller margin top */
   text-align: center;
 }
 
 .apply-button {
   background-color: #0066cc;
   color: white;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 5px 10px; /* Smaller padding */
+  font-size: 14px; /* Smaller font size */
   border: none;
   border-radius: 5px;
   cursor: pointer;

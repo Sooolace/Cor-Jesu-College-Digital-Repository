@@ -6,7 +6,7 @@ const logActivity = require('../middlewares/logActivity'); // Import log activit
 
 // GET - Fetch all projects without any search conditions, with total count and pagination
 router.get('/allprojs', async (req, res, next) => {
-    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [] } = req.query;
+    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [], authors = [] } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(itemsPerPage);
 
     let searchQuery = `SELECT p.*, 
@@ -37,6 +37,7 @@ router.get('/allprojs', async (req, res, next) => {
     const categoriesParams = [];
     const researchAreasParams = [];
     const topicsParams = [];
+    const authorsParams = [];
 
     // Handle text search
     if (query) {
@@ -70,6 +71,15 @@ router.get('/allprojs', async (req, res, next) => {
         });
         searchQuery += ` AND p.topic_id IN (${topicsParams.join(', ')})`;
         countQuery += ` AND p.topic_id IN (${topicsParams.join(', ')})`;
+    }
+
+    if (authors.length > 0) {
+        authors.forEach((author, index) => {
+            queryParams.push(author);
+            authorsParams.push(`$${queryParams.length}`);
+        });
+        searchQuery += ` AND a.author_id IN (${authorsParams.join(', ')})`;
+        countQuery += ` AND a.author_id IN (${authorsParams.join(', ')})`;
     }
 
     searchQuery += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
@@ -154,7 +164,6 @@ router.get('/allfields', async (req, res) => {
         res.status(500).json({ error: 'Failed to search projects across all fields' });
     }
 });
-
 
 // GET - Search projects by title
 router.get('/search/title', async (req, res, next) => {

@@ -16,25 +16,30 @@ function AllWorks() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [filterYear, setFilterYear] = useState('');
-  const [filterTitle, setFilterTitle] = useState('');
+  const [searchQuery, setSearchQuery] = useState(''); // Single search query state
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [sortOrder, setSortOrder] = useState('latest');
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [currentPage]);
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/projects');
+      const response = await fetch(`/api/search/allfields?query=${searchQuery}&page=${currentPage}&itemsPerPage=${itemsPerPage}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      if (Array.isArray(data)) {
-        setProjects(data);
-        setFilteredProjects(data);
+      if (Array.isArray(data.data)) {
+        const projectsWithAuthors = await Promise.all(data.data.map(async (project) => {
+          const authorsResponse = await fetch(`/api/project_authors/${project.project_id}`);
+          const authors = await authorsResponse.json();
+          return { ...project, authors: authors.map(author => author.name) };
+        }));
+        setProjects(projectsWithAuthors);
+        setFilteredProjects(projectsWithAuthors);
       } else {
         console.error('Fetched data is not an array:', data);
         setError('Failed to load projects');
@@ -69,31 +74,7 @@ function AllWorks() {
   };
 
   const handleFilter = () => {
-    let filtered = [...projects];
-
-    if (filterYear) {
-      filtered = filtered.filter(project => {
-        const year = new Date(project.publication_date).getFullYear();
-        return year.toString() === filterYear;
-      });
-    }
-
-    if (filterTitle) {
-      filtered = filtered.filter(project =>
-        project.title.toLowerCase().includes(filterTitle.toLowerCase())
-      );
-    }
-
-    const sortedFilteredProjects = filtered.sort((a, b) => {
-      if (sortOrder === 'latest') {
-        return new Date(b.publication_date) - new Date(a.publication_date);
-      } else {
-        return new Date(a.publication_date) - new Date(b.publication_date);
-      }
-    });
-
-    setFilteredProjects(sortedFilteredProjects);
-    setCurrentPage(1);
+    fetchProjects();
   };
 
   const toggleSortOrder = () => {
@@ -135,7 +116,6 @@ function AllWorks() {
       handleFilter();
     }
   };
-
   return (
     <>
       <div className="breadcrumb-container">
@@ -152,9 +132,9 @@ function AllWorks() {
           <Form.Control
             type="text"
             className="flex-grow-1 me-2"
-            placeholder="Search by Title"
-            value={filterTitle}
-            onChange={(e) => setFilterTitle(e.target.value)}
+            placeholder="Search by Title, Author, or Keyword"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyPress} // Listen for Enter key press
           />
           <Form.Select
@@ -224,7 +204,7 @@ function AllWorks() {
                         {project.title}
                       </a>
                       <div style={{ fontStyle: 'italic', color: '#6c757d' }}>
-                        {removeDuplicateAuthors(project.authors).join(', ') || 'N/A'}
+                        {Array.isArray(project.authors) ? removeDuplicateAuthors(project.authors).join(', ') : 'N/A'}
                       </div>
                       <div style={{ fontSize: '12px', color: '#6c757d' }}>
                         {new Date(project.publication_date).toLocaleDateString() || 'N/A'}
