@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import StepTracker from './components/steptracker';
 
@@ -10,6 +10,15 @@ function UploadFiles() {
   const [file, setFile] = useState(null); // State to handle uploaded file
   const [studyUrls, setStudyUrls] = useState(projectData.study_urls || []); // Initialize with existing URLs if any
   const [newUrl, setNewUrl] = useState(''); // State for new URL input
+
+  useEffect(() => {
+    // Load saved form data from localStorage
+    const savedData = JSON.parse(localStorage.getItem('uploadFilesFormData'));
+    if (savedData) {
+      setFile(savedData.file || null);
+      setStudyUrls(savedData.studyUrls || []);
+    }
+  }, []);
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
@@ -45,6 +54,9 @@ function UploadFiles() {
       file_path: file, // Include the uploaded file if any
       keywords: projectData.keywords, // Ensure keywords are included
     };
+
+    // Save form data to localStorage
+    localStorage.setItem('uploadFilesFormData', JSON.stringify({ file, studyUrls }));
 
     // Navigate to confirmation page with project data
     navigate('/admin/DescribeWork/upload-files/Confirm', { state: { projectData: updatedProjectData } });

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export const  Uploadform= () => {
+export const Uploadform = () => {
   // Form state
   const [title, setTitle] = useState('');
   const [authors, setAuthors] = useState(['']); // Starts with one author input
@@ -68,6 +68,7 @@ export const  Uploadform= () => {
     title,
     setTitle,
     authors,
+    setAuthors,
     handleAuthorChange,
     addAuthor,
     removeAuthor,

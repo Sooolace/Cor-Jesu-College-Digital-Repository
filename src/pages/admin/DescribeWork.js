@@ -1,5 +1,5 @@
 // DescribeWork.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles/upload.css';
 import { Uploadform } from './scripts/Uploadform';
@@ -24,6 +24,21 @@ function DescribeWork() {
   const [pubYear, setPubYear] = useState('');
   const [descriptionType, setDescriptionType] = useState('abstract');
   const [keywords, setKeywords] = useState(['']); // Initialize with one empty keyword input
+
+  useEffect(() => {
+    // Load saved form data from localStorage
+    const savedData = JSON.parse(localStorage.getItem('describeWorkFormData'));
+    if (savedData) {
+      setTitle(savedData.title || '');
+      setAuthors(savedData.authors || ['']);
+      setAbstract(savedData.abstract || '');
+      setPubMonth(savedData.pubMonth || '');
+      setPubDay(savedData.pubDay || '');
+      setPubYear(savedData.pubYear || '');
+      setDescriptionType(savedData.descriptionType || 'abstract');
+      setKeywords(savedData.keywords || ['']);
+    }
+  }, [setTitle, setAuthors, setAbstract]);
 
   const handleKeywordChange = (index, event) => {
     const updatedKeywords = [...keywords];
@@ -56,6 +71,9 @@ function DescribeWork() {
       publication_date: publicationDate,
       keywords: keywords.filter(keyword => keyword.trim() !== ''), // Ensure keywords are included
     };
+
+    // Save form data to localStorage
+    localStorage.setItem('describeWorkFormData', JSON.stringify(projectData));
 
     // Navigate to UploadFiles, passing projectData
     navigate('/admin/DescribeWork/upload-files', { state: { projectData } });

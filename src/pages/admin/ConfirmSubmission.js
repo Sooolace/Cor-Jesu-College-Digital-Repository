@@ -43,6 +43,10 @@ function ConfirmSubmission() {
 
       const projectId = projectResponse.data.project_id; // Get the project ID from the response
 
+      // Clear saved form data from localStorage
+      localStorage.removeItem('describeWorkFormData');
+      localStorage.removeItem('uploadFilesFormData');
+
       alert('Submission Confirmed!');
       navigate('/');
     } catch (error) {
