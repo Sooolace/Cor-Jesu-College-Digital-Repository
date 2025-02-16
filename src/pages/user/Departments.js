@@ -1,35 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../pages/user/styles/departments.css'; 
-import CCIS from '../../assets/CCIS.png';
-import CJC from '../../assets/GRAD_SCHOOL.png';
-import CABE from '../../assets/CABE.png';
-import COE from '../../assets/COE.png';
-import CHS from '../../assets/CHS.png';
-import CEDAS from '../../assets/CEDAS.png';
 import Breadcrumb from '../../components/BreadCrumb';
 
 function Departments() {
     const navigate = useNavigate();
+    const [departments, setDepartments] = useState([]);
 
     useEffect(() => {
-        // Cache the departments on first load or if not cached
-        const cachedDepartments = localStorage.getItem('departments');
-        if (!cachedDepartments) {
-            const departmentsData = [
-                { id: 'ccis', name: 'College of Computing and Information Sciences', image: CCIS },
-                { id: 'cjc', name: 'Graduate School', image: CJC },
-                { id: 'cabe', name: 'College of Accountancy, Business, and Entrepreneurship', image: CABE },
-                { id: 'coe', name: 'College of Engineering', image: COE },
-                { id: 'chs', name: 'College of Health Sciences', image: CHS },
-                { id: 'cedas', name: 'College of Education Arts and Sciences', image: CEDAS },
-            ];
-            // Cache this data in localStorage
-            localStorage.setItem('departments', JSON.stringify(departmentsData));
-        }
-    }, []);
+        const fetchDepartments = async () => {
+            try {
+                const response = await fetch('/api/categories');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch departments');
+                }
+                const data = await response.json();
+                setDepartments(data);
+            } catch (error) {
+                console.error('Error fetching departments:', error);
+            }
+        };
 
-    const departments = JSON.parse(localStorage.getItem('departments')) || [];
+        fetchDepartments();
+    }, []);
 
     return (
         <>
@@ -45,10 +38,10 @@ function Departments() {
             <div className="author-underline"></div>
                 <div className="departments-grid-container">
                     {departments.map((department) => (
-                        <div className="departments-grid-item" key={department.id}>
-                            <a href={`/departments/${department.id}`} className="department-link">
+                        <div className="departments-grid-item" key={department.category_id}>
+                            <a href={`/departments/${department.category_id}`} className="department-link">
                                 <img 
-                                    src={department.image} 
+                                    src={`http://localhost:5000${department.image_url}`} 
                                     alt={department.name} 
                                     className="department-image" 
                                 />

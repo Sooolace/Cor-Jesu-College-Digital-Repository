@@ -6,7 +6,7 @@ const logActivity = require('../middlewares/logActivity'); // Import log activit
 
 // GET - Fetch all projects without any search conditions, with total count and pagination
 router.get('/allprojs', async (req, res, next) => {
-    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [], authors = [] } = req.query;
+    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [], authors = [], fromYear, toYear } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(itemsPerPage);
 
     let searchQuery = `SELECT p.*, 
@@ -80,6 +80,18 @@ router.get('/allprojs', async (req, res, next) => {
         });
         searchQuery += ` AND a.author_id IN (${authorsParams.join(', ')})`;
         countQuery += ` AND a.author_id IN (${authorsParams.join(', ')})`;
+    }
+
+    if (fromYear) {
+        queryParams.push(fromYear);
+        searchQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+    }
+
+    if (toYear) {
+        queryParams.push(toYear);
+        searchQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
     }
 
     searchQuery += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;

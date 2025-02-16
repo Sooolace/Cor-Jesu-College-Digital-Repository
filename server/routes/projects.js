@@ -475,57 +475,34 @@ router.delete('/:project_id', async (req, res) => {
     }
 });
 
-// GET - Fetch projects by department name
-router.get('/departments/:departmentName', async (req, res) => {
-    const { departmentName } = req.params;  
-
-    // Mapping of department short codes to full department names
-    const departmentNameMapping = {
-        'ccis': 'College of Computer and Information Sciences (CCIS)',
-        'coe': 'College of Engineering (COE)',
-        'cabe': 'College of Accountancy, Business, and Entrepreneurship (CABE)',
-        'chs': 'College of Health Sciences (CHS)',
-        'cedas': 'College of Education Arts and Sciences (CEDAS)',
-        'cjc': 'Graduate School',
-    };
-
-    const fullDepartmentName = departmentNameMapping[departmentName.toLowerCase()];
-
-    if (!fullDepartmentName) {
-        return res.status(404).json({ error: 'Department not found' });
-    }
-
+// GET - Fetch projects by category (excluding archived projects) with featured projects at the top
+router.get('/departments/:categoryId', async (req, res) => {
+    const { categoryId } = req.params;
     try {
-        // Query the database for projects related to this department and not archived
-        const query = `
-            SELECT p.*, STRING_AGG(a.name, ', ') AS authors
+        const searchQuery = `
+            SELECT p.*, 
+                   STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+                   STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
             FROM projects p
             JOIN projects_category pc ON p.project_id = pc.project_id
-            JOIN categories c ON pc.category_id = c.category_id
-            LEFT JOIN project_authors pa ON p.project_id = pa.project_id
-            LEFT JOIN authors a ON pa.author_id = a.author_id
-            WHERE c.name = $1 AND p.is_archived = false
-            GROUP BY p.project_id
+            LEFT JOIN project_authors pa ON p.project_id = pa.project_id 
+            LEFT JOIN authors a ON pa.author_id = a.author_id 
+            LEFT JOIN project_keywords pk ON p.project_id = pk.project_id 
+            LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
+            WHERE pc.category_id = $1 AND p.is_archived = false
+            GROUP BY p.project_id 
             ORDER BY p.publication_date DESC;
         `;
-        
-        const result = await pool.query(query, [fullDepartmentName]);
 
-        // Log the activity (User fetched projects for the department)
-        req.activity = `User fetched projects for ${fullDepartmentName}`;
+        const result = await pool.query(searchQuery, [categoryId]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No projects found for this category' });
+        }
 
-        // Ensure req.user is set for logging
-        req.user = req.user || { id: 0, role: 'normal' };
-
-        // Proceed with the logActivity middleware
-        logActivity(req, res, () => {
-            // Send response after logging the activity
-            res.status(200).json(result.rows);
-        });
-
+        res.status(200).json(result.rows);
     } catch (error) {
-        console.error('Error retrieving projects by department:', error);
-        res.status(500).json({ error: 'Failed to retrieve projects' });
+        console.error('Error fetching projects by category', error.stack);
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
@@ -574,7 +551,6 @@ router.get('/projects/active-featured', async (req, res) => {
         GROUP BY p.project_id 
         ORDER BY p.publication_date DESC;
       `;
-          
 
         console.log('Executing query to retrieve featured projects');
 

@@ -1,0 +1,99 @@
+.year-range-filter {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.year-range-values {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 15px;
+}
+
+.apply-button {
+  padding: 8px 12px;
+  background-color: #28a745; /* Green color */
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.apply-button:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80%;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #007bff;
+  text-align: right;
+}
+
+.close-button:hover {
+  color: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .year-range-values {
+    font-size: 14px;
+  }
+
+  .apply-button {
+    padding: 6px 10px;
+  }
+
+  .modal-content {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .close-button {
+    font-size: 1.3rem;
+  }
+}

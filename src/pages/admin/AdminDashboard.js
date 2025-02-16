@@ -117,6 +117,7 @@ function AdminDashboard() {
           <MetricItem title="Manage Authors" link="/admin/TotalAuthors" value={totalAuthors} icon={faUserFriends} />
           <MetricItem title="Manage Featured" link="/Featured_Projects" value={totalDepartments} icon={faBuilding} />
           <MetricItem title="Manage Keywords" link="/admin/TotalKeywords" value={totalKeywords} icon={faTags} />
+          <MetricItem title="Manage Departments" link="/admin/edit-departments" value={totalDepartments} icon={faBuilding} />
           <MetricItem title="Archived Works" link="/Archived_Projects"value={archivedProjectsCount}icon={faTags} />
         </div>
 

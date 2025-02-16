@@ -23,19 +23,22 @@ function DescribeWork() {
   const [pubDay, setPubDay] = useState('');
   const [pubYear, setPubYear] = useState('');
   const [descriptionType, setDescriptionType] = useState('abstract');
-  const [newKeyword, setNewKeyword] = useState('');
-  const [keywordsList, setKeywordsList] = useState([]);
+  const [keywords, setKeywords] = useState(['']); // Initialize with one empty keyword input
 
-  const addKeyword = () => {
-    const trimmedKeyword = newKeyword.trim();
-    if (trimmedKeyword && !keywordsList.includes(trimmedKeyword)) {
-      setKeywordsList([...keywordsList, trimmedKeyword]);
-      setNewKeyword('');
-    }
+  const handleKeywordChange = (index, event) => {
+    const updatedKeywords = [...keywords];
+    updatedKeywords[index] = event.target.value;
+    setKeywords(updatedKeywords);
   };
 
-  const removeKeyword = (indexToRemove) => {
-    setKeywordsList(keywordsList.filter((_, index) => index !== indexToRemove));
+  const addKeyword = () => {
+    setKeywords([...keywords, '']);
+  };
+
+  const removeKeyword = (index) => {
+    const updatedKeywords = [...keywords];
+    updatedKeywords.splice(index, 1);
+    setKeywords(updatedKeywords);
   };
 
   const handleSubmit = (event) => {
@@ -51,7 +54,7 @@ function DescribeWork() {
       description_type: descriptionType,
       abstract,
       publication_date: publicationDate,
-      keywords: keywordsList,
+      keywords: keywords.filter(keyword => keyword.trim() !== ''), // Ensure keywords are included
     };
 
     // Navigate to UploadFiles, passing projectData
@@ -217,47 +220,34 @@ function DescribeWork() {
             </div>
 
             {/* Keywords */}
-<div className="form-group mb-3">
-  <label className="form-label">Keywords:</label>
-  <div id="keywordsList">
-    {keywordsList.map((keyword, index) => (
-      <div key={index} className="input-group mb-2">
-        <input
-          type="text"
-          className="form-control"
-          value={keyword}
-          readOnly
-        />
-        {index > 0 && (
-          <button
-            type="button"
-            className="btn btn-outline-danger"
-            onClick={() => removeKeyword(index)}
-          >
-            <i className="fas fa-times"></i>
-          </button>
-        )}
-      </div>
-    ))}
-  </div>
-  <div className="d-flex gap-2">
-    <input
-      type="text"
-      className="form-control"
-      placeholder="Enter keyword"
-      value={newKeyword}
-      onChange={(e) => setNewKeyword(e.target.value)}
-    />
-  </div>
-  <button
-    type="button"
-    className="btn btn-outline-secondary btn-sm mt-2"
-    onClick={addKeyword}
-  >
-    Add Another Keyword
-  </button>
-</div>
-
+            <div className="form-group mb-3">
+              <label className="form-label">Keywords:</label>
+              <div id="keywordsList">
+                {keywords.map((keyword, index) => (
+                  <div key={index} className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter keyword"
+                      value={keyword}
+                      onChange={(e) => handleKeywordChange(index, e)}
+                    />
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger"
+                        onClick={() => removeKeyword(index)}
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button type="button" className="btn btn-outline-secondary btn-sm" onClick={addKeyword}>
+                Add Another Keyword
+              </button>
+            </div>
 
             {/* Button Container */}
             <div className="button-container d-flex justify-content-between">

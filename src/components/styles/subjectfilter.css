@@ -5,8 +5,8 @@
   border-radius: 8px;
   width: 100%;
   max-width: 350px; /* Smaller max-width */
-  margin-bottom: 10px; /* Smaller margin bottom */
-  margin-top: 5px; /* Add margin top */
+  margin-bottom: -10px; /* Smaller margin bottom */
+  margin-top: -10px; /* Add margin top */
 }
 
 /* Header for Filter Category and Clear Filters */

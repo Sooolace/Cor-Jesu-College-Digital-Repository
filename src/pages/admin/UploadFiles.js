@@ -42,7 +42,8 @@ function UploadFiles() {
     const updatedProjectData = {
       ...projectData,
       study_urls: studyUrls, // Add study URLs
-      file_path: file // Include the uploaded file
+      file_path: file, // Include the uploaded file if any
+      keywords: projectData.keywords, // Ensure keywords are included
     };
 
     // Navigate to confirmation page with project data

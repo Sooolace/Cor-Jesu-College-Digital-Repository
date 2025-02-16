@@ -262,3 +262,25 @@ a:hover {
 .apply-button:hover {
     background-color: #0056b3; /* Darker blue on hover */
 }
+
+/* Year Range Filter */
+.year-range-filter {
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.year-range-filter h3 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.year-range-values {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 14px;
+}

@@ -19,15 +19,28 @@ function DepartmentProjects() {
   const [projectsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
+  const [departmentNameMapping, setDepartmentNameMapping] = useState({});
 
-  const departmentNameMapping = {
-    ccis: 'College of Computer and Information Sciences (CCIS)',
-    coe: 'College of Engineering (COE)',
-    cabe: 'College of Accountancy, Business, and Entrepreneurship (CABE)',
-    chs: 'College of Health Sciences (CHS)',
-    cedas: 'College of Education Arts and Sciences (CEDAS)',
-    cjc: 'Graduate School',
-  };
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (!response.ok) {
+          throw new Error('Failed to fetch departments');
+        }
+        const data = await response.json();
+        const mapping = data.reduce((acc, department) => {
+          acc[department.category_id] = department.name;
+          return acc;
+        }, {});
+        setDepartmentNameMapping(mapping);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   const fullDepartmentName = departmentNameMapping[departmentName] || 'Unknown Department';
 

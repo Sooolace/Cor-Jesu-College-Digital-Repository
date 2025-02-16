@@ -7,6 +7,7 @@ import Breadcrumb from '../../components/BreadCrumb';
 import PaginationComponent from '../../components/PaginationComponent';
 import AuthorFilter from '../../components/UniqueAuthorFilter';
 import KeywordFilter from '../../components/KeywordFilter';
+import YearRangeFilter from '../../components/YearRangeFilter'; // Import YearRangeFilter
 import './styles/filter.css';
 import { FaTag } from 'react-icons/fa'; // Import a valid icon
 
@@ -28,12 +29,13 @@ function SearchPage() {
   const [selectedResearchAreas, setSelectedResearchAreas] = useState(initialResearchAreas);
   const [selectedTopics, setSelectedTopics] = useState(initialTopics);
   const [selectedKeywords, setSelectedKeywords] = useState(initialKeywords || []);
+  const [selectedYears, setSelectedYears] = useState([1900, new Date().getFullYear()]); // Add state for selected years
   const [loading, setLoading] = useState(false);
 
   const totalPages = Math.ceil(totalCount / itemsPerPage); // Calculate total pages
 
   // Function to fetch data from API
-  const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = [], keywords = []) => {
+  const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = [], keywords = [], years = []) => {
     setLoading(true);
     try {
       const endpointMap = {
@@ -56,6 +58,7 @@ function SearchPage() {
         ...(topics.length > 0 && { topics }),
         ...(authors.length > 0 && { authors }), // Include authors in params if any are selected
         ...(keywords.length > 0 && { keywords }), // Include keywords in params if any are selected
+        ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }), // Include year range in params if selected
       };
 
       const response = await axios.get(endpoint, { params });
@@ -79,6 +82,7 @@ function SearchPage() {
       selectedTopics,
       selectedAuthors, // Include selected authors
       selectedKeywords, // Include selected keywords
+      selectedYears, // Include selected years
     });
 
     fetchProjects(
@@ -89,7 +93,8 @@ function SearchPage() {
       selectedResearchAreas,
       selectedTopics,
       selectedAuthors, // Pass selected authors to the API call
-      selectedKeywords // Pass selected keywords to the API call
+      selectedKeywords, // Pass selected keywords to the API call
+      selectedYears // Pass selected years to the API call
     );
   }, [searchTrigger, currentPage]); // Remove selectedAuthors from the dependency array
 
@@ -106,7 +111,7 @@ function SearchPage() {
     setSearchQuery(typedQuery);
     setCurrentPage(1);
     setSearchTrigger((prev) => prev + 1);
-    navigate('/search', { state: { query: typedQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords } });
+    navigate('/search', { state: { query: typedQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
   };
 
   const handleApplyFilters = (categories, researchAreas, topics) => {
@@ -115,7 +120,7 @@ function SearchPage() {
     setSelectedResearchAreas(researchAreas);
     setSelectedTopics(topics);
     setSearchTrigger((prev) => prev + 1);
-    navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories, researchAreas, topics, keywords: selectedKeywords } });
+    navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories, researchAreas, topics, keywords: selectedKeywords, years: selectedYears } });
   };
 
   const handleClearFilters = () => {
@@ -132,14 +137,21 @@ function SearchPage() {
     console.log('Selected Authors:', authors);
     setSelectedAuthors(authors); // Update the selected authors state
     setSearchTrigger((prev) => prev + 1); // Trigger a search update
-    navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords } });
+    navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
   };
 
   const handleApplyKeywordFilters = (keywords) => {
     console.log('Selected Keywords:', keywords);
     setSelectedKeywords(keywords); // Update the selected keywords state
     setSearchTrigger((prev) => prev + 1); // Trigger a search update
-    navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords } });
+    navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords, years: selectedYears } });
+  };
+
+  const handleApplyYearFilters = (years) => {
+    console.log('Selected Years:', years);
+    setSelectedYears(years); // Update the selected years state
+    setSearchTrigger((prev) => prev + 1); // Trigger a search update
+    navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years } });
   };
 
   // Cleanup effect to ensure no localStorage or cache references
@@ -198,6 +210,12 @@ function SearchPage() {
     />
   ), [selectedKeywords]);
 
+  const MemoizedYearRangeFilter = useMemo(() => (
+    <YearRangeFilter
+      onApply={handleApplyYearFilters}
+    />
+  ), []);
+
   return (
     <>
       <div className="breadcrumb-container">
@@ -212,6 +230,11 @@ function SearchPage() {
               {/* Search Bar */}
               <div className="search-bar-wrapper">
                 {MemoizedSearchBar}
+              </div>
+
+              {/* Year Range Filter */}
+              <div className="filter-section">
+                {MemoizedYearRangeFilter}
               </div>
 
               {/* Subject Filter */}
@@ -288,6 +311,11 @@ function SearchPage() {
                         )}
                       </p>
 
+                      {/* Add publication date in italic and adjust margins to make it closer to the author */}
+                      <p className="publication-date" style={{ marginTop: '-10px' }}>
+                        {project.publication_date ? <i>{new Date(project.publication_date).toLocaleDateString()}</i> : <i>Publication date not available</i>}
+                      </p>
+
                       {/* Abstract Container */}
                       <div className="abstract-container" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 3, overflow: 'hidden' }}>
                         {project.abstract || 'No abstract available.'}
@@ -328,7 +356,7 @@ function SearchPage() {
                     totalPages={totalPages}  // Correctly passing totalPages
                     handlePageChange={newPage => {
                       setCurrentPage(newPage);
-                      navigate('/search', { state: { query: searchQuery, option: searchOption, page: newPage, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords } });
+                      navigate('/search', { state: { query: searchQuery, option: searchOption, page: newPage, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
                     }}
                   />
                 </>

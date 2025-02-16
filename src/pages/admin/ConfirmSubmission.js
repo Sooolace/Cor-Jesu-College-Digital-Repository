@@ -21,43 +21,27 @@ function ConfirmSubmission() {
       if (projectData.file_path && projectData.file_path instanceof File) {
         formData.append('file_path', projectData.file_path); // Attach the actual file object
       } else {
-        alert('No file selected or invalid file type.');
-        return;
+        formData.append('file_path', ''); // Append an empty string if no file is uploaded
       }
 
       // Append authors and keywords as JSON strings
       formData.append('authors', JSON.stringify(projectData.authors));
-      formData.append('keywords', JSON.stringify(projectData.keywords));
+      formData.append('keywords', JSON.stringify(projectData.keywords)); // Ensure keywords are added
       formData.append('study_urls', JSON.stringify(projectData.study_urls));
 
-      console.log('FormData:', formData);
+      // Log the FormData entries for debugging
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
 
       // Step 1: Submit the project data
-      const projectResponse = await axios.post('http://localhost:5000/api/projects/upload', formData, {
+      const projectResponse = await axios.post('http://localhost:5000/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       const projectId = projectResponse.data.project_id; // Get the project ID from the response
-
-      // Step 2: Submit authors
-      for (const author of projectData.authors) {
-        const authorResponse = await axios.post('http://localhost:5000/api/authors', { name: author });
-        const authorId = authorResponse.data.author_id; // Get the author ID from the response
-
-        // Link project and author
-        await axios.post('http://localhost:5000/api/project_authors', { project_id: projectId, author_id: authorId });
-      }
-
-      // Step 3: Submit keywords
-      for (const keyword of projectData.keywords) {
-        const keywordResponse = await axios.post('http://localhost:5000/api/keywords', { keyword });
-        const keywordId = keywordResponse.data.keyword_id; // Assuming the response has a keyword_id field
-
-        // Link project and keyword
-        await axios.post('http://localhost:5000/api/project_keywords', { project_id: projectId, keyword_id: keywordId });
-      }
 
       alert('Submission Confirmed!');
       navigate('/');

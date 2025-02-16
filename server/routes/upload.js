@@ -42,17 +42,15 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
 
     // Ensure required fields are present
     if (!title || !abstract || !publication_date) {
+        console.log('Missing required fields:', { title, abstract, publication_date });
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
-        // Ensure a file was uploaded
-        if (!file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-
-        const filePath = file.originalname; // Only the file name
+        const filePath = file ? file.originalname : null; // Only the file name if file is uploaded
         const studyUrlString = parseStudyUrl(study_urls); // Parse study URL if provided
+
+        console.log('Inserting project with data:', { title, description_type, abstract, publication_date, filePath, studyUrlString });
 
         // Insert project into the database
         const query = `
@@ -63,6 +61,8 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
         const result = await pool.query(query, [title, description_type, abstract, publication_date, filePath, studyUrlString]);
 
         const projectId = result.rows[0].project_id;
+
+        console.log('Project inserted with ID:', projectId);
 
         // Insert authors if provided
         if (authors && Array.isArray(authors) && authors.length > 0) {
@@ -75,6 +75,8 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
                 pool.query(insertAuthorsQuery, [author])
             );
             const authorResults = await Promise.all(authorInsertPromises);
+
+            console.log('Authors inserted:', authorResults.map(result => result.rows[0].author_id));
 
             // Link project and authors
             const insertProjectAuthorsQuery = `
@@ -99,6 +101,8 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
             );
             const keywordResults = await Promise.all(keywordInsertPromises);
 
+            console.log('Keywords inserted:', keywordResults.map(result => result.rows[0].keyword_id));
+
             // Link project and keywords
             const insertProjectKeywordsQuery = `
                 INSERT INTO project_keywords (project_id, keyword_id) 
@@ -110,10 +114,10 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
             await Promise.all(projectKeywordInsertPromises);
         }
 
-        // Respond with the newly created project, including the file_path
+        // Respond with the newly created project, including the file_path if any
         res.status(201).json({
             ...result.rows[0],
-            file_path: filePath,  // Add file_path to the response
+            file_path: filePath,  // Add file_path to the response if any
         });
     } catch (error) {
         console.error('Error adding project:', error.message);

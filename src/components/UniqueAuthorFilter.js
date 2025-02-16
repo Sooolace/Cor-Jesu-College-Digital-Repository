@@ -68,7 +68,7 @@ const UniqueAuthorFilter = ({ selectedAuthors = [], setSelectedAuthors, onApply 
   };
 
   return (
-    <div className="unique-author-filter">
+    <div className="subject-filter">
       <h3>Filter by Author</h3>
       <div className="unique-author-list">
         {authors.slice(0, 6).map((author) => (
