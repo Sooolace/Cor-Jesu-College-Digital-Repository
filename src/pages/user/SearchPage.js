@@ -23,11 +23,11 @@ function SearchPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const itemsPerPage = 5;
-  const [selectedAuthors, setSelectedAuthors] = useState(initialAuthors);
+  const [selectedAuthors, setSelectedAuthors] = useState(initialAuthors || []);
   const [selectedCategories, setSelectedCategories] = useState(initialCategories);
   const [selectedResearchAreas, setSelectedResearchAreas] = useState(initialResearchAreas);
   const [selectedTopics, setSelectedTopics] = useState(initialTopics);
-  const [selectedKeywords, setSelectedKeywords] = useState(initialKeywords);
+  const [selectedKeywords, setSelectedKeywords] = useState(initialKeywords || []);
   const [loading, setLoading] = useState(false);
 
   const totalPages = Math.ceil(totalCount / itemsPerPage); // Calculate total pages

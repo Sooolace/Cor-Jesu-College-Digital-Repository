@@ -3,7 +3,7 @@ import axios from 'axios';
 import './styles/keywordfilter.css';
 import './styles/subjectfilter.css'; // Use the same styles as the subject filter
 
-const KeywordFilter = ({ selectedKeywords, setSelectedKeywords, onApply }) => {
+const KeywordFilter = ({ selectedKeywords = [], setSelectedKeywords, onApply }) => {
   const [keywords, setKeywords] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

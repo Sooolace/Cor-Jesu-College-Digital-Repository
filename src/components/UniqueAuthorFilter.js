@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './styles/uniqueAuthorFilter.css';
 
-const UniqueAuthorFilter = ({ selectedAuthors, setSelectedAuthors, onApply }) => {
+const UniqueAuthorFilter = ({ selectedAuthors = [], setSelectedAuthors, onApply }) => {
   const [authors, setAuthors] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

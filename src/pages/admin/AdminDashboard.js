@@ -128,27 +128,6 @@ function AdminDashboard() {
             <MostViewed />
           </section>
         </div>
-
-        <Section title="Trending Topics">
-          <ul>
-            {['AI', 'Sustainability', 'Healthcare', 'Data Science'].map((keyword, index) => (
-              <li key={index}>
-                <Link to={`/projects/keyword/${keyword.toLowerCase()}`}>{keyword}</Link>
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        {/* Pagination for Recent Projects */}
-        <div className="pagination-controls">
-          <button onClick={handlePrevPage} disabled={currentPage === 1}>
-            Prev
-          </button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button onClick={handleNextPage} disabled={currentPage === totalPages}>
-            Next
-          </button>
-        </div>
       </div>
     </div>
   );

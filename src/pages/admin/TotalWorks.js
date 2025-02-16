@@ -256,7 +256,7 @@ function TotalWorks() {
                 <th>Title</th>
                 <th>Authors</th>
                 <th>Date Published</th>
-                <th>Action</th>
+                <th style={{ width: '170px' }}>Action</th> {/* Increase the width here */}
               </tr>
             </thead>
             <tbody>

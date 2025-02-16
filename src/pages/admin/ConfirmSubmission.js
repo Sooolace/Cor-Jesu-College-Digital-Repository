@@ -24,46 +24,48 @@ function ConfirmSubmission() {
         alert('No file selected or invalid file type.');
         return;
       }
-  
+
+      // Append authors and keywords as JSON strings
+      formData.append('authors', JSON.stringify(projectData.authors));
+      formData.append('keywords', JSON.stringify(projectData.keywords));
+      formData.append('study_urls', JSON.stringify(projectData.study_urls));
+
       console.log('FormData:', formData);
-  
+
       // Step 1: Submit the project data
       const projectResponse = await axios.post('http://localhost:5000/api/projects/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      
-  
+
       const projectId = projectResponse.data.project_id; // Get the project ID from the response
-  
+
       // Step 2: Submit authors
       for (const author of projectData.authors) {
         const authorResponse = await axios.post('http://localhost:5000/api/authors', { name: author });
         const authorId = authorResponse.data.author_id; // Get the author ID from the response
-  
+
         // Link project and author
         await axios.post('http://localhost:5000/api/project_authors', { project_id: projectId, author_id: authorId });
       }
-  
+
       // Step 3: Submit keywords
       for (const keyword of projectData.keywords) {
         const keywordResponse = await axios.post('http://localhost:5000/api/keywords', { keyword });
         const keywordId = keywordResponse.data.keyword_id; // Assuming the response has a keyword_id field
-  
+
         // Link project and keyword
         await axios.post('http://localhost:5000/api/project_keywords', { project_id: projectId, keyword_id: keywordId });
       }
-  
+
       alert('Submission Confirmed!');
       navigate('/');
     } catch (error) {
-      console.error('Error confirming submission:', error);
+      console.error('Error confirming submission:', error.response ? error.response.data : error.message);
       alert('An error occurred while confirming your submission. Please try again.');
     }
   };
-  
-  
 
   const handleCancel = () => {
     // Go back to the previous page
@@ -86,6 +88,7 @@ function ConfirmSubmission() {
               <p><strong>Description:</strong> {projectData.abstract}</p>
               <p><strong>Keywords:</strong> {projectData.keywords && projectData.keywords.length > 0 ? projectData.keywords.join(', ') : 'N/A'}</p>
               <p><strong>Study Url:</strong> {projectData.study_urls?.length > 0 ? projectData.study_urls.join(', ') : 'N/A'}</p>
+              <p><strong>File:</strong> {projectData.file_path?.name || 'No file selected'}</p>
             </>
           ) : (
             <p>No submission data available. Please ensure all steps are completed properly.</p>

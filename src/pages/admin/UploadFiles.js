@@ -19,7 +19,6 @@ function UploadFiles() {
       alert('Please upload a valid PDF file.');
     }
   };
-  
 
   const handleUrlChange = (e) => {
     setNewUrl(e.target.value);

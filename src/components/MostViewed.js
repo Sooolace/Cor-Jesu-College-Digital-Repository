@@ -25,7 +25,6 @@ const MostViewed = ({ searchQuery }) => {
         setMostViewedDocs(data); // No need for frontend sorting
       } catch (error) {
         console.error('Error fetching most viewed projects:', error);
-        setError('Unable to load data. Please try again later.');
       } finally {
         setIsLoading(false);
       }

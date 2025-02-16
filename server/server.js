@@ -17,6 +17,7 @@ const featuredDocumentsRouter = require('./routes/featureddocuments');
 const searchRouter = require('./routes/search');
 const projectsCategoryRouter = require('./routes/project_category'); 
 const activityLogRouter = require('./routes/activitylog');
+const uploadRouter = require('./routes/upload'); // Import the upload route
 
 require('dotenv').config();
 
@@ -27,9 +28,25 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// **Serve static files from the downloads directory**
-app.use('/downloads', express.static(path.join(__dirname, '../downloads')));
+// **Ensure downloads folder is served correctly**
+app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
 
+app.get("/downloads/:filename", (req, res) => {
+    const decodedFilename = decodeURIComponent(req.params.filename);
+
+    // Fix the file path (Remove 'server' from the path)
+    const filePath = path.join(__dirname, "..", "downloads", decodedFilename);
+
+    console.log("Decoded Filename:", decodedFilename);
+    console.log("Full Path:", filePath);
+
+    res.download(filePath, (err) => {
+        if (err) {
+            console.error("Error downloading file:", err);
+            res.status(500).send("File not found or server error.");
+        }
+    });
+});
 // Public Routes
 app.use('/api/projects', projectsRouter);
 app.use('/api/authors', authorsRouter);
@@ -41,14 +58,10 @@ app.use('/api/researchTypes', researchTypesRouter);
 app.use('/api/keywords', keywordsRouter);
 app.use('/api/project_keywords', projectKeywordsRouter);
 app.use('/api/activitylog', activityLogRouter);
-// New route for projects_category
 app.use('/api/project_category', projectsCategoryRouter);
-
-// Featured documents route
 app.use('/api/featured-documents', featuredDocumentsRouter);
-
-// Search route
 app.use('/api/search', searchRouter);
+app.use('/api', uploadRouter);
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -84,18 +97,15 @@ app.post('/api/auth/login', async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        // Set req.user
         req.user = {
             id: user.id,
             username: user.username,
             role: user.role // Assuming you have a role field in your user table
         };
 
-        // Log the login activity (this is handled by logActivity middleware)
         req.activity = 'User logged in';
         req.additionalInfo = { username: user.username };
 
-        // Proceed with sending the response after logging activity
         return res.json({ token });
 
     } catch (err) {
@@ -107,11 +117,11 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Serve static files from the React app's build folder in production
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'build')));
+    app.use(express.static(path.join(__dirname, '../build')));
 
     // Catch-all route to serve the React app for any non-API requests
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+        res.sendFile(path.join(__dirname, '../build', 'index.html'));
     });
 }
 

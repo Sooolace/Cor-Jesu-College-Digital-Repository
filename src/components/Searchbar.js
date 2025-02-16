@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
 import '../pages/user/styles/searchbar.css';
 
 function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }) {
@@ -44,6 +45,11 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
         <button className="btn-search" onClick={onSearch}>
           <FontAwesomeIcon icon={faMagnifyingGlass} />
         </button>
+
+        {/* Advanced search link */}
+        <Link to="/advanced-search" className="advanced-search-link">
+          Advanced Search
+        </Link>
       </div>
     </section>
   );

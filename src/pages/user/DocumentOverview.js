@@ -204,15 +204,16 @@ function DocumentOverview() {
             <p className="detail-title"><strong>Downloadable File:</strong></p>
             <p className="detail-content">
               {project.file_path ? (
-                // Make sure the file_path is a correct URL
                 <a 
-                  href={project.file_path} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  download // This triggers the download behavior
-                >
-                  {project.file_path.split('/').pop()} {/* Display the file name, e.g. 'researchdocu.pdf' */}
-                </a>
+  href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
+                download
+>
+  {project.file_path.split('/').pop()}
+</a>
+
+
+
+
               ) : (
                 'No Document Available'
               )}
@@ -222,12 +223,6 @@ function DocumentOverview() {
               <div className="print-button">
                 <Button onClick={handlePrintSummary}>
                   <FaPrint /> Print
-                </Button>
-              </div>
-
-              <div className="bookmark-button">
-                <Button variant={isBookmarked ? 'success' : 'secondary'} onClick={handleBookmark}>
-                  <FaBookmark /> {isBookmarked ? 'Bookmarked' : 'Add to Bookmark'}
                 </Button>
               </div>
             </div>

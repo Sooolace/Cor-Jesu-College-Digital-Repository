@@ -54,7 +54,7 @@ function AdminNavbar({ handleLogout }) {
                         onMouseEnter={() => setIsDropdownOpen(true)}
                         onMouseLeave={() => setIsDropdownOpen(false)}
                     >
-                        <span className="dropdown-link">Academics</span>
+                        <span className="dropdown-link">Research Resources</span>
                         {isDropdownOpen && (
                             <div className="dropdown-menu">
                                 <Link to="/Authors">Authors</Link>

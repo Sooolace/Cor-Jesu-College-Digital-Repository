@@ -1,17 +1,9 @@
 const express = require('express');
 const pool = require('../db'); // Database connection
-const multer = require('multer'); // For handling file uploads
 const NodeCache = require('node-cache'); // In-memory cache
 const logActivity = require('../middlewares/logActivity'); // Import log activity middleware
-const path = require('path');
 
 const router = express.Router();
-
-// Set up multer for handling file uploads
-const upload = multer({
-    dest: 'downloads/',
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-});
 
 // Initialize in-memory cache (TTL: 10 minutes)
 const cache = new NodeCache({ stdTTL: 600 });
@@ -28,57 +20,80 @@ const parseStudyUrl = (study_url) => {
 };
 
 // POST - Add a new project
-router.post('/upload', upload.single('file_path'), async (req, res) => { 
-    const { title, description_type, abstract, publication_date, study_url, category_id, keywords } = req.body;
-    const { file } = req;
+router.post('/upload', async (req, res) => { 
+    const { title, description_type, abstract, publication_date, study_urls, category_id, authors, keywords } = req.body;
 
     // Ensure required fields are present
-    if (!title || !abstract || !publication_date || !category_id) {
+    if (!title || !abstract || !publication_date) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
-        // Ensure a file was uploaded
-        if (!file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-
-        const filePath = file.path; // Path to the uploaded file
-        const studyUrlString = parseStudyUrl(study_url); // Parse study URL if provided
+        const studyUrlString = parseStudyUrl(study_urls); // Parse study URL if provided
 
         // Insert project into the database
         const query = `
-            INSERT INTO projects (title, description_type, abstract, publication_date, file_path, study_url, category_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO projects (title, description_type, abstract, publication_date, study_url)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *
         `;
-        const result = await pool.query(query, [title, description_type, abstract, publication_date, filePath, studyUrlString, category_id]);
+        const result = await pool.query(query, [title, description_type, abstract, publication_date, studyUrlString]);
 
         const projectId = result.rows[0].project_id;
+
+        // Insert authors if provided
+        if (authors && Array.isArray(authors) && authors.length > 0) {
+            const insertAuthorsQuery = `
+                INSERT INTO authors (name) 
+                VALUES ($1)
+                RETURNING author_id
+            `;
+            const authorInsertPromises = authors.map((author) => 
+                pool.query(insertAuthorsQuery, [author])
+            );
+            const authorResults = await Promise.all(authorInsertPromises);
+
+            // Link project and authors
+            const insertProjectAuthorsQuery = `
+                INSERT INTO project_authors (project_id, author_id) 
+                VALUES ($1, $2)
+            `;
+            const projectAuthorInsertPromises = authorResults.map((authorResult) => 
+                pool.query(insertProjectAuthorsQuery, [projectId, authorResult.rows[0].author_id])
+            );
+            await Promise.all(projectAuthorInsertPromises);
+        }
 
         // Insert keywords if provided
         if (keywords && Array.isArray(keywords) && keywords.length > 0) {
             const insertKeywordsQuery = `
-                INSERT INTO keywords (project_id, keyword) 
-                VALUES ($1, $2)
+                INSERT INTO keywords (keyword) 
+                VALUES ($1)
+                RETURNING keyword_id
             `;
             const keywordInsertPromises = keywords.map((keyword) => 
-                pool.query(insertKeywordsQuery, [projectId, keyword])
+                pool.query(insertKeywordsQuery, [keyword])
             );
-            await Promise.all(keywordInsertPromises);
+            const keywordResults = await Promise.all(keywordInsertPromises);
+
+            // Link project and keywords
+            const insertProjectKeywordsQuery = `
+                INSERT INTO project_keywords (project_id, keyword_id) 
+                VALUES ($1, $2)
+            `;
+            const projectKeywordInsertPromises = keywordResults.map((keywordResult) => 
+                pool.query(insertProjectKeywordsQuery, [projectId, keywordResult.rows[0].keyword_id])
+            );
+            await Promise.all(projectKeywordInsertPromises);
         }
 
-        // Respond with the newly created project, including the file_path
-        res.status(201).json({
-            ...result.rows[0],
-            file_path: filePath,  // Add file_path to the response
-        });
+        // Respond with the newly created project
+        res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Error adding project:', error.message);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error', details: error.message });
     }
 });
-
 
 // GET - Fetch all projects (excluding archived projects) without cache
 router.get('/', async (req, res) => {
@@ -179,7 +194,6 @@ router.get('/mostviewed', async (req, res) => {
         res.status(500).json({ error: 'Failed to retrieve most-viewed projects' });
     }
 });
-
 
 //GET ARCHIVED PROJECTS
 router.get('/archived-projects', async (req, res) => {
@@ -301,10 +315,8 @@ router.put('/:project_id/unarchive', async (req, res) => {
     }
 });
 
-
-
 // PUT - Update project by project_id
-router.put('/:project_id', upload.single('file_path'), async (req, res) => {
+router.put('/:project_id', async (req, res) => {
     const { project_id } = req.params;
     const {
         title,
@@ -319,21 +331,19 @@ router.put('/:project_id', upload.single('file_path'), async (req, res) => {
     } = req.body;
 
     try {
-        const filePath = req.file ? req.file.path : undefined;
         const studyUrlString = study_url;
 
         const query = `
             UPDATE projects 
             SET title = $1, publication_date = $2, abstract = $3, 
                 study_url = $4, category_id = $5, research_area_id = $6, 
-                topic_id = $7, research_type_id = $8, 
-                file_path = COALESCE($9, file_path) 
-            WHERE project_id = $10 
+                topic_id = $7, research_type_id = $8
+            WHERE project_id = $9 
             RETURNING *
         `;
         const params = [
             title, publication_date, abstract, studyUrlString,
-            category_id, research_area_id, topic_id, research_type_id, filePath, project_id
+            category_id, research_area_id, topic_id, research_type_id, project_id
         ];
         const result = await pool.query(query, params);
 
@@ -409,7 +419,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-
 router.get('/most_viewed', async (req, res) => {
     const query = `
         SELECT p.*, 
@@ -434,7 +443,6 @@ router.get('/most_viewed', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 
 // DELETE - Delete project by project_id
 router.delete('/:project_id', async (req, res) => {
@@ -521,7 +529,6 @@ router.get('/departments/:departmentName', async (req, res) => {
     }
 });
 
-
 // GET - Fetch all projects (excluding archived projects) with featured projects at the top
 router.get('/projects/featured-proj', async (req, res) => {
     try {
@@ -543,14 +550,12 @@ router.get('/projects/featured-proj', async (req, res) => {
 
         const result = await pool.query(searchQuery);
 
-
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Database query error:', error.message);
         res.status(500).json({ error: 'Failed to retrieve projects' });
     }
 });
-
 
 // GET - Fetch all featured projects (excluding archived projects) with featured projects at the top
 router.get('/projects/active-featured', async (req, res) => {
@@ -622,6 +627,5 @@ router.put('/:projectId/toggle-featured', async (req, res) => {
         res.status(500).json({ error: 'Failed to update featured status' });
     }
 });
-
 
 module.exports = router;

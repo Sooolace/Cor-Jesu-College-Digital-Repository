@@ -3,14 +3,13 @@ import React, { useEffect } from 'react';
   import AdminNavbar from './pages/admin/components/AdminNavbar';
   import Navbar from './components/navbar';
   import Home from './pages/user/Home';
-  import AdvanceSearch from './pages/user/Advance_search';
+  import AdvancedSearch from './pages/user/AdvancedSearch';
   import SearchPage from './pages/user/SearchPage';
   import DocumentOverview from './pages/user/DocumentOverview';
   import Register from './pages/user/Register';
   import Topics from './components/Topics';
   import AuthorOverview from './pages/user/AuthorOverview';
   import AdminDashboard from './pages/admin/AdminDashboard';
-  import UploadProject from './pages/admin/UploadProject';
   import UploadDetails from './pages/admin/UploadDetails';
   import UploadFiles from './pages/admin/UploadFiles';
   import DescribeWork from './pages/admin/DescribeWork';
@@ -117,7 +116,7 @@ import React, { useEffect } from 'react';
         <Routes>
           <Route path="/login" element={<Login setIsAdmin={setIsAdmin} />} />
           <Route path="/" element={<MemoizedHome />} />
-          <Route path="/AdvanceSearch" element={<AdvanceSearch />} />
+          <Route path="/advanced-search" element={<AdvancedSearch />} />
           <Route path="/Search" element={<MemoizedSearchPage />} />
           <Route path="/DocumentOverview/:projectId" element={<MemoizedDocumentOverview />} />
           <Route path="/AuthorOverview/:authorId" element={<MemoizedAuthorOverview />} />
@@ -136,7 +135,6 @@ import React, { useEffect } from 'react';
           {isAdmin && (
             <>
               <Route path="/admindashboard" element={<AdminDashboard />} />
-              <Route path="/admin/UploadProject" element={<UploadProject />} />
               <Route path="/admin/UploadDetails" element={<UploadDetails />} />
               <Route path="/admin/DescribeWork" element={<DescribeWork />} />
               <Route path="/admin/DescribeWork/upload-files" element={<UploadFiles />} />
