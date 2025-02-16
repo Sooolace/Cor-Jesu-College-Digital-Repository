@@ -66,50 +66,24 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
 
         // Insert authors if provided
         if (authors && Array.isArray(authors) && authors.length > 0) {
-            const insertAuthorsQuery = `
-                INSERT INTO authors (name) 
-                VALUES ($1)
-                RETURNING author_id
-            `;
-            const authorInsertPromises = authors.map((author) => 
-                pool.query(insertAuthorsQuery, [author])
-            );
-            const authorResults = await Promise.all(authorInsertPromises);
-
-            console.log('Authors inserted:', authorResults.map(result => result.rows[0].author_id));
-
-            // Link project and authors
             const insertProjectAuthorsQuery = `
                 INSERT INTO project_authors (project_id, author_id) 
-                VALUES ($1, $2)
+                VALUES ($1, (SELECT author_id FROM authors WHERE name = $2))
             `;
-            const projectAuthorInsertPromises = authorResults.map((authorResult) => 
-                pool.query(insertProjectAuthorsQuery, [projectId, authorResult.rows[0].author_id])
+            const projectAuthorInsertPromises = authors.map((authorName) => 
+                pool.query(insertProjectAuthorsQuery, [projectId, authorName])
             );
             await Promise.all(projectAuthorInsertPromises);
         }
 
         // Insert keywords if provided
         if (keywords && Array.isArray(keywords) && keywords.length > 0) {
-            const insertKeywordsQuery = `
-                INSERT INTO keywords (keyword) 
-                VALUES ($1)
-                RETURNING keyword_id
-            `;
-            const keywordInsertPromises = keywords.map((keyword) => 
-                pool.query(insertKeywordsQuery, [keyword])
-            );
-            const keywordResults = await Promise.all(keywordInsertPromises);
-
-            console.log('Keywords inserted:', keywordResults.map(result => result.rows[0].keyword_id));
-
-            // Link project and keywords
             const insertProjectKeywordsQuery = `
                 INSERT INTO project_keywords (project_id, keyword_id) 
-                VALUES ($1, $2)
+                VALUES ($1, (SELECT keyword_id FROM keywords WHERE keyword = $2))
             `;
-            const projectKeywordInsertPromises = keywordResults.map((keywordResult) => 
-                pool.query(insertProjectKeywordsQuery, [projectId, keywordResult.rows[0].keyword_id])
+            const projectKeywordInsertPromises = keywords.map((keywordName) => 
+                pool.query(insertProjectKeywordsQuery, [projectId, keywordName])
             );
             await Promise.all(projectKeywordInsertPromises);
         }

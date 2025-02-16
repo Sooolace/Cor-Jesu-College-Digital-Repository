@@ -64,6 +64,7 @@ function UploadFiles() {
       study_urls: studyUrls, // Add study URLs
       file_path: file, // Include the uploaded file if any
       keywords: projectData.keywords, // Ensure keywords are included
+      authors: projectData.authors, // Ensure authors are included
     };
 
     // Save form data to localStorage

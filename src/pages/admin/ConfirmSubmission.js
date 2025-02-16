@@ -37,15 +37,8 @@ function ConfirmSubmission() {
         formData.append('file_path', ''); // Append an empty string if no file is uploaded
       }
 
-      // Append authors and keywords as JSON strings
-      formData.append('authors', JSON.stringify(projectData.authors));
-      formData.append('keywords', JSON.stringify(projectData.keywords)); // Ensure keywords are added
+      // Append study URLs as JSON strings
       formData.append('study_urls', JSON.stringify(projectData.study_urls));
-
-      // Log the FormData entries for debugging
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
 
       // Step 1: Submit the project data
       const projectResponse = await axios.post('http://localhost:5000/api/upload', formData, {
@@ -55,6 +48,46 @@ function ConfirmSubmission() {
       });
 
       const projectId = projectResponse.data.project_id; // Get the project ID from the response
+
+      // Step 2: Submit authors
+      for (const author of projectData.authors) {
+        let authorId;
+        try {
+          const authorResponse = await axios.post('http://localhost:5000/api/authors', { name: author.name });
+          authorId = authorResponse.data.author_id; // Get the author ID from the response
+        } catch (error) {
+          if (error.response && error.response.status === 400 && error.response.data.error === 'Author with this name already exists') {
+            // Fetch the existing author ID
+            const existingAuthorResponse = await axios.get(`http://localhost:5000/api/authors/name/${author.name}`);
+            authorId = existingAuthorResponse.data.author_id;
+          } else {
+            throw error;
+          }
+        }
+
+        // Link project and author
+        await axios.post('http://localhost:5000/api/project_authors', { project_id: projectId, author_id: authorId });
+      }
+
+      // Step 3: Submit keywords
+      for (const keyword of projectData.keywords) {
+        let keywordId;
+        try {
+          const keywordResponse = await axios.post('http://localhost:5000/api/keywords', { keyword: keyword.name });
+          keywordId = keywordResponse.data.keyword_id; // Assuming the response has a keyword_id field
+        } catch (error) {
+          if (error.response && error.response.status === 400 && error.response.data.error === 'Keyword with this name already exists') {
+            // Fetch the existing keyword ID
+            const existingKeywordResponse = await axios.get(`http://localhost:5000/api/keywords/by-name/${keyword.name}`);
+            keywordId = existingKeywordResponse.data.keyword_id;
+          } else {
+            throw error;
+          }
+        }
+
+        // Link project and keyword
+        await axios.post('http://localhost:5000/api/project_keywords', { project_id: projectId, keyword_id: keywordId });
+      }
 
       // Clear saved form data from localStorage
       localStorage.removeItem('describeWorkFormData');
@@ -84,10 +117,10 @@ function ConfirmSubmission() {
             <>
               <p>Please review your submission before confirming.</p>
               <p><strong>Title:</strong> {projectData.title}</p>
-              <p><strong>Authors:</strong> {projectData.authors?.length > 0 ? projectData.authors.join(', ') : 'N/A'}</p>
+              <p><strong>Authors:</strong> {projectData.authors?.length > 0 ? projectData.authors.map(author => author.name).join(', ') : 'N/A'}</p>
               <p><strong>Type:</strong> {projectData.description_type}</p>
               <p><strong>Description:</strong> {projectData.abstract}</p>
-              <p><strong>Keywords:</strong> {projectData.keywords && projectData.keywords.length > 0 ? projectData.keywords.join(', ') : 'N/A'}</p>
+              <p><strong>Keywords:</strong> {projectData.keywords && projectData.keywords.length > 0 ? projectData.keywords.map(keyword => keyword.name).join(', ') : 'N/A'}</p>
               <p><strong>Study Url:</strong> {projectData.study_urls?.length > 0 ? projectData.study_urls.join(', ') : 'N/A'}</p>
               <p><strong>File:</strong> {projectData.file_path?.name || 'No file selected'}</p>
             </>

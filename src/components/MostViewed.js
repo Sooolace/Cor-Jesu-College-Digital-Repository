@@ -33,6 +33,31 @@ const MostViewed = ({ searchQuery }) => {
     fetchMostViewed();
   }, []);
 
+  // Function to update view count
+  const updateViewCount = async (projectId) => {
+    const lastViewed = localStorage.getItem(`lastViewed_${projectId}`);
+    const now = new Date().getTime();
+    const viewInterval = 60 * 60 * 1000; // 1 hour
+
+    if (!lastViewed || now - lastViewed > viewInterval) {
+      try {
+        console.log(`Updating view count for project ID: ${projectId}`);
+        const response = await fetch(`/api/projects/updateviewcount/${projectId}`, {
+          method: 'POST',
+        });
+        if (!response.ok) {
+          throw new Error('Failed to update view count');
+        }
+        localStorage.setItem(`lastViewed_${projectId}`, now);
+        console.log(`View count updated for project ID: ${projectId}`);
+      } catch (error) {
+        console.error('Error updating view count:', error);
+      }
+    } else {
+      console.log(`View count not updated for project ID: ${projectId} due to view interval`);
+    }
+  };
+
   // Pagination Logic
   const totalPages = Math.ceil(mostViewedDocs.length / itemsPerPage);
   const displayedDocs = mostViewedDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -73,7 +98,10 @@ const MostViewed = ({ searchQuery }) => {
                       <React.Fragment key={doc.project_id}>
                         <tr>
                           <td>
-                            <a href={`/DocumentOverview/${doc.project_id}`}>
+                            <a
+                              href={`/DocumentOverview/${doc.project_id}`}
+                              onClick={() => updateViewCount(doc.project_id)}
+                            >
                               {doc.title}
                             </a>
                           </td>

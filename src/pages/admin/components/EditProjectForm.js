@@ -123,12 +123,36 @@ function EditProjectForm({ projectId, onClose }) {
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
-    
+
+        const updatedProjectData = {
+            ...formData,
+            authors: selectedAuthors.map(authorId => {
+                const author = authors.find(a => a.author_id === authorId);
+                return { id: authorId, name: author ? author.name : '' };
+            }),
+            keywords: selectedKeywords.map(keywordId => {
+                const keyword = keywords.find(k => k.keyword_id === keywordId);
+                return { id: keywordId, name: keyword ? keyword.keyword : '' };
+            }),
+            departments: selectedDepartments.map(departmentId => {
+                const department = categories.find(c => c.category_id === departmentId);
+                return { id: departmentId, name: department ? department.name : '' };
+            }),
+        };
+
         try {
-            const isSuccess = await handleSubmit(event); // Ensure handleSubmit returns true on success
-            console.log('Submission success:', isSuccess); // Add debugging log here
-            if (isSuccess) {
+            const response = await fetch(`/api/projects/${projectId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedProjectData),
+            });
+
+            if (response.ok) {
                 setSuccessModal(true); // Show success modal if the form submission is successful
+            } else {
+                throw new Error('Failed to update the project');
             }
         } catch (error) {
             console.error('Error in form submission:', error); // Log any errors
@@ -215,21 +239,7 @@ function EditProjectForm({ projectId, onClose }) {
                     >
                         Add New Keyword
                     </a>
-                </div>
-
-                {/* Departments */}
-                <div className="mb-3">
-                    <label htmlFor="formDepartments" className="form-label">Departments</label>
-                    <Select
-                        id="formDepartments"
-                        isMulti
-                        options={departmentOptions}
-                        value={departmentOptions.filter(option => selectedDepartments.includes(option.value))}
-                        onChange={handleDepartmentChange}
-                        isClearable
-                        placeholder="Select departments..."
-                    />
-                </div>        
+                </div>     
 
                 {/* Publication Date and Study URL */}
                 <div className="row mb-3">

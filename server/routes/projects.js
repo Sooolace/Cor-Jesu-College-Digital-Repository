@@ -327,7 +327,8 @@ router.put('/:project_id', async (req, res) => {
         category_id,
         research_area_id,
         topic_id,
-        research_type_id
+        research_type_id,
+        authors // Add authors to the request body
     } = req.body;
 
     try {
@@ -348,6 +349,39 @@ router.put('/:project_id', async (req, res) => {
         const result = await pool.query(query, params);
 
         if (!result.rows.length) return res.status(404).json({ error: 'Project not found' });
+
+        // Update authors
+        if (authors && Array.isArray(authors) && authors.length > 0) {
+            // Delete existing authors
+            await pool.query('DELETE FROM project_authors WHERE project_id = $1', [project_id]);
+
+            // Insert new authors
+            const insertProjectAuthorsQuery = `
+                INSERT INTO project_authors (project_id, author_id) 
+                VALUES ($1, (SELECT author_id FROM authors WHERE name = $2))
+            `;
+            const projectAuthorInsertPromises = authors.map((authorName) => 
+                pool.query(insertProjectAuthorsQuery, [project_id, authorName])
+            );
+            await Promise.all(projectAuthorInsertPromises);
+        }
+
+        // Update keywords
+        if (keywords && Array.isArray(keywords) && keywords.length > 0) {
+            // Delete existing keywords
+            await pool.query('DELETE FROM project_keywords WHERE project_id = $1', [project_id]);
+
+            // Insert new keywords
+            const insertProjectKeywordsQuery = `
+                INSERT INTO project_keywords (project_id, keyword_id) 
+                VALUES ($1, (SELECT keyword_id FROM keywords WHERE keyword = $2))
+            `;
+            const projectKeywordInsertPromises = keywords.map((keywordName) => 
+                pool.query(insertProjectKeywordsQuery, [project_id, keywordName])
+            );
+            await Promise.all(projectKeywordInsertPromises);
+        }
+
         res.status(200).json(result.rows[0]);
 
         // Clear the cache after updating a project

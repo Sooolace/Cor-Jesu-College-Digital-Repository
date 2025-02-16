@@ -24,9 +24,6 @@ router.get(
     }
 );
 
-
-
-
 // POST - Add a new keyword
 router.post('/', async (req, res) => {
     const { keyword } = req.body; // Expecting a single keyword
@@ -36,6 +33,12 @@ router.post('/', async (req, res) => {
     }
 
     try {
+        // Check if the keyword already exists
+        const existingKeyword = await pool.query('SELECT * FROM keywords WHERE keyword = $1', [keyword]);
+        if (existingKeyword.rows.length > 0) {
+            return res.status(400).json({ error: 'Keyword with this name already exists' });
+        }
+
         const result = await pool.query(
             'INSERT INTO keywords (keyword) VALUES ($1) RETURNING *',
             [keyword]
@@ -141,7 +144,5 @@ router.get('/by-name/:keyword_name', async (req, res) => {
         res.status(500).json({ error: 'Failed to retrieve keyword' });
     }
 });
-
-
 
 module.exports = router;

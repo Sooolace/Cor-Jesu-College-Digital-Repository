@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './styles/upload.css';
 import { Uploadform } from './scripts/Uploadform';
 import StepTracker from './components/steptracker';
+import Select from 'react-select';
 
 function DescribeWork() {
   const navigate = useNavigate();
@@ -23,7 +24,10 @@ function DescribeWork() {
   const [pubDay, setPubDay] = useState('');
   const [pubYear, setPubYear] = useState('');
   const [descriptionType, setDescriptionType] = useState('abstract');
-  const [keywords, setKeywords] = useState(['']); // Initialize with one empty keyword input
+  const [allAuthors, setAllAuthors] = useState([]);
+  const [allKeywords, setAllKeywords] = useState([]);
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
+  const [selectedKeywords, setSelectedKeywords] = useState([]);
 
   useEffect(() => {
     // Load saved form data from localStorage
@@ -36,8 +40,26 @@ function DescribeWork() {
       setPubDay(savedData.pubDay || '');
       setPubYear(savedData.pubYear || '');
       setDescriptionType(savedData.descriptionType || 'abstract');
-      setKeywords(savedData.keywords || ['']);
+      setSelectedAuthors(savedData.authors || []);
+      setSelectedKeywords(savedData.keywords || []);
     }
+
+    // Fetch all authors and keywords
+    const fetchAuthorsAndKeywords = async () => {
+      try {
+        const authorsResponse = await fetch('/api/authors');
+        const authorsData = await authorsResponse.json();
+        setAllAuthors(authorsData);
+
+        const keywordsResponse = await fetch('/api/keywords');
+        const keywordsData = await keywordsResponse.json();
+        setAllKeywords(keywordsData);
+      } catch (error) {
+        console.error('Error fetching authors or keywords:', error);
+      }
+    };
+
+    fetchAuthorsAndKeywords();
 
     // Add beforeunload event listener
     const handleBeforeUnload = (event) => {
@@ -51,21 +73,23 @@ function DescribeWork() {
     };
   }, [setTitle, setAuthors, setAbstract]);
 
-  const handleKeywordChange = (index, event) => {
-    const updatedKeywords = [...keywords];
-    updatedKeywords[index] = event.target.value;
-    setKeywords(updatedKeywords);
+  const handleAuthorSelectChange = (selected) => {
+    setSelectedAuthors(selected ? selected.map(author => author.value) : []);
   };
 
-  const addKeyword = () => {
-    setKeywords([...keywords, '']);
+  const handleKeywordChange = (selected) => {
+    setSelectedKeywords(selected ? selected.map(keyword => keyword.value) : []);
   };
 
-  const removeKeyword = (index) => {
-    const updatedKeywords = [...keywords];
-    updatedKeywords.splice(index, 1);
-    setKeywords(updatedKeywords);
-  };
+  const authorOptions = allAuthors.map(author => ({
+    value: author.author_id,
+    label: author.name
+  }));
+
+  const keywordOptions = allKeywords.map(keyword => ({
+    value: keyword.keyword_id,
+    label: keyword.keyword
+  }));
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -76,11 +100,17 @@ function DescribeWork() {
     // Prepare data for the project
     const projectData = {
       title,
-      authors,
+      authors: selectedAuthors.map(authorId => {
+        const author = allAuthors.find(a => a.author_id === authorId);
+        return { id: authorId, name: author ? author.name : '' };
+      }),
       description_type: descriptionType,
       abstract,
       publication_date: publicationDate,
-      keywords: keywords.filter(keyword => keyword.trim() !== ''), // Ensure keywords are included
+      keywords: selectedKeywords.map(keywordId => {
+        const keyword = allKeywords.find(k => k.keyword_id === keywordId);
+        return { id: keywordId, name: keyword ? keyword.keyword : '' };
+      }),
     };
 
     // Save form data to localStorage
@@ -122,32 +152,14 @@ function DescribeWork() {
             {/* Multiple Authors */}
             <div className="form-group mb-3">
               <label className="form-label">Author(s) Name:</label>
-              <div id="authorList">
-                {authors.map((author, index) => (
-                  <div key={index} className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter author name"
-                      value={author}
-                      onChange={(e) => handleAuthorChange(index, e)}
-                      required
-                    />
-                    {index > 0 && (
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => removeAuthor(index)}
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <button type="button" className="btn btn-outline-secondary btn-sm" onClick={addAuthor}>
-                Add Another Author
-              </button>
+              <Select
+                isMulti
+                options={authorOptions}
+                value={authorOptions.filter(option => selectedAuthors.includes(option.value))}
+                onChange={handleAuthorSelectChange}
+                isClearable
+                placeholder="Select authors..."
+              />
             </div>
 
             {/* Radio Buttons for Description Type */}
@@ -253,31 +265,14 @@ function DescribeWork() {
             {/* Keywords */}
             <div className="form-group mb-3">
               <label className="form-label">Keywords:</label>
-              <div id="keywordsList">
-                {keywords.map((keyword, index) => (
-                  <div key={index} className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter keyword"
-                      value={keyword}
-                      onChange={(e) => handleKeywordChange(index, e)}
-                    />
-                    {index > 0 && (
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => removeKeyword(index)}
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <button type="button" className="btn btn-outline-secondary btn-sm" onClick={addKeyword}>
-                Add Another Keyword
-              </button>
+              <Select
+                isMulti
+                options={keywordOptions}
+                value={keywordOptions.filter(option => selectedKeywords.includes(option.value))}
+                onChange={handleKeywordChange}
+                isClearable
+                placeholder="Select keywords..."
+              />
             </div>
 
             {/* Button Container */}
