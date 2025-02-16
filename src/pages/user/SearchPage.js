@@ -15,13 +15,15 @@ function SearchPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { query: initialQuery, option: initialOption, page: initialPage, authors: initialAuthors, categories: initialCategories, researchAreas: initialResearchAreas, topics: initialTopics, keywords: initialKeywords } = location.state || { query: '', option: 'allfields', page: 1, authors: [], categories: [], researchAreas: [], topics: [], keywords: [] };
+  // Load initial state from localStorage if available
+  const storedState = JSON.parse(localStorage.getItem('searchState')) || {};
+  const { query: initialQuery, option: initialOption, page: initialPage, authors: initialAuthors, categories: initialCategories, researchAreas: initialResearchAreas, topics: initialTopics, keywords: initialKeywords, years: initialYears, totalCount: initialTotalCount, filteredData: initialFilteredData } = storedState;
 
   const [searchQuery, setSearchQuery] = useState(initialQuery || '');
   const [typedQuery, setTypedQuery] = useState(initialQuery || '');
   const [searchOption, setSearchOption] = useState(initialOption);
-  const [filteredData, setFilteredData] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [filteredData, setFilteredData] = useState(initialFilteredData || []);
+  const [totalCount, setTotalCount] = useState(initialTotalCount || 0);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const itemsPerPage = 5;
   const [selectedAuthors, setSelectedAuthors] = useState(initialAuthors || []);
@@ -98,6 +100,24 @@ function SearchPage() {
     );
   }, [searchTrigger, currentPage]); // Remove selectedAuthors from the dependency array
 
+  useEffect(() => {
+    // Save current state to localStorage
+    const stateToStore = {
+      query: searchQuery,
+      option: searchOption,
+      page: currentPage,
+      authors: selectedAuthors,
+      categories: selectedCategories,
+      researchAreas: selectedResearchAreas,
+      topics: selectedTopics,
+      keywords: selectedKeywords,
+      years: selectedYears,
+      totalCount,
+      filteredData,
+    };
+    localStorage.setItem('searchState', JSON.stringify(stateToStore));
+  }, [searchQuery, searchOption, currentPage, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, selectedYears, totalCount, filteredData]);
+
   const handleSearchChange = (query) => {
     setTypedQuery(query);
   };
@@ -131,6 +151,7 @@ function SearchPage() {
     setTypedQuery('');
     setCurrentPage(1);
     setSearchTrigger((prev) => prev + 1);
+    localStorage.removeItem('searchState'); // Clear localStorage
   };
 
   const handleApplyAuthorFilters = (authors) => {

@@ -18,6 +18,17 @@ function UploadFiles() {
       setFile(savedData.file || null);
       setStudyUrls(savedData.studyUrls || []);
     }
+
+    // Add beforeunload event listener
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = 'You have not completed uploading yet, are you sure you want to discontinue?';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const handleFileChange = (e) => {
@@ -60,6 +71,12 @@ function UploadFiles() {
 
     // Navigate to confirmation page with project data
     navigate('/admin/DescribeWork/upload-files/Confirm', { state: { projectData: updatedProjectData } });
+  };
+
+  const handleCancel = () => {
+    if (window.confirm('You have not completed uploading yet, are you sure you want to discontinue?')) {
+      navigate('/admindashboard'); // Redirect to /admindashboard
+    }
   };
 
   return (
@@ -130,7 +147,7 @@ function UploadFiles() {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => navigate(-1)} // Go back to the previous page
+                onClick={handleCancel} // Go back to the previous page
               >
                 Cancel
               </button>

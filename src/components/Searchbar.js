@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import '../pages/user/styles/searchbar.css';
 
 function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }) {
-  
+  // Load initial state from localStorage if available
+  useEffect(() => {
+    const storedState = JSON.parse(localStorage.getItem('searchState')) || {};
+    if (storedState.query) {
+      onChange(storedState.query);
+    }
+    if (storedState.option) {
+      onOptionChange(storedState.option);
+    }
+  }, [onChange, onOptionChange]);
+
   // Function to handle pressing the Enter key
   const handleKeyPressInput = (e) => {
     if (e.key === 'Enter') {

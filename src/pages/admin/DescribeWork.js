@@ -38,6 +38,17 @@ function DescribeWork() {
       setDescriptionType(savedData.descriptionType || 'abstract');
       setKeywords(savedData.keywords || ['']);
     }
+
+    // Add beforeunload event listener
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = 'You have not completed uploading yet, are you sure you want to discontinue?';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [setTitle, setAuthors, setAbstract]);
 
   const handleKeywordChange = (index, event) => {
@@ -81,7 +92,9 @@ function DescribeWork() {
 
   // Handle Cancel logic to redirect to /admindashboard
   const handleCancel = () => {
-    navigate('/admindashboard'); // Redirect to /admindashboard
+    if (window.confirm('You have not completed uploading yet, are you sure you want to discontinue?')) {
+      navigate('/admindashboard'); // Redirect to /admindashboard
+    }
   };
 
   return (

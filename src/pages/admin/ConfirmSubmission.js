@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StepTracker from './components/steptracker';
 import axios from 'axios';
@@ -7,6 +7,19 @@ function ConfirmSubmission() {
   const navigate = useNavigate();
   const location = useLocation();
   const projectData = location.state?.projectData; // Retrieve project data
+
+  useEffect(() => {
+    // Add beforeunload event listener
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = 'You have not completed uploading yet, are you sure you want to discontinue?';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const handleConfirm = async () => {
     try {
