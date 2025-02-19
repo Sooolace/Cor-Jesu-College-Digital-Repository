@@ -368,6 +368,114 @@ router.get('/search/keywords', async (req, res) => {
 
 
 // GET - Search projects by abstract with pagination and total count
+// GET - Advanced search with AND/OR operators
+router.get('/advanced', async (req, res) => {
+  const { page = 1, itemsPerPage = 5, searchFields = [], dateRange = {} } = req.query;
+  const offset = (page - 1) * itemsPerPage;
+
+  try {
+    let searchQuery = `
+      SELECT p.*, 
+             STRING_AGG(DISTINCT a.name, ', ') AS authors, 
+             STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
+      FROM projects p
+      LEFT JOIN project_authors pa ON p.project_id = pa.project_id
+      LEFT JOIN authors a ON pa.author_id = a.author_id
+      LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
+      LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
+      WHERE p.is_archived = false
+    `;
+
+    let countQuery = `
+      SELECT COUNT(DISTINCT p.project_id) AS total_count
+      FROM projects p
+      LEFT JOIN project_authors pa ON p.project_id = pa.project_id
+      LEFT JOIN authors a ON pa.author_id = a.author_id
+      LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
+      LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
+      WHERE p.is_archived = false
+    `;
+
+    const queryParams = [];
+    let conditions = [];
+
+    // Process each search field
+    searchFields.forEach((field, index) => {
+      if (field.value.trim()) {
+        queryParams.push(`%${field.value}%`);
+        let condition = '';
+        
+        switch (field.field) {
+          case 'title':
+            condition = `p.title ILIKE $${queryParams.length}`;
+            break;
+          case 'author':
+            condition = `a.name ILIKE $${queryParams.length}`;
+            break;
+          case 'keywords':
+            condition = `k.keyword ILIKE $${queryParams.length}`;
+            break;
+          case 'abstract':
+            condition = `p.abstract ILIKE $${queryParams.length}`;
+            break;
+          case 'category':
+            condition = `c.name ILIKE $${queryParams.length}`;
+            break;
+        }
+
+        if (index === 0) {
+          conditions.push(condition);
+        } else {
+          conditions.push(`${field.operator} ${condition}`);
+        }
+      }
+    });
+
+    // Add date range conditions if provided
+    if (dateRange.startDate) {
+      queryParams.push(dateRange.startDate);
+      conditions.push(`AND p.publication_date >= $${queryParams.length}`);
+    }
+    if (dateRange.endDate) {
+      queryParams.push(dateRange.endDate);
+      conditions.push(`AND p.publication_date <= $${queryParams.length}`);
+    }
+
+    // Add conditions to queries
+    if (conditions.length > 0) {
+      const whereClause = ` AND (${conditions.join(' ')})`;
+      searchQuery += whereClause;
+      countQuery += whereClause;
+    }
+
+    // Add group by, order by, limit and offset
+    searchQuery += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    
+    // Add limit and offset params
+    queryParams.push(itemsPerPage, offset);
+
+    // Execute queries
+    const countResult = await pool.query(countQuery, queryParams.slice(0, -2));
+    const result = await pool.query(searchQuery, queryParams);
+
+    // Log the activity
+    req.activity = 'User performed advanced search';
+    req.additionalInfo = JSON.stringify({ searchFields, dateRange });
+    req.user = req.user || { id: 0, role: 'normal' };
+
+    logActivity(req, res, () => {
+      res.status(200).json({
+        totalCount: parseInt(countResult.rows[0].total_count, 10),
+        data: result.rows
+      });
+    });
+
+  } catch (error) {
+    console.error('Error performing advanced search:', error);
+    res.status(500).json({ error: 'Failed to perform advanced search', details: error.message });
+  }
+});
+
 router.get('/search/abstract', async (req, res) => {
     const { query, page = 1, itemsPerPage = 5 } = req.query; // Pagination params
     const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination

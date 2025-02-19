@@ -20,17 +20,26 @@
 /* Search input field */
 .searchBar {
   flex: 1; /* Allow the input field to grow and take available space */
-  min-width: 80px; /* Ensure a minimum size */
+  min-width: 200px; /* Increased minimum size for stability */
+  max-width: 600px; /* Maximum width to maintain consistency */
+  height: 45px; /* Fixed height to match other elements */
   padding: 10px 15px;
   font-size: 16px;
-  border: 1px solid #ccc; /* Light border */
+  border: 1px solid #ccc;
   border-radius: 4px;
   outline: none;
-  transition: border-color 0.3s ease;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+  margin: 0; /* Remove any margin that might cause shifting */
+  position: relative; /* Enable positioning context */
+  -webkit-appearance: none; /* Remove default styling on iOS */
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .searchBar:focus {
-  border-color: #007bff; /* Highlight border on focus */
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.1); /* Subtle focus shadow */
 }
 
 /* Search button */

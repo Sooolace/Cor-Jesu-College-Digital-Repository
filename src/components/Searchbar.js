@@ -1,26 +1,25 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import '../pages/user/styles/searchbar.css';
 
 function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }) {
-  // Load initial state from localStorage if available
-  useEffect(() => {
-    const storedState = JSON.parse(localStorage.getItem('searchState')) || {};
-    if (storedState.query) {
-      onChange(storedState.query);
-    }
-    if (storedState.option) {
-      onOptionChange(storedState.option);
-    }
-  }, [onChange, onOptionChange]);
-
   // Function to handle pressing the Enter key
   const handleKeyPressInput = (e) => {
     if (e.key === 'Enter') {
-      onSearch(e);  // Pass the event to SearchPage handler
+      onSearch(e);
     }
+  };
+
+  // Function to handle input changes
+  const handleInputChange = (e) => {
+    onChange(e.target.value);
+  };
+
+  // Function to handle option changes
+  const handleOptionChange = (e) => {
+    onOptionChange(e.target.value);
   };
 
   return (
@@ -30,7 +29,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
           id="searchOptions"
           className="search-options"
           value={selectedOption}
-          onChange={(e) => onOptionChange(e.target.value)}
+          onChange={handleOptionChange}
         >
           <option value="allfields">All Fields</option>
           <option value="title">Title</option>
@@ -40,23 +39,20 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
           <option value="category">Category</option>
         </select>
 
-        {/* Input field with onKeyPress event */}
         <input
           type="text"
           id="searchBar"
           className="searchBar"
           placeholder="Search for..."
-          value={query}
-          onChange={(e) => onChange(e.target.value)}
+          value={query || ''}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPressInput}
         />
 
-        {/* Search button */}
         <button className="btn-search" onClick={onSearch}>
           <FontAwesomeIcon icon={faMagnifyingGlass} />
         </button>
 
-        {/* Advanced search link */}
         <Link to="/advanced-search" className="advanced-search-link">
           Advanced Search
         </Link>

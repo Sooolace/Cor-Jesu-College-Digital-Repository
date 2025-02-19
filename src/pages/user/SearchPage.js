@@ -40,28 +40,48 @@ function SearchPage() {
   const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = [], keywords = [], years = []) => {
     setLoading(true);
     try {
-      const endpointMap = {
-        allfields: '/api/search/allfields',
-        title: '/api/search/search/title',
-        author: '/api/search/search/author',
-        keywords: '/api/search/search/keywords',
-        abstract: '/api/search/search/abstract',
-        category: '/api/search/allprojs',
-      };
+      let endpoint;
+      let params;
 
-      const endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
+      // Check if this is an advanced search
+      if (location.state?.advancedSearch) {
+        endpoint = '/api/search/advanced';
+        params = {
+          page,
+          itemsPerPage,
+          searchFields: location.state.searchParams.searchFields,
+          dateRange: location.state.searchParams.dateRange,
+          ...(categories.length > 0 && { categories }),
+          ...(researchAreas.length > 0 && { researchAreas }),
+          ...(topics.length > 0 && { topics }),
+          ...(authors.length > 0 && { authors }),
+          ...(keywords.length > 0 && { keywords }),
+          ...(years.length === 2 && { fromYear: years[0], toYear: years[1] })
+        };
+      } else {
+        const endpointMap = {
+          allfields: '/api/search/allfields',
+          title: '/api/search/search/title',
+          author: '/api/search/search/author',
+          keywords: '/api/search/search/keywords',
+          abstract: '/api/search/search/abstract',
+          category: '/api/search/allprojs',
+        };
 
-      const params = {
-        page,
-        itemsPerPage,
-        ...(query && { query }),
-        ...(categories.length > 0 && { categories }),
-        ...(researchAreas.length > 0 && { researchAreas }),
-        ...(topics.length > 0 && { topics }),
-        ...(authors.length > 0 && { authors }), // Include authors in params if any are selected
-        ...(keywords.length > 0 && { keywords }), // Include keywords in params if any are selected
-        ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }), // Include year range in params if selected
-      };
+        endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
+
+        params = {
+          page,
+          itemsPerPage,
+          ...(query && { query }),
+          ...(categories.length > 0 && { categories }),
+          ...(researchAreas.length > 0 && { researchAreas }),
+          ...(topics.length > 0 && { topics }),
+          ...(authors.length > 0 && { authors }),
+          ...(keywords.length > 0 && { keywords }),
+          ...(years.length === 2 && { fromYear: years[0], toYear: years[1] })
+        };
+      }
 
       const response = await axios.get(endpoint, { params });
 
@@ -120,6 +140,7 @@ function SearchPage() {
 
   const handleSearchChange = (query) => {
     setTypedQuery(query);
+    setSearchQuery(query);
   };
 
   const handleOptionChange = (option) => {
@@ -128,10 +149,21 @@ function SearchPage() {
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setSearchQuery(typedQuery);
     setCurrentPage(1);
     setSearchTrigger((prev) => prev + 1);
-    navigate('/search', { state: { query: typedQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
+    navigate('/search', { 
+      state: { 
+        query: typedQuery, 
+        option: searchOption, 
+        page: 1, 
+        authors: selectedAuthors, 
+        categories: selectedCategories, 
+        researchAreas: selectedResearchAreas, 
+        topics: selectedTopics, 
+        keywords: selectedKeywords, 
+        years: selectedYears 
+      } 
+    });
   };
 
   const handleApplyFilters = (categories, researchAreas, topics) => {
