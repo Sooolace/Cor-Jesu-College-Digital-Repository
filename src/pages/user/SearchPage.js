@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SearchBar from '../../components/Searchbar';
@@ -15,23 +15,35 @@ function SearchPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load initial state from localStorage if available
-  const storedState = JSON.parse(localStorage.getItem('searchState')) || {};
-  const { query: initialQuery, option: initialOption, page: initialPage, authors: initialAuthors, categories: initialCategories, researchAreas: initialResearchAreas, topics: initialTopics, keywords: initialKeywords, years: initialYears, totalCount: initialTotalCount, filteredData: initialFilteredData } = storedState;
+  // Get search parameters from navigation state
+  const locationState = location.state || {};
+  
+  // Initialize state from navigation or defaults
+  const initialState = {
+    query: locationState.query || '',
+    option: locationState.option || 'allfields',
+    page: locationState.page || 1,
+    authors: locationState.authors || [],
+    categories: locationState.categories || [],
+    researchAreas: locationState.researchAreas || [],
+    topics: locationState.topics || [],
+    keywords: locationState.keywords || [],
+    years: locationState.years || [1900, new Date().getFullYear()],
+  };
 
-  const [searchQuery, setSearchQuery] = useState(initialQuery || '');
-  const [typedQuery, setTypedQuery] = useState(initialQuery || '');
-  const [searchOption, setSearchOption] = useState(initialOption);
-  const [filteredData, setFilteredData] = useState(initialFilteredData || []);
-  const [totalCount, setTotalCount] = useState(initialTotalCount || 0);
-  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [inputValue, setInputValue] = useState(initialState.query);
+  const [searchQuery, setSearchQuery] = useState(initialState.query);
+  const [searchOption, setSearchOption] = useState(initialState.option);
+  const [filteredData, setFilteredData] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(initialState.page);
   const itemsPerPage = 5;
-  const [selectedAuthors, setSelectedAuthors] = useState(initialAuthors || []);
-  const [selectedCategories, setSelectedCategories] = useState(initialCategories);
-  const [selectedResearchAreas, setSelectedResearchAreas] = useState(initialResearchAreas);
-  const [selectedTopics, setSelectedTopics] = useState(initialTopics);
-  const [selectedKeywords, setSelectedKeywords] = useState(initialKeywords || []);
-  const [selectedYears, setSelectedYears] = useState([1900, new Date().getFullYear()]); // Add state for selected years
+  const [selectedAuthors, setSelectedAuthors] = useState(initialState.authors);
+  const [selectedCategories, setSelectedCategories] = useState(initialState.categories);
+  const [selectedResearchAreas, setSelectedResearchAreas] = useState(initialState.researchAreas);
+  const [selectedTopics, setSelectedTopics] = useState(initialState.topics);
+  const [selectedKeywords, setSelectedKeywords] = useState(initialState.keywords);
+  const [selectedYears, setSelectedYears] = useState(initialState.years);
   const [loading, setLoading] = useState(false);
 
   const totalPages = Math.ceil(totalCount / itemsPerPage); // Calculate total pages
@@ -74,106 +86,118 @@ function SearchPage() {
     }
   };
 
-  const [searchTrigger, setSearchTrigger] = useState(0);
-
+  // Initial fetch effect with loading state
   useEffect(() => {
-    console.log('Fetching projects with filters:', {
-      searchQuery,
-      selectedCategories,
-      selectedResearchAreas,
-      selectedTopics,
-      selectedAuthors, // Include selected authors
-      selectedKeywords, // Include selected keywords
-      selectedYears, // Include selected years
-    });
-
+    setLoading(true); // Set loading before fetch
+    // Immediately fetch with initial search parameters
     fetchProjects(
-      searchQuery,
-      searchOption,
-      currentPage,
-      selectedCategories,
-      selectedResearchAreas,
-      selectedTopics,
-      selectedAuthors, // Pass selected authors to the API call
-      selectedKeywords, // Pass selected keywords to the API call
-      selectedYears // Pass selected years to the API call
+      initialState.query,
+      initialState.option,
+      initialState.page,
+      initialState.categories,
+      initialState.researchAreas,
+      initialState.topics,
+      initialState.authors,
+      initialState.keywords,
+      initialState.years
     );
-  }, [searchTrigger, currentPage]); // Remove selectedAuthors from the dependency array
+  }, []); // Only run on mount
 
+  // Handle location state changes
   useEffect(() => {
-    // Save current state to localStorage
-    const stateToStore = {
-      query: searchQuery,
-      option: searchOption,
-      page: currentPage,
-      authors: selectedAuthors,
-      categories: selectedCategories,
-      researchAreas: selectedResearchAreas,
-      topics: selectedTopics,
-      keywords: selectedKeywords,
-      years: selectedYears,
-      totalCount,
-      filteredData,
-    };
-    localStorage.setItem('searchState', JSON.stringify(stateToStore));
-  }, [searchQuery, searchOption, currentPage, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, selectedYears, totalCount, filteredData]);
+    if (location.state) {
+      const query = location.state.query || '';
+      setInputValue(query);
+      setSearchQuery(query);
+      setCurrentPage(location.state.page || 1);
+      setSearchOption(location.state.option || searchOption);
+      fetchProjects(
+        query,
+        location.state.option || searchOption,
+        location.state.page || 1,
+        location.state.categories || selectedCategories,
+        location.state.researchAreas || selectedResearchAreas,
+        location.state.topics || selectedTopics,
+        location.state.authors || selectedAuthors,
+        location.state.keywords || selectedKeywords,
+        location.state.years || selectedYears
+      );
+    }
+  }, [location.state]);
 
-  const handleSearchChange = (query) => {
-    setTypedQuery(query);
-  };
 
-  const handleOptionChange = (option) => {
+
+  const handleSearchChange = useCallback((query) => {
+    setInputValue(query);
+  }, []);
+
+  const handleOptionChange = useCallback((option) => {
     setSearchOption(option);
-  };
+  }, []);
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    setSearchQuery(typedQuery);
-    setCurrentPage(1);
-    setSearchTrigger((prev) => prev + 1);
-    navigate('/search', { state: { query: typedQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
-  };
+  const handleSearchSubmit = useCallback((event) => {
+    if (event) {
+      event.preventDefault();
+    }
+    navigate('/search', { 
+      state: { 
+        query: inputValue, 
+        option: searchOption, 
+        page: 1, 
+        authors: selectedAuthors, 
+        categories: selectedCategories, 
+        researchAreas: selectedResearchAreas, 
+        topics: selectedTopics, 
+        keywords: selectedKeywords, 
+        years: selectedYears 
+      } 
+    });
+  }, [inputValue, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, selectedYears, navigate]);
 
-  const handleApplyFilters = (categories, researchAreas, topics) => {
+  const handleClearSearch = useCallback(() => {
+    setInputValue('');
+    navigate('/search', { 
+      state: { 
+        query: '', 
+        option: searchOption,
+        page: 1
+      } 
+    });
+  }, [searchOption, navigate]);
+
+  const handleApplyFilters = useCallback((categories, researchAreas, topics) => {
     console.log('Applying Filters:', { categories, researchAreas, topics });
     setSelectedCategories(categories);
     setSelectedResearchAreas(researchAreas);
     setSelectedTopics(topics);
-    setSearchTrigger((prev) => prev + 1);
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories, researchAreas, topics, keywords: selectedKeywords, years: selectedYears } });
-  };
+  }, [searchQuery, searchOption, selectedAuthors, selectedKeywords, selectedYears, navigate]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setSelectedCategories([]);
     setSelectedResearchAreas([]);
     setSelectedTopics([]);
-    setSearchQuery('');
-    setTypedQuery('');
-    setCurrentPage(1);
-    setSearchTrigger((prev) => prev + 1);
-    localStorage.removeItem('searchState'); // Clear localStorage
-  };
+    setInputValue('');
+    navigate('/search', { state: { query: '', option: 'allfields', page: 1 } });
+  }, [navigate]);
 
-  const handleApplyAuthorFilters = (authors) => {
+  const handleApplyAuthorFilters = useCallback((authors) => {
     console.log('Selected Authors:', authors);
-    setSelectedAuthors(authors); // Update the selected authors state
-    setSearchTrigger((prev) => prev + 1); // Trigger a search update
+    setSelectedAuthors(authors);
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
-  };
+  }, [searchQuery, searchOption, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, selectedYears, navigate]);
 
-  const handleApplyKeywordFilters = (keywords) => {
+  const handleApplyKeywordFilters = useCallback((keywords) => {
     console.log('Selected Keywords:', keywords);
-    setSelectedKeywords(keywords); // Update the selected keywords state
-    setSearchTrigger((prev) => prev + 1); // Trigger a search update
+    setSelectedKeywords(keywords);
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords, years: selectedYears } });
-  };
+  }, [searchQuery, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedYears, navigate]);
 
-  const handleApplyYearFilters = (years) => {
+  const handleApplyYearFilters = useCallback((years) => {
     console.log('Selected Years:', years);
-    setSelectedYears(years); // Update the selected years state
-    setSearchTrigger((prev) => prev + 1); // Trigger a search update
+    setSelectedYears(years);
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years } });
-  };
+  }, [searchQuery, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, navigate]);
 
   // Cleanup effect to ensure no localStorage or cache references
   useEffect(() => {
@@ -183,7 +207,6 @@ function SearchPage() {
       setSelectedResearchAreas([]);
       setSelectedTopics([]);
       setSearchQuery('');
-      setTypedQuery('');
       setCurrentPage(1);
       setFilteredData([]);
       setTotalCount(0);
@@ -195,13 +218,14 @@ function SearchPage() {
 
   const MemoizedSearchBar = useMemo(() => (
     <SearchBar
-      query={typedQuery}
+      query={inputValue}
       onChange={handleSearchChange}
       selectedOption={searchOption}
       onOptionChange={handleOptionChange}
       onSearch={handleSearchSubmit}
+      onClear={handleClearSearch}
     />
-  ), [typedQuery, searchOption]);
+  ), [inputValue, searchOption, handleSearchChange, handleOptionChange, handleSearchSubmit, handleClearSearch]);
 
   const MemoizedSubjectFilter = useMemo(() => (
     <SubjectFilter
@@ -381,10 +405,17 @@ function SearchPage() {
                     }}
                   />
                 </>
-              ) : loading ? (
-                <div>Loading...</div>
-              ) : (
-                <div>No results found.</div>
+              ) : !loading && (
+                <div style={{ 
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '200px',
+                  fontSize: '1.2em',
+                  color: '#666'
+                }}>
+                  No results found.
+                </div>
               )}
             </div>
 

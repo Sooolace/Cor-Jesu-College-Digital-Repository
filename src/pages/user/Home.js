@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../../components/Searchbar';
 import Featured from '../../components/Featured';
@@ -10,12 +10,39 @@ import './styles/transition.css'; // Import the new CSS file for transitions
 
 function Home() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchOption, setSearchOption] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const [searchOption, setSearchOption] = useState('allfields');
 
-  const handleSearch = () => {
-    navigate('/search', { state: { query: searchQuery, option: searchOption } });
-  };
+  const handleSearch = useCallback((event) => {
+    if (event) {
+      event.preventDefault();
+    }
+    navigate('/search', { 
+      state: { 
+        query: inputValue,
+        option: searchOption,
+        page: 1,
+        categories: [],
+        researchAreas: [],
+        topics: [],
+        authors: [],
+        keywords: [],
+        years: [1900, new Date().getFullYear()]
+      } 
+    });
+  }, [inputValue, searchOption, navigate]);
+
+  const handleSearchChange = useCallback((query) => {
+    setInputValue(query);
+  }, []);
+
+  const handleOptionChange = useCallback((option) => {
+    setSearchOption(option);
+  }, []);
+
+  const handleClearSearch = useCallback(() => {
+    setInputValue('');
+  }, []);
 
   useEffect(() => {
     document.title = 'CJC Digital Repository';
@@ -24,13 +51,14 @@ function Home() {
   const MemoizedHorizontalImageBanner = useMemo(() => <HorizontalImageBanner />, []);
   const MemoizedSearchBar = useMemo(() => (
     <SearchBar 
-      query={searchQuery}
-      onChange={setSearchQuery}
+      query={inputValue}
+      onChange={handleSearchChange}
       selectedOption={searchOption}
-      onOptionChange={setSearchOption}
-      onSearch={handleSearch} 
+      onOptionChange={handleOptionChange}
+      onSearch={handleSearch}
+      onClear={handleClearSearch}
     />
-  ), [searchQuery, searchOption]);
+  ), [inputValue, searchOption, handleSearchChange, handleOptionChange, handleSearch, handleClearSearch]);
 
   const MemoizedFeatured = useMemo(() => <Featured />, []);
   const MemoizedRecentSubmissions = useMemo(() => <RecentSubmissions />, []);
