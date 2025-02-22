@@ -2,44 +2,27 @@ import React, { useState } from 'react';
 import { Range, getTrackBackground } from 'react-range';
 import './styles/yearRangeFilter.css';
 
-const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), onApply }) => {
-  const [values, setValues] = useState([minYear, maxYear]);
-  const [showModal, setShowModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+const YearRangeFilter = ({ selectedYears, setSelectedYears, onApply }) => {
+  const [fromYear, setFromYear] = useState(selectedYears[0]);
+  const [toYear, setToYear] = useState(selectedYears[1]);
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
-
-  const handleApplyFilters = () => {
-    if (onApply) {
-      onApply(values);
-    }
-    setShowModal(false);
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    const results = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i).filter((year) =>
-      year.toString().includes(searchTerm)
-    );
-    setSearchResults(results);
+  const handleApply = () => {
+    setSelectedYears([fromYear, toYear]);
+    onApply([fromYear, toYear]);
   };
 
   return (
-    <div className="subject-filter  ">
+    <div className="year-range-filter">
       <h3>Filter by Year</h3>
       <Range
-        values={values}
+        values={[fromYear, toYear]}
         step={1}
-        min={minYear}
-        max={maxYear}
-        onChange={(values) => setValues(values)}
+        min={1900}
+        max={new Date().getFullYear()}
+        onChange={(values) => {
+          setFromYear(values[0]);
+          setToYear(values[1]);
+        }}
         renderTrack={({ props, children }) => (
           <div
             {...props}
@@ -48,10 +31,10 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
               height: '6px',
               width: '100%',
               background: getTrackBackground({
-                values,
+                values: [fromYear, toYear],
                 colors: ['#ccc', '#007bff', '#ccc'],
-                min: minYear,
-                max: maxYear,
+                min: 1900,
+                max: new Date().getFullYear(),
               }),
             }}
           >
@@ -71,64 +54,13 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
         )}
       />
       <div className="year-range-values">
-        <span>{values[0]}</span> - <span>{values[1]}</span>
+        <span>{fromYear}</span> - <span>{toYear}</span>
       </div>
       <div className="button-container">
-        <button className="apply-button" onClick={handleApplyFilters}>
-          Set year range
+        <button className="apply-button" onClick={handleApply}>
+          Apply Year Range
         </button>
       </div>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h4>All Years</h4>
-              <button className="close-button" onClick={handleCloseModal}>
-                ×
-              </button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={handleSearchSubmit} className="unique-search-form">
-                <input
-                  type="text"
-                  placeholder="Search years..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="unique-search-input"
-                />
-                <button type="submit" className="unique-search-button">Search</button>
-              </form>
-              <div className="unique-year-list-scrollable">
-                {searchResults.map((year) => (
-                  <div key={year} className="unique-year-item filter-item">
-                    <input
-                      type="checkbox"
-                      checked={values.includes(year)}
-                      onChange={() => {
-                        if (values.includes(year)) {
-                          setValues(values.filter((v) => v !== year));
-                        } else {
-                          setValues([...values, year]);
-                        }
-                      }}
-                    />
-                    <label>{year}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="apply-button" onClick={handleApplyFilters}>
-                Apply Filters
-              </button>
-              <button className="close-button" onClick={handleCloseModal}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -7,18 +7,16 @@ import Breadcrumb from '../../components/BreadCrumb';
 import PaginationComponent from '../../components/PaginationComponent';
 import AuthorFilter from '../../components/UniqueAuthorFilter';
 import KeywordFilter from '../../components/KeywordFilter';
-import YearRangeFilter from '../../components/YearRangeFilter'; // Import YearRangeFilter
+import YearRangeFilter from '../../components/YearRangeFilter';
 import './styles/filter.css';
-import { FaTag } from 'react-icons/fa'; // Import a valid icon
+import { FaTag } from 'react-icons/fa';
 
 function SearchPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get search parameters from navigation state
   const locationState = location.state || {};
   
-  // Initialize state from navigation or defaults
   const initialState = {
     query: locationState.query || '',
     option: locationState.option || 'allfields',
@@ -46,9 +44,8 @@ function SearchPage() {
   const [selectedYears, setSelectedYears] = useState(initialState.years);
   const [loading, setLoading] = useState(false);
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage); // Calculate total pages
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-  // Function to fetch data from API
   const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = [], keywords = [], years = []) => {
     setLoading(true);
     try {
@@ -70,9 +67,9 @@ function SearchPage() {
         ...(categories.length > 0 && { categories }),
         ...(researchAreas.length > 0 && { researchAreas }),
         ...(topics.length > 0 && { topics }),
-        ...(authors.length > 0 && { authors }), // Include authors in params if any are selected
-        ...(keywords.length > 0 && { keywords }), // Include keywords in params if any are selected
-        ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }), // Include year range in params if selected
+        ...(authors.length > 0 && { authors }),
+        ...(keywords.length > 0 && { keywords }),
+        ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }),
       };
 
       const response = await axios.get(endpoint, { params });
@@ -86,10 +83,8 @@ function SearchPage() {
     }
   };
 
-  // Initial fetch effect with loading state
   useEffect(() => {
-    setLoading(true); // Set loading before fetch
-    // Immediately fetch with initial search parameters
+    setLoading(true);
     fetchProjects(
       initialState.query,
       initialState.option,
@@ -101,9 +96,8 @@ function SearchPage() {
       initialState.keywords,
       initialState.years
     );
-  }, []); // Only run on mount
+  }, []);
 
-  // Handle location state changes
   useEffect(() => {
     if (location.state) {
       const query = location.state.query || '';
@@ -124,8 +118,6 @@ function SearchPage() {
       );
     }
   }, [location.state]);
-
-
 
   const handleSearchChange = useCallback((query) => {
     setInputValue(query);
@@ -199,7 +191,6 @@ function SearchPage() {
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years } });
   }, [searchQuery, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, navigate]);
 
-  // Cleanup effect to ensure no localStorage or cache references
   useEffect(() => {
     return () => {
       console.log('Cleaning up component state.');
@@ -257,9 +248,11 @@ function SearchPage() {
 
   const MemoizedYearRangeFilter = useMemo(() => (
     <YearRangeFilter
+      selectedYears={selectedYears}
+      setSelectedYears={setSelectedYears}
       onApply={handleApplyYearFilters}
     />
-  ), []);
+  ), [selectedYears, handleApplyYearFilters]);
 
   return (
     <>
@@ -269,32 +262,32 @@ function SearchPage() {
       <div className="search-page-container">
         <div className="centered-content">
           <div className="search-results-wrapper">
-            
-            {/* Filters Container */}
-            <div className="filters-container" style={{ width: '380px' }}>
-              {/* Search Bar */}
-              <div className="search-bar-wrapper">
-                {MemoizedSearchBar}
-              </div>
+            <div className="sidebar">
+              {/* Filters Container */}
+              <div className="filters-container">
+                {/* Search Bar */}
+                <div className="search-bar-wrapper">
+                  {MemoizedSearchBar}
+                </div>
+                {/* Year Range Filter */}
+                <div className="filter-section">
+                  {MemoizedYearRangeFilter}
+                </div>
 
-              {/* Year Range Filter */}
-              <div className="filter-section">
-                {MemoizedYearRangeFilter}
-              </div>
+                {/* Subject Filter */}
+                <div className="filter-section subject-filter-wrapper">
+                  {MemoizedSubjectFilter}
+                </div>
 
-              {/* Subject Filter */}
-              <div className="filter-section subject-filter-wrapper">
-                {MemoizedSubjectFilter}
-              </div>
+                {/* Author Filter */}
+                <div className="filter-section">
+                  {MemoizedAuthorFilter}
+                </div>
 
-              {/* Author Filter */}
-              <div className="filter-section">
-                {MemoizedAuthorFilter}
-              </div>
-
-              {/* Keyword Filter */}
-              <div className="filter-section">
-                {MemoizedKeywordFilter}
+                {/* Keyword Filter */}
+                <div className="filter-section">
+                  {MemoizedKeywordFilter}
+                </div>
               </div>
             </div>
 
@@ -324,9 +317,9 @@ function SearchPage() {
                           src={project.cover_image}
                           alt="Cover"
                           style={{
-                            maxWidth: '80px', // Limit max width
-                            height: '120px',  // Set a fixed height
-                            objectFit: 'cover', // Ensure the image covers the area without stretching
+                            maxWidth: '80px',
+                            height: '120px',
+                            objectFit: 'cover',
                             marginRight: '20px',
                           }}
                         />
@@ -371,7 +364,7 @@ function SearchPage() {
                         {Array.isArray(project.keywords) ? (
                           project.keywords.map((keyword, index) => (
                             <span key={keyword.keyword_id || index}>
-                              {index === 0 && <FaTag />} {/* Add icon next to the first keyword */}
+                              {index === 0 && <FaTag />}
                               <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword_id)}`} className="keyword-link">
                                 {keyword.keyword}
                               </Link>
@@ -381,7 +374,7 @@ function SearchPage() {
                         ) : project.keywords ? (
                           project.keywords.split(', ').map((keyword, index) => (
                             <span key={index}>
-                              {index === 0 && <FaTag />} {/* Add icon next to the first keyword */}
+                              {index === 0 && <FaTag />}
                               <Link to={`/KeywordOverview/${encodeURIComponent(keyword)}`} className="keyword-link">
                                 {keyword}
                               </Link>
@@ -398,7 +391,7 @@ function SearchPage() {
                   {/* Pagination Component */}
                   <PaginationComponent
                     currentPage={currentPage}
-                    totalPages={totalPages}  // Correctly passing totalPages
+                    totalPages={totalPages}
                     handlePageChange={newPage => {
                       setCurrentPage(newPage);
                       navigate('/search', { state: { query: searchQuery, option: searchOption, page: newPage, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
@@ -414,11 +407,10 @@ function SearchPage() {
                   fontSize: '1.2em',
                   color: '#666'
                 }}>
-                  No results found.
+                  No results                  No results found.
                 </div>
               )}
             </div>
-
           </div>
         </div>
       </div>
