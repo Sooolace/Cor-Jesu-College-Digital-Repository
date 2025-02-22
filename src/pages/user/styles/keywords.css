@@ -1,0 +1,214 @@
+.keywords-page {
+  /* Wrapper class for Keywords component */
+}
+
+.keywords-page .keyword-overview-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.keywords-page .keyword-title {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.keywords-page .alphabet-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.keywords-page .alphabet-button {
+  width: 35px;
+  height: 35px;
+  border: none;
+  background: white;
+  color: #666;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.keywords-page .alphabet-button:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.keywords-page .alphabet-button.active {
+  background: #a33307;
+  color: white;
+  box-shadow: 0 4px 8px rgba(163, 51, 7, 0.2);
+}
+
+.keywords-page .search-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.keywords-page .search-box {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+  align-items: center;
+}
+
+.keywords-page .search-input {
+  flex: 1;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+  height: 43px;
+}
+
+.keywords-page .search-input:focus {
+  border-color: #a33307;
+  box-shadow: 0 0 0 2px rgba(163, 51, 7, 0.1);
+}
+
+.keywords-page .search-button {
+  background-color: #a33307 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keywords-page .search-button:hover {
+  background-color: #8a2a06 !important;
+  transform: translateY(-1px);
+}
+
+.keywords-page .clear-filter-button {
+  background-color: #6c757d !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keywords-page .clear-filter-button:hover {
+  background-color: #5a6268 !important;
+  transform: translateY(-1px);
+}
+
+.keywords-page .keywords-grid {
+  margin-top: 30px;
+}
+
+.keywords-page .keyword-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 140px;
+  height: 100%;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.keywords-page .keyword-card:hover {
+  background: white;
+}
+
+.keywords-page .keyword-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.keywords-page .keyword-text {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 600;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
+}
+
+.keywords-page .keyword-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.keywords-page .keyword-count svg {
+  color: #a33307;
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.keywords-page .keyword-count span {
+  transition: all 0.3s ease;
+}
+
+.keywords-page .keyword-card:hover .keyword-count svg {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.keywords-page .keyword-card:hover .keyword-count span {
+  color: #333;
+}
+
+.keywords-page .loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #a33307;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 50px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.keywords-page .no-results {
+  text-align: center;
+  padding: 50px;
+  color: #666;
+}
+
+.keywords-page .pagination-wrapper {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}

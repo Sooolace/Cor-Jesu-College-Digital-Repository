@@ -1,161 +1,182 @@
-.unique-author-filter {
-  padding: 10px; /* Smaller padding */
-  font-family: Arial, sans-serif;
-  max-width: 350px; /* Smaller max-width */
-  margin-bottom: 10px; /* Smaller margin bottom */
-}
-
 .unique-author-list {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Smaller gap */
+  gap: 8px;
 }
 
 .unique-author-item {
   display: flex;
-  align-items: center;  /* Align items vertically to the center */
-  justify-content: flex-start;  /* Align items horizontally to the left */
+  align-items: center;
+  gap: 8px;
 }
 
-.unique-author-item input {
-  margin-right: 8px; /* Smaller space between the checkbox and the label */
-  transform: scale(1.2); /* Slightly increases the checkbox size for better visibility */
+.unique-author-item input[type="checkbox"] {
+  margin: 0;
 }
 
 .unique-author-item label {
-  font-size: 14px; /* Smaller font size */
-  color: #333; /* Match color with subject filter */
-  font-weight: normal; /* Match font weight with subject filter */
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.unique-author-item:hover label {
+  color: #a33307;
+}
+
+.unique-author-category {
+  font-style: italic;
+  color: #666;
+  font-size: 13px;
 }
 
 .unique-button-container {
   display: flex;
-  justify-content: space-between;  /* Ensures there is space between the buttons */
-  margin-top: 10px;  /* Adds space above the buttons */
-  gap: 10px;  /* Smaller gap between the buttons */
+  justify-content: space-between;
+  margin-top: 15px;
+  gap: 10px;
 }
 
-.unique-see-all-button, .unique-apply-button {
-  padding: 8px 12px;
-  background-color: #a33307;  /* Red color */
+.unique-see-all-button,
+.unique-apply-button {
+  padding: 8px 15px;
+  background-color: #a33307;
   color: white;
   border: none;
   cursor: pointer;
-  text-align: center;
   border-radius: 4px;
-  flex: 1;  /* Make buttons the same size */
+  transition: background-color 0.3s ease;
+  flex: 1;
 }
 
-.unique-see-all-button:hover, .unique-apply-button:hover {
-  background-color: #c0392b;  /* Darker red on hover */
+.unique-see-all-button {
+  background-color: #666;
 }
 
+.unique-see-all-button:hover {
+  background-color: #555;
+}
+
+.unique-apply-button:hover {
+  background-color: #8a2a06;
+}
+
+/* Modal Styles */
 .unique-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);  /* Darker background for better visibility */
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .unique-modal-content {
   background: white;
-  padding: 20px;
-  border-radius: 10px;  /* More rounded corners for a modern look */
-  width: 80%;
+  padding: 25px;
+  border-radius: 12px;
+  width: 90%;
   max-width: 600px;
-  max-height: 80%;
-  overflow-y: auto;
-  text-align: left;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Add shadow for depth */
+  max-height: 80vh;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .unique-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #ccc;  /* Add bottom border for separation */
-  padding-bottom: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.unique-modal-body {
-  margin-top: 10px;
-  text-align: left;
-  position: relative;
+.unique-modal-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
 }
 
 .unique-close-button {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 24px;
+  color: #666;
   cursor: pointer;
-  color: #007bff;  /* Set color to blue for consistency */
-  text-align: right;
+  padding: 0;
+  line-height: 1;
 }
 
 .unique-close-button:hover {
-  color: #0056b3; /* Darker blue on hover */
-}
-
-.unique-author-category {
-  font-style: italic;
-  color: gray;
+  color: #333;
 }
 
 .unique-search-form {
   position: sticky;
   top: 0;
   background: white;
-  padding: 10px 0;
+  padding: 15px 0;
+  margin-bottom: 15px;
   z-index: 10;
 }
 
 .unique-search-input {
-  width: 80%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  width: calc(100% - 100px);
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-right: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.unique-search-input:focus {
+  border-color: #a33307;
+  outline: none;
 }
 
 .unique-search-button {
-  padding: 8px 12px;
-  background-color: #007bff;  /* Blue color */
+  padding: 10px 15px;
+  background-color: #a33307;
   color: white;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  text-align: center;
-  border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
 
 .unique-search-button:hover {
-  background-color: #0056b3;  /* Darker blue on hover */
+  background-color: #8a2a06;
 }
 
 .unique-author-list-scrollable {
-  max-height: 60vh;
+  max-height: 50vh;
   overflow-y: auto;
+  padding-right: 10px;
+}
+
+.unique-modal-footer {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 @media (max-width: 768px) {
-  .unique-author-item label {
-    font-size: 12px;  /* Slightly smaller label for mobile devices */
-  }
-
-  .unique-see-all-button, .unique-apply-button {
-    padding: 6px 10px;  /* Adjust padding for smaller screens */
-  }
-
   .unique-modal-content {
-    width: 90%;  /* Modal takes up more width on small screens */
-    padding: 15px; /* Less padding for smaller screens */
+    padding: 20px;
+    width: 95%;
   }
 
-  .unique-close-button {
-    font-size: 1.3rem;  /* Smaller close button on mobile */
+  .unique-search-input {
+    width: calc(100% - 90px);
+  }
+
+  .unique-search-button {
+    padding: 8px 12px;
   }
 }

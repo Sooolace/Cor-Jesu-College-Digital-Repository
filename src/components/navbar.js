@@ -1,47 +1,93 @@
 import React, { useState } from 'react';
+import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
+import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/CJCREPOLOGO.png';
 import '../pages/user/styles/header.css';
-import { Link } from 'react-router-dom';
 
-function Navbar() {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+function NavigationBar() {
+    const [expanded, setExpanded] = useState(false);
+    const location = useLocation();
 
-    const toggleDropdown = () => {
-        setIsDropdownOpen(!isDropdownOpen);
-    };
+    const closeNavbar = () => setExpanded(false);
+
+    const isActive = (path) => location.pathname === path;
 
     return (
-        <header>
-        <div className="header-container">
-            <Link to="/">
-                <img src={logo} alt="CJC Repository Logo" className="logo" />
-            </Link>
-    
-            <nav>
-                <Link to="/">Home</Link>
-                <Link to="/search">Search</Link>
-    
-                <div className="dropdown" onMouseEnter={toggleDropdown} onMouseLeave={toggleDropdown}>
-                    <Link to="#" className="dropdown-link">
-                        Research Resources <span className="dropdown-arrow">&#9660;</span> {/* Downward arrow */}
-                    </Link>
-                    {isDropdownOpen && (
-                        <div className="dropdown-menu">
-                            <Link to="/AllWorks">Theses & Disserations</Link>
-                            <Link to="/Authors">Authors</Link>
-                            <Link to="/Keywords">Keywords</Link>
-                            <Link to="/Departments">Departments</Link>
-                            <Link to="/resources">Resources</Link>
-                        </div>
-                    )}
-                </div>
-    
-                <Link to="/help">Help</Link>
-            </nav>
-        </div>
-    </header>
-    
+        <Navbar 
+            expanded={expanded}
+            expand="lg" 
+            className="custom-navbar"
+            variant="dark"
+        >
+            <Container>
+                <Navbar.Brand as={Link} to="/" onClick={closeNavbar}>
+                    <img
+                        src={logo}
+                        alt="CJC Repository Logo"
+                        className="navbar-logo"
+                    />
+                </Navbar.Brand>
+                
+                <Navbar.Toggle 
+                    aria-controls="responsive-navbar-nav"
+                    onClick={() => setExpanded(!expanded)}
+                />
+                
+                <Navbar.Collapse id="responsive-navbar-nav">
+                    <Nav className="ms-auto">
+                        <Nav.Link 
+                            as={Link} 
+                            to="/"
+                            className={isActive('/') ? 'active' : ''}
+                            onClick={closeNavbar}
+                        >
+                            Home
+                        </Nav.Link>
+                        
+                        <Nav.Link 
+                            as={Link} 
+                            to="/search"
+                            className={isActive('/search') ? 'active' : ''}
+                            onClick={closeNavbar}
+                        >
+                            Search
+                        </Nav.Link>
+                        
+                        <NavDropdown 
+                            title="Research Resources" 
+                            id="basic-nav-dropdown"
+                            className="custom-dropdown"
+                        >
+                            <NavDropdown.Item as={Link} to="/AllWorks" onClick={closeNavbar}>
+                                Theses & Dissertations
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/Authors" onClick={closeNavbar}>
+                                Authors
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/Keywords" onClick={closeNavbar}>
+                                Keywords
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/Departments" onClick={closeNavbar}>
+                                Departments
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/resources" onClick={closeNavbar}>
+                                Resources
+                            </NavDropdown.Item>
+                        </NavDropdown>
+                        
+                        <Nav.Link 
+                            as={Link} 
+                            to="/help"
+                            className={isActive('/help') ? 'active' : ''}
+                            onClick={closeNavbar}
+                        >
+                            Help
+                        </Nav.Link>
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
     );
 }
 
-export default Navbar;
+export default NavigationBar;

@@ -215,6 +215,7 @@ function SearchPage() {
       onOptionChange={handleOptionChange}
       onSearch={handleSearchSubmit}
       onClear={handleClearSearch}
+      className="search-page-searchbar"
     />
   ), [inputValue, searchOption, handleSearchChange, handleOptionChange, handleSearchSubmit, handleClearSearch]);
 
@@ -248,11 +249,9 @@ function SearchPage() {
 
   const MemoizedYearRangeFilter = useMemo(() => (
     <YearRangeFilter
-      selectedYears={selectedYears}
-      setSelectedYears={setSelectedYears}
       onApply={handleApplyYearFilters}
     />
-  ), [selectedYears, handleApplyYearFilters]);
+  ), []);
 
   return (
     <>
@@ -262,32 +261,32 @@ function SearchPage() {
       <div className="search-page-container">
         <div className="centered-content">
           <div className="search-results-wrapper">
-            <div className="sidebar">
-              {/* Filters Container */}
-              <div className="filters-container">
-                {/* Search Bar */}
-                <div className="search-bar-wrapper">
-                  {MemoizedSearchBar}
-                </div>
-                {/* Year Range Filter */}
-                <div className="filter-section">
-                  {MemoizedYearRangeFilter}
-                </div>
+            
+            {/* Filters Container */}
+            <div className="filters-container" style={{ width: '380px' }}>
+              {/* Search Bar */}
+              <div className="search-bar-wrapper">
+                {MemoizedSearchBar}
+              </div>
 
-                {/* Subject Filter */}
-                <div className="filter-section subject-filter-wrapper">
-                  {MemoizedSubjectFilter}
-                </div>
+              {/* Year Range Filter */}
+              <div className="filter-section">
+                {MemoizedYearRangeFilter}
+              </div>
 
-                {/* Author Filter */}
-                <div className="filter-section">
-                  {MemoizedAuthorFilter}
-                </div>
+              {/* Subject Filter */}
+              <div className="filter-section subject-filter-wrapper">
+                {MemoizedSubjectFilter}
+              </div>
 
-                {/* Keyword Filter */}
-                <div className="filter-section">
-                  {MemoizedKeywordFilter}
-                </div>
+              {/* Author Filter */}
+              <div className="filter-section">
+                {MemoizedAuthorFilter}
+              </div>
+
+              {/* Keyword Filter */}
+              <div className="filter-section">
+                {MemoizedKeywordFilter}
               </div>
             </div>
 
@@ -407,7 +406,7 @@ function SearchPage() {
                   fontSize: '1.2em',
                   color: '#666'
                 }}>
-                  No results                  No results found.
+                  No results found.
                 </div>
               )}
             </div>

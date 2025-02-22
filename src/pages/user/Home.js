@@ -57,6 +57,7 @@ function Home() {
       onOptionChange={handleOptionChange}
       onSearch={handleSearch}
       onClear={handleClearSearch}
+      className="home-page-searchbar" // Add this line
     />
   ), [inputValue, searchOption, handleSearchChange, handleOptionChange, handleSearch, handleClearSearch]);
 

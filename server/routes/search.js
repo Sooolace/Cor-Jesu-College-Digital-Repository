@@ -40,8 +40,8 @@ router.get('/allprojs', async (req, res, next) => {
     const authorsParams = [];
 
     // Handle text search
-    if (query) {
-        queryParams.push(`%${query}%`);
+    if (query.trim() !== '') {
+        queryParams.push(`%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`);
         searchQuery += ` AND (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length})`;
         countQuery += ` AND (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length})`;
     }
@@ -116,7 +116,7 @@ router.get('/allfields', async (req, res) => {
     const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query;
     const offset = (page - 1) * itemsPerPage;
 
-    const searchQuery = query.trim() === '' ? '%' : `%${query}%`;  // Handle empty query
+    const searchQuery = query.trim() === '' ? '%' : `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Handle empty query
 
     let sqlQuery = `
         SELECT p.*, 
@@ -197,7 +197,7 @@ router.get('/search/title', async (req, res, next) => {
     const offset = (page - 1) * itemsPerPage;
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
         let searchQuerySQL = `
             SELECT p.*, 
@@ -275,7 +275,7 @@ router.get('/search/author', async (req, res) => {
     const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
         let searchQuerySQL = `
             SELECT p.*, 
@@ -352,7 +352,7 @@ router.get('/search/keywords', async (req, res) => {
     const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
         let searchQuerySQL = `
             SELECT p.*, 
@@ -429,7 +429,7 @@ router.get('/search/abstract', async (req, res) => {
     const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
         let searchQuerySQL = `
             SELECT p.*, 

@@ -4,7 +4,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import '../pages/user/styles/searchbar.css';
 
-function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch, onClear }) {
+function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch, onClear, className }) {
   // Load initial state from localStorage if available
   useEffect(() => {
     const storedState = JSON.parse(localStorage.getItem('searchState')) || {};
@@ -24,7 +24,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch, 
   };
 
   return (
-    <section className="search-section">
+    <section className={`search-section ${className}`}>
       <div className="search-container">
         <select
           id="searchOptions"
@@ -40,7 +40,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch, 
           <option value="category">Category</option>
         </select>
 
-        <div className="search-input-container" style={{ position: 'relative', flex: 1 }}>
+        <div className="search-input-container" style={{ position: 'relative', flex: 1}}>
           {/* Input field with onKeyPress event */}
           <input
             type="text"
@@ -82,7 +82,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch, 
 
         {/* Advanced search link */}
         <Link to="/advanced-search" className="advanced-search-link">
-          Advanced Search
+          Advanced
         </Link>
       </div>
     </section>

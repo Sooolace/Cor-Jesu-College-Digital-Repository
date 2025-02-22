@@ -2,27 +2,24 @@ import React, { useState } from 'react';
 import { Range, getTrackBackground } from 'react-range';
 import './styles/yearRangeFilter.css';
 
-const YearRangeFilter = ({ selectedYears, setSelectedYears, onApply }) => {
-  const [fromYear, setFromYear] = useState(selectedYears[0]);
-  const [toYear, setToYear] = useState(selectedYears[1]);
+const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), onApply }) => {
+  const [values, setValues] = useState([minYear, maxYear]);
 
-  const handleApply = () => {
-    setSelectedYears([fromYear, toYear]);
-    onApply([fromYear, toYear]);
+  const handleApplyFilters = () => {
+    if (onApply) {
+      onApply(values);
+    }
   };
 
   return (
     <div className="year-range-filter">
       <h3>Filter by Year</h3>
       <Range
-        values={[fromYear, toYear]}
+        values={values}
         step={1}
-        min={1900}
-        max={new Date().getFullYear()}
-        onChange={(values) => {
-          setFromYear(values[0]);
-          setToYear(values[1]);
-        }}
+        min={minYear}
+        max={maxYear}
+        onChange={(values) => setValues(values)}
         renderTrack={({ props, children }) => (
           <div
             {...props}
@@ -31,10 +28,10 @@ const YearRangeFilter = ({ selectedYears, setSelectedYears, onApply }) => {
               height: '6px',
               width: '100%',
               background: getTrackBackground({
-                values: [fromYear, toYear],
-                colors: ['#ccc', '#007bff', '#ccc'],
-                min: 1900,
-                max: new Date().getFullYear(),
+                values,
+              colors: ['#ccc', '#a33307', '#ccc'],
+                min: minYear,
+                max: maxYear,
               }),
             }}
           >
@@ -48,16 +45,16 @@ const YearRangeFilter = ({ selectedYears, setSelectedYears, onApply }) => {
               ...props.style,
               height: '20px',
               width: '20px',
-              backgroundColor: '#007bff',
+              backgroundColor: '#a33307',
             }}
           />
         )}
       />
       <div className="year-range-values">
-        <span>{fromYear}</span> - <span>{toYear}</span>
+        <span>{values[0]}</span> - <span>{values[1]}</span>
       </div>
       <div className="button-container">
-        <button className="apply-button" onClick={handleApply}>
+        <button className="apply-button" onClick={handleApplyFilters}>
           Apply Year Range
         </button>
       </div>
