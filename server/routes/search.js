@@ -6,7 +6,7 @@ const logActivity = require('../middlewares/logActivity'); // Import log activit
 
 // GET - Fetch all projects without any search conditions, with total count and pagination
 router.get('/allprojs', async (req, res, next) => {
-    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [], authors = [], fromYear, toYear } = req.query;
+    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [], authors = [], fromYear, toYear, advancedSearchInputs = [], yearRange = [] } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(itemsPerPage);
 
     let searchQuery = `SELECT p.*, 
@@ -90,6 +90,33 @@ router.get('/allprojs', async (req, res, next) => {
 
     if (toYear) {
         queryParams.push(toYear);
+        searchQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+    }
+
+    // Handle advanced search inputs
+    if (advancedSearchInputs.length > 0) {
+        advancedSearchInputs.forEach((input, index) => {
+            const { query, option, condition } = input;
+            const searchCondition = condition === 'AND' ? 'AND' : 'OR';
+            queryParams.push(`%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`);
+            if (option === 'allfields') {
+                searchQuery += ` ${searchCondition} (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length} OR p.abstract ILIKE $${queryParams.length})`;
+                countQuery += ` ${searchCondition} (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length} OR p.abstract ILIKE $${queryParams.length})`;
+            } else {
+                searchQuery += ` ${searchCondition} p.${option} ILIKE $${queryParams.length}`;
+                countQuery += ` ${searchCondition} p.${option} ILIKE $${queryParams.length}`;
+            }
+        });
+    }
+
+    // Handle year range filter
+    if (yearRange.length === 2) {
+        queryParams.push(yearRange[0]);
+        searchQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        
+        queryParams.push(yearRange[1]);
         searchQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
         countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
     }

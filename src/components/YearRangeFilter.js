@@ -13,7 +13,7 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
 
   return (
     <div className="year-range-filter">
-      <h3>Filter by Year</h3>
+      <h3>Set year range</h3>
       <Range
         values={values}
         step={1}

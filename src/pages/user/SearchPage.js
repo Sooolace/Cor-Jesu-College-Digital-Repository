@@ -26,7 +26,8 @@ function SearchPage() {
     researchAreas: locationState.researchAreas || [],
     topics: locationState.topics || [],
     keywords: locationState.keywords || [],
-    years: locationState.years || [1900, new Date().getFullYear()],
+    years: locationState.yearRange || locationState.years || [1900, new Date().getFullYear()],
+    advancedSearchInputs: locationState.advancedSearchInputs || [],
   };
 
   const [inputValue, setInputValue] = useState(initialState.query);
@@ -46,7 +47,7 @@ function SearchPage() {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-  const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = [], keywords = [], years = []) => {
+  const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = [], keywords = [], years = [], advancedSearchInputs = []) => {
     setLoading(true);
     try {
       const endpointMap = {
@@ -70,6 +71,7 @@ function SearchPage() {
         ...(authors.length > 0 && { authors }),
         ...(keywords.length > 0 && { keywords }),
         ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }),
+        ...(advancedSearchInputs.length > 0 && { advancedSearchInputs }),
       };
 
       const response = await axios.get(endpoint, { params });
@@ -94,17 +96,22 @@ function SearchPage() {
       initialState.topics,
       initialState.authors,
       initialState.keywords,
-      initialState.years
+      initialState.years,
+      initialState.advancedSearchInputs
     );
   }, []);
 
   useEffect(() => {
     if (location.state) {
       const query = location.state.query || '';
+      const years = location.state.yearRange || location.state.years || selectedYears;
+      
       setInputValue(query);
       setSearchQuery(query);
       setCurrentPage(location.state.page || 1);
       setSearchOption(location.state.option || searchOption);
+      setSelectedYears(years);
+      
       fetchProjects(
         query,
         location.state.option || searchOption,
@@ -114,7 +121,8 @@ function SearchPage() {
         location.state.topics || selectedTopics,
         location.state.authors || selectedAuthors,
         location.state.keywords || selectedKeywords,
-        location.state.years || selectedYears
+        years,
+        location.state.advancedSearchInputs || initialState.advancedSearchInputs
       );
     }
   }, [location.state]);
@@ -141,7 +149,8 @@ function SearchPage() {
         researchAreas: selectedResearchAreas, 
         topics: selectedTopics, 
         keywords: selectedKeywords, 
-        years: selectedYears 
+        years: selectedYears,
+        advancedSearchInputs: initialState.advancedSearchInputs // Ensure advanced search inputs are included
       } 
     });
   }, [inputValue, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, selectedYears, navigate]);
@@ -252,6 +261,24 @@ function SearchPage() {
       onApply={handleApplyYearFilters}
     />
   ), []);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    navigate('/search', { 
+      state: { 
+        query: searchQuery, 
+        option: searchOption, 
+        page: newPage, 
+        authors: selectedAuthors, 
+        categories: selectedCategories, 
+        researchAreas: selectedResearchAreas, 
+        topics: selectedTopics, 
+        keywords: selectedKeywords, 
+        years: selectedYears,
+        advancedSearchInputs: initialState.advancedSearchInputs // Ensure advanced search inputs are included
+      } 
+    });
+  };
 
   return (
     <>
@@ -391,10 +418,7 @@ function SearchPage() {
                   <PaginationComponent
                     currentPage={currentPage}
                     totalPages={totalPages}
-                    handlePageChange={newPage => {
-                      setCurrentPage(newPage);
-                      navigate('/search', { state: { query: searchQuery, option: searchOption, page: newPage, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
-                    }}
+                    handlePageChange={handlePageChange}
                   />
                 </>
               ) : !loading && (
