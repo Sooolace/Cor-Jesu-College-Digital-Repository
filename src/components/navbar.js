@@ -83,6 +83,14 @@ function NavigationBar() {
                         >
                             Help
                         </Nav.Link>
+                        <Nav.Link 
+                            as={Link} 
+                            to="/login"
+                            className="sign-in"
+                            onClick={closeNavbar}
+                        >
+                            Sign In
+                        </Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>
