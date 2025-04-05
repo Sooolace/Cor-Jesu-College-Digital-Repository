@@ -106,13 +106,13 @@ function Home() {
           <div className="two-column-section">
             <section
               ref={recentSubmissionsRef}
-              className={`recent-submissions ${recentSubmissionsInView ? 'transition-left-to-right' : 'hidden'}`}
+              className={`recent-submissions ${recentSubmissionsInView ? 'transition-left-to-right' : 'opacity-0'}`}
             >
               {MemoizedRecentSubmissions}
             </section>
             <section
               ref={mostViewedRef}
-              className={`most-viewed ${mostViewedInView ? 'transition-right-to-left' : 'hidden'}`}
+              className={`most-viewed ${mostViewedInView ? 'transition-right-to-left' : 'opacity-0'}`}
             >
               {MemoizedMostViewed}
             </section>

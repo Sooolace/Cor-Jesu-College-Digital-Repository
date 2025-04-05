@@ -1,5 +1,10 @@
+.opacity-0 {
+  opacity: 0;
+}
+
 .transition-bottom-to-top {
-  animation: bottomToTop 1s ease-out;
+  animation: bottomToTop 1s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes bottomToTop {
@@ -14,7 +19,8 @@
 }
 
 .transition-top-to-bottom {
-  animation: topToBottom 1s ease-out;
+  animation: topToBottom 1s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes topToBottom {
@@ -29,7 +35,8 @@
 }
 
 .transition-left-to-right {
-  animation: leftToRight 1s ease-out;
+  animation: leftToRight 1s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes leftToRight {
@@ -44,7 +51,8 @@
 }
 
 .transition-right-to-left {
-  animation: rightToLeft 1s ease-out;
+  animation: rightToLeft 1s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes rightToLeft {

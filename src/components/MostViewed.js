@@ -5,33 +5,44 @@ import '../pages/user/styles/mostviewed.css';
 import PaginationComponent from '../components/PaginationComponent';
 
 const MostViewed = ({ searchQuery }) => {
-  const [mostViewedDocs, setMostViewedDocs] = useState([]);
+  const [mostViewedDocs, setMostViewedDocs] = useState(() => {
+    const cached = sessionStorage.getItem('mostViewedDocs');
+    return cached ? JSON.parse(cached) : [];
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !sessionStorage.getItem('mostViewedDocs'));
   const [error, setError] = useState(null);
   const [expandedIndex, setExpandedIndex] = useState(null);
-  const itemsPerPage = 5; // Set the limit for items per page
+  const itemsPerPage = 5;
 
   // Fetch most viewed documents from your API
   useEffect(() => {
     const fetchMostViewed = async () => {
+      // Check for cached data
+      const cached = sessionStorage.getItem('mostViewedDocs');
+      if (cached) {
+        setMostViewedDocs(JSON.parse(cached));
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        setIsLoading(true);
-        const response = await fetch('/api/projects/mostviewed'); // Update endpoint to match your backend
+        const response = await fetch('/api/projects/mostviewed');
         if (!response.ok) {
           throw new Error('Failed to fetch most viewed documents');
         }
         const data = await response.json();
-        setMostViewedDocs(data); // No need for frontend sorting
+        setMostViewedDocs(data);
+        sessionStorage.setItem('mostViewedDocs', JSON.stringify(data));
       } catch (error) {
-        console.error('Error fetching most viewed projects:', error);
+        setError('Failed to fetch most viewed documents');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMostViewed();
-  }, []);
+  }, [mostViewedDocs.length]);
 
   // Function to update view count
   const updateViewCount = async (projectId) => {

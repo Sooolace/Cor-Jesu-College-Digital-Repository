@@ -6,37 +6,44 @@ import '../pages/user/styles/recentsubmissions.css';
 import PaginationComponent from '../components/PaginationComponent';
 
 const RecentSubmissions = ({ searchQuery }) => {
-  const [submissions, setSubmissions] = useState([]);
+  const [submissions, setSubmissions] = useState(() => {
+    const cached = sessionStorage.getItem('recentSubmissions');
+    return cached ? JSON.parse(cached) : [];
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [expandedIndex, setExpandedIndex] = useState(null); // To track which item is expanded
-  const itemsPerPage = 5; // Set the limit for items per page
+  const [isLoading, setIsLoading] = useState(() => !sessionStorage.getItem('recentSubmissions'));
+  const [error, setError] = useState(null);
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const itemsPerPage = 5;
 
-  // Function to fetch submissions from the API
-  const fetchSubmissions = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/projects/projects/recent');
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-      const data = await response.json();
-
-      // Sort submissions by created_at (timestamp) in descending order
-      const sortedData = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-      setSubmissions(sortedData);
-    } catch (error) {
-      console.error('Error fetching submissions:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch data when the component is mounted
   useEffect(() => {
+    const fetchSubmissions = async () => {
+      // If we have cached data, don't fetch again
+      if (submissions.length > 0) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/projects/projects/recent');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const data = await response.json();
+        
+        // Sort submissions by created_at
+        const sortedData = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+        setSubmissions(sortedData);
+        sessionStorage.setItem('recentSubmissions', JSON.stringify(sortedData));
+      } catch (error) {
+        setError('Failed to fetch recent submissions');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchSubmissions();
-  }, []); // Empty dependency array to fetch data on initial render
+  }, [submissions.length]);
 
   // Pagination Logic
   const totalPages = Math.ceil(submissions.length / itemsPerPage);

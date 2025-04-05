@@ -33,22 +33,57 @@ function SearchPage() {
   const [inputValue, setInputValue] = useState(initialState.query);
   const [searchQuery, setSearchQuery] = useState(initialState.query);
   const [searchOption, setSearchOption] = useState(initialState.option);
-  const [filteredData, setFilteredData] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [filteredData, setFilteredData] = useState(() => {
+    const cached = sessionStorage.getItem('searchResults');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [totalCount, setTotalCount] = useState(() => {
+    const cached = sessionStorage.getItem('searchTotalCount');
+    return cached ? parseInt(cached) : 0;
+  });
   const [currentPage, setCurrentPage] = useState(initialState.page);
   const itemsPerPage = 5;
-  const [selectedAuthors, setSelectedAuthors] = useState(initialState.authors);
-  const [selectedCategories, setSelectedCategories] = useState(initialState.categories);
-  const [selectedResearchAreas, setSelectedResearchAreas] = useState(initialState.researchAreas);
-  const [selectedTopics, setSelectedTopics] = useState(initialState.topics);
-  const [selectedKeywords, setSelectedKeywords] = useState(initialState.keywords);
-  const [selectedYears, setSelectedYears] = useState(initialState.years);
-  const [loading, setLoading] = useState(false);
+  const [selectedAuthors, setSelectedAuthors] = useState(() => {
+    const cached = sessionStorage.getItem('selectedAuthors');
+    return cached ? JSON.parse(cached) : initialState.authors;
+  });
+  const [selectedCategories, setSelectedCategories] = useState(() => {
+    const cached = sessionStorage.getItem('selectedCategories');
+    return cached ? JSON.parse(cached) : initialState.categories;
+  });
+  const [selectedResearchAreas, setSelectedResearchAreas] = useState(() => {
+    const cached = sessionStorage.getItem('selectedResearchAreas');
+    return cached ? JSON.parse(cached) : initialState.researchAreas;
+  });
+  const [selectedTopics, setSelectedTopics] = useState(() => {
+    const cached = sessionStorage.getItem('selectedTopics');
+    return cached ? JSON.parse(cached) : initialState.topics;
+  });
+  const [selectedKeywords, setSelectedKeywords] = useState(() => {
+    const cached = sessionStorage.getItem('selectedKeywords');
+    return cached ? JSON.parse(cached) : initialState.keywords;
+  });
+  const [selectedYears, setSelectedYears] = useState(() => {
+    const cached = sessionStorage.getItem('selectedYears');
+    return cached ? JSON.parse(cached) : initialState.years;
+  });
+  // Initialize loading to false if we have cached data
+  const [loading, setLoading] = useState(() => {
+    const hasCache = sessionStorage.getItem('searchResults') && 
+                    sessionStorage.getItem('searchTotalCount');
+    return !hasCache;
+  });
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   const fetchProjects = async (query = '', option = 'allfields', page = 1, categories = [], researchAreas = [], topics = [], authors = [], keywords = [], years = [], advancedSearchInputs = []) => {
-    setLoading(true);
+    // Only show loading if we're fetching new data
+    const isFetchingNew = !sessionStorage.getItem('searchResults') || 
+                         query !== searchQuery || 
+                         page !== currentPage;
+    if (isFetchingNew) {
+      setLoading(true);
+    }
     try {
       const endpointMap = {
         allfields: '/api/search/allfields',
@@ -76,8 +111,15 @@ function SearchPage() {
 
       const response = await axios.get(endpoint, { params });
 
-      setFilteredData(response.data.data || []);
-      setTotalCount(response.data.totalCount);
+      const data = response.data.data || [];
+      const count = response.data.totalCount;
+      
+      setFilteredData(data);
+      setTotalCount(count);
+      
+      // Cache the results
+      sessionStorage.setItem('searchResults', JSON.stringify(data));
+      sessionStorage.setItem('searchTotalCount', count.toString());
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -86,7 +128,17 @@ function SearchPage() {
   };
 
   useEffect(() => {
-    setLoading(true);
+    // If we have cached data that matches current parameters, don't fetch
+    const cachedResults = sessionStorage.getItem('searchResults');
+    const cachedCount = sessionStorage.getItem('searchTotalCount');
+    
+    if (cachedResults && cachedCount && !location.state) {
+      setFilteredData(JSON.parse(cachedResults));
+      setTotalCount(parseInt(cachedCount));
+      return;
+    }
+
+    // Only fetch if we don't have matching cached data
     fetchProjects(
       initialState.query,
       initialState.option,
@@ -99,31 +151,41 @@ function SearchPage() {
       initialState.years,
       initialState.advancedSearchInputs
     );
-  }, []);
+  }, [location.state]);
 
   useEffect(() => {
     if (location.state) {
       const query = location.state.query || '';
       const years = location.state.yearRange || location.state.years || selectedYears;
       
+      // Update state without triggering loading
       setInputValue(query);
       setSearchQuery(query);
       setCurrentPage(location.state.page || 1);
       setSearchOption(location.state.option || searchOption);
       setSelectedYears(years);
       
-      fetchProjects(
-        query,
-        location.state.option || searchOption,
-        location.state.page || 1,
-        location.state.categories || selectedCategories,
-        location.state.researchAreas || selectedResearchAreas,
-        location.state.topics || selectedTopics,
-        location.state.authors || selectedAuthors,
-        location.state.keywords || selectedKeywords,
-        years,
-        location.state.advancedSearchInputs || initialState.advancedSearchInputs
-      );
+      // Check if we have cached results for these exact parameters
+      const cachedResults = sessionStorage.getItem('searchResults');
+      const cachedCount = sessionStorage.getItem('searchTotalCount');
+      
+      if (cachedResults && cachedCount) {
+        setFilteredData(JSON.parse(cachedResults));
+        setTotalCount(parseInt(cachedCount));
+      } else {
+        fetchProjects(
+          query,
+          location.state.option || searchOption,
+          location.state.page || 1,
+          location.state.categories || selectedCategories,
+          location.state.researchAreas || selectedResearchAreas,
+          location.state.topics || selectedTopics,
+          location.state.authors || selectedAuthors,
+          location.state.keywords || selectedKeywords,
+          years,
+          location.state.advancedSearchInputs || initialState.advancedSearchInputs
+        );
+      }
     }
   }, [location.state]);
 
@@ -171,47 +233,60 @@ function SearchPage() {
     setSelectedCategories(categories);
     setSelectedResearchAreas(researchAreas);
     setSelectedTopics(topics);
+    
+    // Cache filter selections
+    sessionStorage.setItem('selectedCategories', JSON.stringify(categories));
+    sessionStorage.setItem('selectedResearchAreas', JSON.stringify(researchAreas));
+    sessionStorage.setItem('selectedTopics', JSON.stringify(topics));
+    
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories, researchAreas, topics, keywords: selectedKeywords, years: selectedYears } });
   }, [searchQuery, searchOption, selectedAuthors, selectedKeywords, selectedYears, navigate]);
 
   const handleClearFilters = useCallback(() => {
+    // Clear all filters from state and sessionStorage
     setSelectedCategories([]);
     setSelectedResearchAreas([]);
     setSelectedTopics([]);
+    setSelectedAuthors([]);
+    setSelectedKeywords([]);
+    setSelectedYears([1900, new Date().getFullYear()]);
     setInputValue('');
+    
+    // Clear all cached data
+    sessionStorage.removeItem('selectedCategories');
+    sessionStorage.removeItem('selectedResearchAreas');
+    sessionStorage.removeItem('selectedTopics');
+    sessionStorage.removeItem('selectedAuthors');
+    sessionStorage.removeItem('selectedKeywords');
+    sessionStorage.removeItem('selectedYears');
+    sessionStorage.removeItem('searchResults');
+    sessionStorage.removeItem('searchTotalCount');
+    
     navigate('/search', { state: { query: '', option: 'allfields', page: 1 } });
   }, [navigate]);
 
   const handleApplyAuthorFilters = useCallback((authors) => {
     console.log('Selected Authors:', authors);
     setSelectedAuthors(authors);
+    sessionStorage.setItem('selectedAuthors', JSON.stringify(authors));
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years: selectedYears } });
   }, [searchQuery, searchOption, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, selectedYears, navigate]);
 
   const handleApplyKeywordFilters = useCallback((keywords) => {
     console.log('Selected Keywords:', keywords);
     setSelectedKeywords(keywords);
+    sessionStorage.setItem('selectedKeywords', JSON.stringify(keywords));
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords, years: selectedYears } });
   }, [searchQuery, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedYears, navigate]);
 
   const handleApplyYearFilters = useCallback((years) => {
     console.log('Selected Years:', years);
     setSelectedYears(years);
+    sessionStorage.setItem('selectedYears', JSON.stringify(years));
     navigate('/search', { state: { query: searchQuery, option: searchOption, page: 1, authors: selectedAuthors, categories: selectedCategories, researchAreas: selectedResearchAreas, topics: selectedTopics, keywords: selectedKeywords, years } });
   }, [searchQuery, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, navigate]);
 
-  useEffect(() => {
-    return () => {
-      console.log('Cleaning up component state.');
-      setSelectedCategories([]);
-      setSelectedResearchAreas([]);
-      setSelectedTopics([]);
-      setSearchQuery('');
-      setCurrentPage(1);
-      setFilteredData([]);
-      setTotalCount(0);
-    };
-  }, []);
+  // Remove cleanup effect to maintain cache between navigations
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
