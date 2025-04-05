@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Spinner, Alert, Container, Row, Col } from 'react-bootstrap';
+import { Table, Button, Spinner, Alert, Container, Row, Col, Modal } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import './styles/TotalAuthors.css'; // Reuse the same styling as TotalAuthors
@@ -10,6 +10,9 @@ function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newRole, setNewRole] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -28,24 +31,37 @@ function UserManagement() {
     }
   };
 
-  const toggleUserRole = async (userId, currentRole) => {
-    const newRole = currentRole === 'admin' ? 'user' : 'admin';
-    
+  const handleRoleChange = (userId, username, currentRole) => {
+    const roleToChangeTo = currentRole === 'admin' ? 'user' : 'admin';
+    setSelectedUser({ id: userId, username, currentRole });
+    setNewRole(roleToChangeTo);
+    setShowModal(true);
+  };
+
+  const confirmRoleChange = async () => {
     try {
-      await updateUserRole(userId, newRole);
+      await updateUserRole(selectedUser.id, newRole);
       
       // Update local state
       setUsers(users.map(user => 
-        user.id === userId ? {...user, role: newRole} : user
+        user.id === selectedUser.id ? {...user, role: newRole} : user
       ));
       
-      setSuccessMessage(`User role updated successfully to ${newRole}`);
+      setSuccessMessage(`User role for ${selectedUser.username} updated successfully to ${newRole}`);
       setTimeout(() => setSuccessMessage(''), 3000);
+      setShowModal(false);
     } catch (error) {
       console.error('Error updating user role:', error);
       setError('Failed to update user role. Please try again.');
       setTimeout(() => setError(null), 3000);
+      setShowModal(false);
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedUser(null);
+    setNewRole('');
   };
 
   return (
@@ -97,15 +113,15 @@ function UserManagement() {
                 <tr key={user.id}>
                   <td>{user.username}</td>
                   <td>{user.email}</td>
-                  <td>
-                    <span className={`badge ${user.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>
-                      {user.role}
+                  <td className="text-center">
+                    <span className={`role-badge ${user.role === 'admin' ? 'role-admin' : 'role-user'}`}>
+                      {user.role.toUpperCase()}
                     </span>
                   </td>
                   <td>
                     <Button 
                       variant={user.role === 'admin' ? 'outline-primary' : 'outline-danger'}
-                      onClick={() => toggleUserRole(user.id, user.role)}
+                      onClick={() => handleRoleChange(user.id, user.username, user.role)}
                     >
                       {user.role === 'admin' ? 'Change to User' : 'Change to Admin'}
                     </Button>
@@ -116,6 +132,33 @@ function UserManagement() {
           </tbody>
         </Table>
       )}
+
+      {/* Confirmation Modal */}
+      <Modal show={showModal} onHide={handleCloseModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Role Change</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to change <strong>{selectedUser?.username}</strong>'s role from 
+          <span className={`role-badge-inline ${selectedUser?.currentRole === 'admin' ? 'role-admin' : 'role-user'}`}>
+            {selectedUser?.currentRole?.toUpperCase()}
+          </span> to 
+          <span className={`role-badge-inline ${newRole === 'admin' ? 'role-admin' : 'role-user'}`}>
+            {newRole.toUpperCase()}
+          </span>?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Cancel
+          </Button>
+          <Button 
+            variant={newRole === 'admin' ? 'danger' : 'primary'} 
+            onClick={confirmRoleChange}
+          >
+            Confirm Change
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
