@@ -59,40 +59,71 @@
   color: #fff;
 }
 
+/* Metrics Container */
+.metrics-container {
+  width: 100%;
+  margin-bottom: 30px;
+  overflow-x: auto; /* Enable horizontal scrolling on smaller screens */
+  padding-bottom: 5px; /* Add some bottom padding for the scrollbar */
+}
+
 /* Metrics Section */
 .metrics {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 30px;
+  flex-wrap: nowrap; /* Prevent wrapping to keep everything on one line */
+  gap: 15px;
+  min-width: max-content; /* Ensure items don't shrink below their natural width */
+  padding: 5px; /* Add some padding for the scrolling experience */
 }
 
 /* Metric Items */
 .metric-item {
   background: #fff;
-  padding: 25px;
+  padding: 15px 10px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
-  flex: 1;
-  transition: transform 0.3s ease;
+  flex: 1 0 auto; /* Don't grow but don't shrink */
+  width: 130px; /* Fixed width for each item */
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-decoration: none;
   color: inherit;
 }
 
 .metric-item:hover {
   transform: translateY(-5px);
-  background-color: #fad96c;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Metric Item Title */
+/* Metrics Item properties */
+.icon-container {
+  margin-bottom: 5px;
+}
+
+.metric-icon {
+  font-size: 24px;
+  color: #a33307;
+}
+
 .metric-item h4 {
-  display: flex;
-  align-items: center; /* Align icon and text */
-  font-size: 20px;    /* Adjust this value to change the font size of the title */
-  margin: 0;            /* Remove any default margin */
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
 }
 
+.metric-item p {
+  font-size: 20px;
+  font-weight: bold;
+  color: #a33307;
+  margin: 0;
+}
 
 /* Section Layout */
 .section {
@@ -110,43 +141,40 @@ li {
   border-bottom: 1px solid #e0e0e0;
 }
 
-/* Parent container for both sections */
-/* Parent container for both sections */
+/* Two Column Section */
 .two-column-section {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;  /* Space between the two sections */
-  margin: 0 auto;
-  width: 100%;  /* Ensure the container takes up the full width */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 10px;
+  padding: 0 5px;
 }
 
-/* Each section inside the two-column container */
-.two-column-section .section {
-  flex: 0 1 48%;  /* Ensure each section takes up 48% of the container width */
-  min-width: 300px;  /* Minimum width for smaller screens */
-  box-sizing: border-box;  /* Ensures padding and borders are included in the width */
+.two-column-section section {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
-/* For smaller screens (less than 768px) */
-@media (max-width: 768px) {
+.two-column-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+/* Ensure the content inside the sections aligns properly */
+.two-column-section .recent-submissions,
+.two-column-section .most-viewed {
+  width: 100%;
+}
+
+@media (max-width: 992px) {
   .two-column-section {
-    flex-direction: row;  /* Keep sections side by side */
+    grid-template-columns: 1fr;
   }
-
-  .two-column-section .section {
-    flex: 0 1 100%;  /* Ensure both sections take up full width on smaller screens */
-    min-width: 200px;  /* Allow the sections to shrink further */
-  }
-}
-
-
-
-.section {
-  flex: 1;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 16px;
-  background-color: #f9f9f9;
 }
 
 /* Responsive Design */
@@ -182,4 +210,12 @@ li {
     flex-direction: column;
     gap: 10px;
   }
+}
+
+/* Section separator */
+.section-separator {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 15px 5px;
+  width: 100%;
 }

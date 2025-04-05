@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
-import { FaArrowLeft, FaBookmark, FaPrint, FaDownload } from 'react-icons/fa';  // Add FaDownload for the download icon
+import { FaArrowLeft, FaBookmark, FaPrint, FaDownload, FaLock } from 'react-icons/fa';  // Add FaLock for the lock icon
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf'; 
 import './styles/documentoverview.css';
@@ -24,8 +24,14 @@ function DocumentOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Check if user is logged in by looking for token in localStorage
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    setIsLoggedIn(!!token && (role === 'user' || role === 'admin'));
+    
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -143,6 +149,11 @@ function DocumentOverview() {
     }
   };
 
+  // Function to redirect to login page
+  const redirectToLogin = () => {
+    navigate('/login', { state: { from: location.pathname } });
+  };
+
   if (loading) {
     return (
       <div className="loader-container">
@@ -180,45 +191,50 @@ function DocumentOverview() {
             <p className="abstract">{project.abstract}</p>
 
             {/* Keywords */}
-              <div className="project-detail-item">
-                <p className="detail-title"><strong>Keywords:</strong></p>
-                <p className="detail-content">
-                  {keywords.length > 0 ? keywords.map((keyword, index) => (
-                    <span key={keyword.keyword_id}>
-                      <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword)}`} className="keyword-link">
-                        {keyword.keyword}
-                      </Link>
-                      {index < keywords.length - 1 && ', '}
-                    </span>
-                  )) : 'N/A'}
-                </p>
-              </div>
-
-          <div className="project-detail-item">
-                        <p className="detail-title"><strong>Study Url:</strong></p>
-                        <p className="detail-content">
-                          {project.study_url ? <a href={project.study_url} target="_blank" rel="noopener noreferrer">{project.study_url}</a> : 'No Link Available'}
-                        </p>
+            <div className="project-detail-item">
+              <p className="detail-title"><strong>Keywords:</strong></p>
+              <p className="detail-content">
+                {keywords.length > 0 ? keywords.map((keyword, index) => (
+                  <span key={keyword.keyword_id}>
+                    <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword)}`} className="keyword-link">
+                      {keyword.keyword}
+                    </Link>
+                    {index < keywords.length - 1 && ', '}
+                  </span>
+                )) : 'N/A'}
+              </p>
             </div>
-                      <div className="project-detail-item">
-            <p className="detail-title"><strong>Downloadable File:</strong></p>
-            <p className="detail-content">
-              {project.file_path ? (
-                <a 
-  href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
-                download
->
-  {project.file_path.split('/').pop()}
-</a>
 
-
-
-
-              ) : (
-                'No Document Available'
-              )}
-            </p>
-          </div>
+            <div className="project-detail-item">
+              <p className="detail-title"><strong>Study Url:</strong></p>
+              <p className="detail-content">
+                {project.study_url ? <a href={project.study_url} target="_blank" rel="noopener noreferrer">{project.study_url}</a> : 'No Link Available'}
+              </p>
+            </div>
+            
+            {/* Downloadable File - Only shown if logged in */}
+            <div className="project-detail-item">
+              <p className="detail-title"><strong>Downloadable File:</strong></p>
+              <p className="detail-content">
+                {isLoggedIn ? (
+                  project.file_path ? (
+                    <a 
+                      href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
+                      download
+                    >
+                      {project.file_path.split('/').pop()}
+                    </a>
+                  ) : (
+                    'No Document Available'
+                  )
+                ) : (
+                  <div className="login-prompt">
+                    <FaLock /> <span>Please <Link to="/login" className="login-link" state={{ from: location.pathname }}>login</Link> to access downloadable files</span>
+                  </div>
+                )}
+              </p>
+            </div>
+            
             <div className="buttons-container">
               <div className="print-button">
                 <Button onClick={handlePrintSummary}>

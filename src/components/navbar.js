@@ -1,16 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../assets/CJCREPOLOGO.png';
 import '../pages/user/styles/header.css';
 
 function NavigationBar() {
     const [expanded, setExpanded] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState('');
     const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        const storedUsername = localStorage.getItem('username');
+        
+        if (token && storedUsername) {
+            setIsAuthenticated(true);
+            setUsername(storedUsername);
+        } else {
+            setIsAuthenticated(false);
+        }
+    }, []);
 
     const closeNavbar = () => setExpanded(false);
 
     const isActive = (path) => location.pathname === path;
+    
+    // Handle logout
+    const handleLogout = () => {
+        // Clear all localStorage items
+        localStorage.clear();
+        console.log('Logged out, all localStorage items cleared');
+        
+        // Update authentication state
+        setIsAuthenticated(false);
+        
+        // Redirect to homepage
+        navigate('/');
+    };
 
     return (
         <Navbar 
@@ -83,14 +112,28 @@ function NavigationBar() {
                         >
                             Help
                         </Nav.Link>
-                        <Nav.Link 
-                            as={Link} 
-                            to="/login"
-                            className="sign-in"
-                            onClick={closeNavbar}
-                        >
-                            Sign In
-                        </Nav.Link>
+                        
+                        {isAuthenticated ? (
+                            <div className="welcome-container">
+                                <div className="welcome-message">
+                                    <span className="welcome-text">
+                                        <i className="fas fa-user-circle"></i> Hi, {username}
+                                    </span>
+                                    <button onClick={handleLogout} className="logout-btn">
+                                        <i className="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <Nav.Link 
+                                as={Link} 
+                                to="/login"
+                                className="sign-in"
+                                onClick={closeNavbar}
+                            >
+                                Sign In
+                            </Nav.Link>
+                        )}
                     </Nav>
                 </Navbar.Collapse>
             </Container>

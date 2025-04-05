@@ -18,14 +18,27 @@ const searchRouter = require('./routes/search');
 const projectsCategoryRouter = require('./routes/project_category'); 
 const activityLogRouter = require('./routes/activitylog');
 const uploadRouter = require('./routes/upload'); // Import the upload route
+const usersRouter = require('./routes/users'); // Import the users route
+const { OAuth2Client } = require('google-auth-library');
 
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Google OAuth Configuration
+const googleClient = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET
+);
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins in development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -64,6 +77,7 @@ app.use('/api/project_category', projectsCategoryRouter);
 app.use('/api/featured-documents', featuredDocumentsRouter);
 app.use('/api/search', searchRouter);
 app.use('/api', uploadRouter);
+app.use('/api/users', usersRouter); // Add the users routes
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -115,6 +129,101 @@ app.post('/api/auth/login', async (req, res) => {
         console.error(err.stack);
         return res.status(500).json({ message: 'Server error. Please try again later.' });
     }
+});
+
+// Google OAuth Route
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    if (!token) {
+      console.error('No token provided in request');
+      return res.status(400).json({ message: 'No token provided' });
+    }
+    
+    console.log('Received Google token, attempting to verify...');
+    
+    // Verify Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      // Don't strictly verify audience during development
+      // audience: process.env.GOOGLE_CLIENT_ID
+    }).catch(error => {
+      console.error('Token verification failed:', error.message);
+      throw new Error(`Token verification failed: ${error.message}`);
+    });
+    
+    if (!ticket) {
+      console.error('Failed to verify token but no error was thrown');
+      return res.status(401).json({ message: 'Token verification failed' });
+    }
+    
+    console.log('Token successfully verified');
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+    
+    console.log(`User authenticated: ${email}`);
+    
+    // Determine role based on email pattern
+    // You can customize this logic based on your requirements
+    let role = 'user'; // Default role is user
+    
+    // Example: Set specific emails as admin or check for specific domain
+    const adminEmails = ['your.admin@gmail.com', 'admin@yourdomain.com'];
+    if (adminEmails.includes(email) || email.endsWith('@admin.yourdomain.com')) {
+      role = 'admin';
+    }
+    
+    console.log(`Assigned role: ${role} for user ${email}`);
+    
+    // Check if the user exists in your database
+    const userQuery = 'SELECT * FROM admin WHERE email = $1';
+    const userResult = await pool.query(userQuery, [email]);
+    
+    let userId;
+    
+    if (userResult.rows.length === 0) {
+      console.log(`User ${email} not found in database, creating new account with role: ${role}`);
+      // User doesn't exist, create them with determined role
+      const insertQuery = 'INSERT INTO admin (username, email, role, picture_url) VALUES ($1, $2, $3, $4) RETURNING id';
+      const insertResult = await pool.query(insertQuery, [name, email, role, picture]);
+      userId = insertResult.rows[0].id;
+      console.log(`New user created with ID: ${userId} and role: ${role}`);
+    } else {
+      // User exists, maintain their existing role unless updating is desired
+      userId = userResult.rows[0].id;
+      role = userResult.rows[0].role || role; // Keep existing role if present
+      console.log(`Existing user found with ID: ${userId} and role: ${role}`);
+    }
+    
+    // Generate JWT token with role included
+    const jwtToken = jwt.sign(
+      { userId, email, name, role },
+      process.env.JWT_SECRET || 'your_default_secret',
+      { expiresIn: '1h' }
+    );
+    
+    console.log(`Authentication successful, returning token with role: ${role}`);
+    
+    return res.json({
+      token: jwtToken,
+      user: {
+        id: userId,
+        name,
+        email,
+        picture,
+        role  // Include actual role in the response
+      }
+    });
+    
+  } catch (error) {
+    console.error('Google authentication error details:', error);
+    console.error('Stack trace:', error.stack);
+    return res.status(401).json({ 
+      message: 'Google authentication failed', 
+      details: error.message 
+    });
+  }
 });
 
 // Serve static files from the React app's build folder in production

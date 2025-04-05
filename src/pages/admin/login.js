@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/cjclogo.PNG';
 import backgroundImage from '../../assets/loginbg.png'; // Ensure this path is correct
 import '../admin/styles/login.css'; // Ensure this path is correct
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
+
 
 function Login({ setIsAdmin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Check if user is already logged in by looking at localStorage
+  // Get the redirect path from location state or default to homepage
+  const from = location.state?.from || '/';
+  
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedRole = localStorage.getItem('role');
@@ -20,11 +26,25 @@ function Login({ setIsAdmin }) {
         setIsAdmin(true);
         navigate('/admindashboard');
       } else {
-        // Handle non-admin role if needed
-        navigate('/');
+        // Redirect to the page they came from or homepage
+        navigate(from);
       }
     }
-  }, [navigate, setIsAdmin]);
+  }, [navigate, setIsAdmin, from]);
+
+  // Always clear previous auth state when the login page is loaded
+  useEffect(() => {
+    // Clear previous auth data when visiting login page
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('username');
+    localStorage.removeItem('email');
+    localStorage.removeItem('picture');
+    setIsAdmin(false);
+    
+    console.log('Login page loaded - All previous auth data cleared');
+  }, [setIsAdmin]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -34,7 +54,7 @@ function Login({ setIsAdmin }) {
 
     try {
       // Make API request to backend for authentication
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,13 +74,13 @@ function Login({ setIsAdmin }) {
 
         if (role === 'admin') {
           localStorage.setItem('isAdmin', 'true');
+          setIsAdmin(true); // set isAdmin state
+          navigate('/admindashboard'); // Navigate to admin dashboard
         } else {
           localStorage.setItem('isAdmin', 'false');
+          // Navigate back to the page they came from
+          navigate(from);
         }
-
-        // Navigate to admin dashboard or home
-        setIsAdmin(true); // set isAdmin state
-        navigate('/admindashboard'); // Navigate to admin dashboard (or other page based on role)
       } else {
         // Show error message if login fails
         setErrorMessage(data.message || 'Login failed. Please try again.');
@@ -70,117 +90,195 @@ function Login({ setIsAdmin }) {
     }
   };
 
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      console.log('Google login credential received:', credentialResponse);
+      
+      if (!credentialResponse.credential) {
+        console.error('No credential received from Google');
+        setErrorMessage('Failed to receive credentials from Google');
+        return;
+      }
+      
+      // Send the ID token to your backend
+      console.log('Sending token to backend...');
+      const response = await axios.post('http://localhost:5000/api/auth/google', {
+        token: credentialResponse.credential
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Backend response:', response.data);
+      const { token, user } = response.data;
+      
+      // Debug roles
+      console.log('User object:', user);
+      console.log('User role:', user.role);
+      
+      // Clear any previous auth data first
+      localStorage.clear();
+
+      // Store authentication data
+      localStorage.setItem('token', token);
+      localStorage.setItem('username', user.name);
+      localStorage.setItem('email', user.email);
+      localStorage.setItem('picture', user.picture);
+      localStorage.setItem('role', user.role); // Use actual role from server
+      localStorage.setItem('isAdmin', user.role === 'admin' ? 'true' : 'false'); // Set isAdmin based on role
+      
+      console.log('Local storage set with role:', user.role, {
+        role: localStorage.getItem('role'),
+        isAdmin: localStorage.getItem('isAdmin'),
+        token: localStorage.getItem('token') ? 'Set' : 'Not set'
+      });
+      
+      // Set isAdmin state based on the role
+      const isUserAdmin = user.role === 'admin';
+      setIsAdmin(isUserAdmin);
+      console.log(`setIsAdmin(${isUserAdmin}) has been called`);
+      
+      // Navigate based on user role
+      if (isUserAdmin) {
+        console.log('Admin user, navigating to admin dashboard...');
+        navigate('/admindashboard');
+      } else {
+        console.log('Regular user, navigating to original page or home...');
+        navigate(from);
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      let errorMessage = 'Google login failed. Please try again.';
+      
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        errorMessage = error.response.data.message || error.response.data.details || errorMessage;
+      }
+      
+      setErrorMessage(errorMessage);
+    }
+  };
+
   const goToHome = () => {
     navigate('/');
   };
   
   return (
-    <section
-      className="vh-100 d-flex align-items-center justify-content-center bg-cover"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-md-6 col-lg-5">
-            <div className="card shadow border-0">
-              <div className="card-body p-4">
-                {/* Go Back to Home Button */}
-                <div className="text-center mb-3">
-                  <button
-                    className="btn btn-link text-decoration-none fw-bold text-primary"
-                    onClick={goToHome}
-                  >
-                    ← Go Back to Home
-                  </button>
-                </div>
-
-                {/* Logo */}
-                <div className="text-center mb-4">
-                  <img
-                    src={logo}
-                    alt="Logo"
-                    className="img-fluid mb-3"
-                    style={{ maxWidth: '180px' }}
-                  />
-                  <h4 className="mb-0 fw-bold">COR JESU COLLEGE: DIGITAL REPOSITORY</h4>
-                  <p className="text-muted">Please sign in to continue</p>
-                </div>
-
-                {/* Login Form */}
-                <form onSubmit={handleLogin}>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">Username</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter your username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">Password</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  {errorMessage && (
-                    <div className="alert alert-danger text-center mb-3">
-                      {errorMessage}
-                    </div>
-                  )}
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="rememberMe"
-                      />
-                      <label className="form-check-label" htmlFor="rememberMe">
-                        Remember me
-                      </label>
-                    </div>
-                    <a href="#!" className="text-decoration-none">
-                      Forgot password?
-                    </a>
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-100 py-2 s-custom-btn"
-                  >
-                    Sign In
-                  </button>
-                </form>
-
-                {/* Google Sign-In Button */}
-                <div className="text-center mt-4">
-                  <p className="small text-muted mb-0">Or sign in with</p>
-                  <div className="d-flex justify-content-center mt-2">
+    <GoogleOAuthProvider clientId="15930922340-0rjl4r2b1iib6pdbqmqoribadkoni71a.apps.googleusercontent.com">
+      <section
+        className="vh-100 d-flex align-items-center justify-content-center bg-cover"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-6 col-lg-5">
+              <div className="card shadow border-0">
+                <div className="card-body p-4">
+                  {/* Go Back to Home Button */}
+                  <div className="text-center mb-3">
                     <button
-                      type="button"
-                      className="btn btn-outline-primary btn-sm rounded-circle mx-1 g-custom-btn"
-                      style={{ width: '36px', height: '36px' }}
+                      className="btn btn-link text-decoration-none fw-bold text-primary"
+                      onClick={goToHome}
                     >
-                      <i className="fab fa-google"></i>
+                      ← Go Back to Home
                     </button>
+                  </div>
+
+                  {/* Logo */}
+                  <div className="text-center mb-4">
+                    <img
+                      src={logo}
+                      alt="Logo"
+                      className="img-fluid mb-3"
+                      style={{ maxWidth: '180px' }}
+                    />
+                    <h4 className="mb-0 fw-bold">COR JESU COLLEGE: DIGITAL REPOSITORY</h4>
+                    <p className="text-muted">Please sign in to continue</p>
+                  </div>
+
+                  {/* Login Form */}
+                  <form onSubmit={handleLogin}>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Username</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter your username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Password</label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    {errorMessage && (
+                      <div className="alert alert-danger text-center mb-3">
+                        {errorMessage}
+                      </div>
+                    )}
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="rememberMe"
+                        />
+                        <label className="form-check-label" htmlFor="rememberMe">
+                          Remember me
+                        </label>
+                      </div>
+                      <a href="#!" className="text-decoration-none">
+                        Forgot password?
+                      </a>
+                    </div>
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100 py-2 s-custom-btn"
+                    >
+                      Sign In
+                    </button>
+                  </form>
+
+                  {/* Google Sign-In Button */}
+                  <div className="text-center mt-4">
+                    <p className="small text-muted mb-0">Or sign in with</p>
+                    <div className="d-flex justify-content-center mt-2">
+                      <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={(error) => {
+                          console.error('Google Login Error:', error);
+                          setErrorMessage('Google Login Failed: ' + (error?.error_description || ''));
+                        }}
+                        useOneTap={false}
+                        type="standard"
+                        width="280px"
+                        logo_alignment="center"
+                        text="signin_with"
+                        context="signin"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </GoogleOAuthProvider>
   );
 }
 
