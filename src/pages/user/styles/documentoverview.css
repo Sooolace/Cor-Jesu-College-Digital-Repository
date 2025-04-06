@@ -90,25 +90,98 @@
   opacity: 0.8;
 }
 
-/* Download button styling */
+/* Download button styling - enhanced */
 .download-button-container {
   display: inline-block;
+  margin-top: 10px;
+  width: 100%;
 }
 
 .download-link {
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  color: #a33307;
+  font-weight: 500;
+  padding: 8px 0;
+  transition: all 0.2s ease;
+  max-width: 320px;
 }
 
-.download-btn {
-  background-color: #a33307;
-  border-color: #a33307;
-  padding: 8px 16px;
-  color: white;
+.download-link:hover {
+  color: #892a06;
+  text-decoration: underline;
 }
 
-.download-btn:hover {
-  opacity: 0.8;
-  color: white;
+.download-link svg {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.download-filename {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Login prompt for downloadable files - enhanced */
+.login-prompt {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.login-prompt:hover {
+  background-color: #f0f1f2;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.login-prompt svg {
+  margin-right: 12px;
+  color: #a33307;
+  font-size: 18px;
+}
+
+.login-prompt .login-link {
+  color: #a33307;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 5px;
+  transition: color 0.2s ease;
+}
+
+.login-prompt .login-link:hover {
+  color: #892a06;
+  text-decoration: underline;
+}
+
+/* Downloadable file section container */
+.downloadable-file-section {
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+
+/* No document available message */
+.no-document-message {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  color: #6c757d;
+  text-align: center;
+  font-style: italic;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  max-width: 320px;
 }
 
 .bookmark-button button {

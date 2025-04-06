@@ -307,7 +307,7 @@ function DocumentOverview() {
             </div>
             
             {/* Downloadable File - Only shown if logged in */}
-            <div className="project-detail-item">
+            <div className="project-detail-item downloadable-file-section">
               <p className="detail-title"><strong>Downloadable File:</strong></p>
               <p className="detail-content">
                 {isLoggedIn ? (
@@ -318,13 +318,14 @@ function DocumentOverview() {
                         download
                         className="download-link"
                       >
-                        <Button className="download-btn">
-                          <FaDownload /> Download {project.file_path.split('/').pop()}
-                        </Button>
+                        <FaDownload /> 
+                        <span className="download-filename">{project.file_path.split('/').pop()}</span>
                       </a>
                     </div>
                   ) : (
-                    'No Document Available'
+                    <div className="no-document-message">
+                      No Document Available
+                    </div>
                   )
                 ) : (
                   <div className="login-prompt">

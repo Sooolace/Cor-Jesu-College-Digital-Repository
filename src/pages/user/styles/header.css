@@ -1,6 +1,7 @@
 .custom-navbar {
   background-color: #a33307;
   padding: 10px 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-logo {
@@ -9,29 +10,43 @@
   max-width: 100%;
 }
 
-/* Navigation links styling */
+/* Navigation with improved spacing */
+.custom-navbar .navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Add consistent spacing between nav items */
+}
+
+/* Navigation links styling with improved spacing */
 .custom-navbar .nav-link {
   color: #fff !important;
   padding: 0.5rem 1rem !important;
-  margin: 0 0.25rem;
+  margin: 0 5px;
   font-weight: 600;
   border-radius: 5px;
   transition: all 0.3s ease;
+  white-space: nowrap; /* Prevents text wrapping */
 }
 
 .custom-navbar .nav-link.sign-in {
   background-color: #fff;
   color: #a33307 !important;
   padding: 0.5rem 1rem !important;
-  margin: 0 0.25rem;
+  margin: 0 5px;
   font-weight: 600;
   border-radius: 5px;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.custom-navbar .nav-link.sign-in i {
+  margin-right: 6px;
 }
 
 .custom-navbar .nav-link:hover,
 .custom-navbar .nav-link.active {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-1px);
 }
 
@@ -41,7 +56,11 @@
   transform: translateY(-1px);
 }
 
-/* Dropdown styling */
+/* Dropdown styling with improved spacing */
+.custom-dropdown {
+  margin: 0 5px; /* Add margin around dropdowns */
+}
+
 .custom-dropdown .dropdown-toggle {
   color: #fff !important;
   padding: 0.5rem 1rem !important;
@@ -49,9 +68,13 @@
   font-weight: 600;
   border-radius: 5px;
   transition: all 0.3s ease;
+  white-space: nowrap; /* Prevents text wrapping */
+  display: flex;
+  align-items: center;
 }
 
 .custom-dropdown .dropdown-toggle::after {
+  margin-left: 8px;
   transition: transform 0.3s ease;
 }
 
@@ -60,24 +83,28 @@
 }
 
 .custom-dropdown .dropdown-menu {
-  margin-top: 0.5rem;
+  margin-top: 10px;
   border: none;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   overflow: hidden;
+  min-width: 200px;
+  padding: 8px;
 }
 
 .custom-dropdown .dropdown-item {
-  padding: 0.75rem 1.5rem;
+  padding: 10px 15px;
   color: #333;
   font-weight: 500;
   transition: all 0.3s ease;
+  border-radius: 4px;
+  margin-bottom: 2px;
 }
 
 .custom-dropdown .dropdown-item:hover {
   background-color: #f8f9fa;
   color: #a33307;
-  padding-left: 2rem;
+  padding-left: 20px;
 }
 
 /* Hamburger menu styling */
@@ -99,16 +126,91 @@
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
 }
 
-/* Mobile styles */
+/* User dropdown styling - improved */
+.user-dropdown {
+  margin: 0 5px; /* Add margin for consistency */
+}
+
+.user-dropdown .dropdown-toggle {
+  color: white !important;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.user-dropdown:hover .dropdown-toggle {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-dropdown .dropdown-toggle::after {
+  margin-left: 8px;
+}
+
+/* Profile image styling - improved */
+.profile-image {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.user-dropdown:hover .profile-image {
+  transform: scale(1.05);
+}
+
+.user-dropdown .dropdown-menu {
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  border: none;
+  min-width: 200px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.user-dropdown .dropdown-item {
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.user-dropdown .dropdown-item i {
+  margin-right: 10px;
+  width: 18px;
+  color: #a33307;
+  font-size: 16px;
+}
+
+.user-dropdown .dropdown-item:hover {
+  background-color: #f8f9fa;
+  padding-left: 20px;
+}
+
+.user-dropdown .dropdown-divider {
+  margin: 0;
+}
+
+/* Mobile styles - improved */
 @media (max-width: 991px) {
   .navbar-logo {
     width: 200px;
   }
 
+  .custom-navbar .navbar-nav {
+    gap: 10px;
+  }
+
   .navbar-collapse {
     background-color: #a33307;
     margin: 0 -12px;
-    padding: 1rem;
+    padding: 15px;
     border-radius: 0 0 8px 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
@@ -116,17 +218,17 @@
   .custom-navbar .nav-link,
   .custom-dropdown .dropdown-toggle {
     padding: 0.75rem 1rem !important;
-    margin: 0.25rem 0;
+    margin: 5px 0;
   }
 
   .custom-navbar .nav-link.sign-in {
     padding: 0.75rem 1rem !important;
-    margin: 0.25rem 0;
+    margin: 5px 0;
   }
 
   .custom-dropdown .dropdown-menu {
     background-color: rgba(255, 255, 255, 0.1);
-    margin: 0;
+    margin: 5px 0;
     border-radius: 5px;
     box-shadow: none;
   }
@@ -158,6 +260,16 @@
 }
 
 /* Small mobile devices */
+@media (max-width: 768px) {
+  .navbar-logo {
+    width: 180px;
+  }
+  
+  .custom-navbar .navbar-nav {
+    gap: 5px;
+  }
+}
+
 @media (max-width: 576px) {
   .navbar-logo {
     width: 150px;
@@ -166,10 +278,12 @@
   .custom-navbar .nav-link,
   .custom-dropdown .dropdown-toggle {
     font-size: 0.95rem;
+    padding: 0.4rem 0.8rem !important;
   }
 
   .custom-navbar .nav-link.sign-in {
     font-size: 0.95rem;
+    padding: 0.4rem 0.8rem !important;
   }
 
   .custom-dropdown .dropdown-item {
@@ -191,47 +305,4 @@
   .custom-dropdown .dropdown-item:active {
     background-color: rgba(255, 255, 255, 0.2);
   }
-}
-
-/* Add styles for welcome message and logout button */
-.welcome-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.welcome-message {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  padding: 8px 15px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.3s ease;
-}
-
-.welcome-message:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-}
-
-.welcome-text {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.logout-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 8px;
-  font-size: 14px;
-  opacity: 0.9;
-  transition: opacity 0.3s ease;
-}
-
-.logout-btn:hover {
-  opacity: 1;
 }
