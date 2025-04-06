@@ -17,6 +17,26 @@ function Login({ setIsAdmin }) {
   // Get the redirect path from location state or default to homepage
   const from = location.state?.from || '/';
   
+  // Check if we're coming from a page where login was initiated
+  const preserveLogin = location.state?.preserveLogin || false;
+  const returnToDocument = location.state?.returnToDocument || false;
+  
+  useEffect(() => {
+    // Only clear auth if we're not preserving login state
+    if (!preserveLogin) {
+      console.log('Clearing previous auth data - not preserving login');
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      localStorage.removeItem('picture');
+      setIsAdmin(false);
+    } else {
+      console.log('Preserving login state - not clearing auth data');
+    }
+  }, [setIsAdmin, preserveLogin]);
+  
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedRole = localStorage.getItem('role');
@@ -31,20 +51,6 @@ function Login({ setIsAdmin }) {
       }
     }
   }, [navigate, setIsAdmin, from]);
-
-  // Always clear previous auth state when the login page is loaded
-  useEffect(() => {
-    // Clear previous auth data when visiting login page
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('username');
-    localStorage.removeItem('email');
-    localStorage.removeItem('picture');
-    setIsAdmin(false);
-    
-    console.log('Login page loaded - All previous auth data cleared');
-  }, [setIsAdmin]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -78,8 +84,8 @@ function Login({ setIsAdmin }) {
           navigate('/admindashboard'); // Navigate to admin dashboard
         } else {
           localStorage.setItem('isAdmin', 'false');
-          // Navigate back to the page they came from
-          navigate(from);
+          // Navigate back to the page they came from with state preservation
+          navigate(from, { state: { preserveLogin: true } });
         }
       } else {
         // Show error message if login fails
@@ -145,7 +151,8 @@ function Login({ setIsAdmin }) {
         navigate('/admindashboard');
       } else {
         console.log('Regular user, navigating to original page or home...');
-        navigate(from);
+        // Navigate with state preservation
+        navigate(from, { state: { preserveLogin: true } });
       }
     } catch (error) {
       console.error('Google login error:', error);
@@ -161,7 +168,7 @@ function Login({ setIsAdmin }) {
   };
 
   const goToHome = () => {
-    navigate('/');
+    navigate('/', { state: { preserveLogin: true } });
   };
   
   return (

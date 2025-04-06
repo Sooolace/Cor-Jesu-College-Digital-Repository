@@ -11,8 +11,13 @@ function NavigationBar() {
     const location = useLocation();
     const navigate = useNavigate();
 
+    // Check authentication whenever the location changes
     useEffect(() => {
-        // Check if user is logged in
+        checkAuthentication();
+    }, [location]);
+
+    // Function to check authentication status
+    const checkAuthentication = () => {
         const token = localStorage.getItem('token');
         const storedUsername = localStorage.getItem('username');
         
@@ -22,7 +27,7 @@ function NavigationBar() {
         } else {
             setIsAuthenticated(false);
         }
-    }, []);
+    };
 
     const closeNavbar = () => setExpanded(false);
 
@@ -41,6 +46,12 @@ function NavigationBar() {
         navigate('/');
     };
 
+    // Preserve login state when navigating
+    const handleNavigation = (path) => {
+        closeNavbar();
+        navigate(path, { state: { preserveLogin: true } });
+    };
+
     return (
         <Navbar 
             expanded={expanded}
@@ -49,7 +60,7 @@ function NavigationBar() {
             variant="dark"
         >
             <Container>
-                <Navbar.Brand as={Link} to="/" onClick={closeNavbar}>
+                <Navbar.Brand as={Link} to="/" onClick={() => handleNavigation('/')}>
                     <img
                         src={logo}
                         alt="CJC Repository Logo"
@@ -65,19 +76,15 @@ function NavigationBar() {
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="ms-auto">
                         <Nav.Link 
-                            as={Link} 
-                            to="/"
+                            onClick={() => handleNavigation('/')}
                             className={isActive('/') ? 'active' : ''}
-                            onClick={closeNavbar}
                         >
                             Home
                         </Nav.Link>
                         
                         <Nav.Link 
-                            as={Link} 
-                            to="/search"
+                            onClick={() => handleNavigation('/search')}
                             className={isActive('/search') ? 'active' : ''}
-                            onClick={closeNavbar}
                         >
                             Search
                         </Nav.Link>
@@ -87,28 +94,26 @@ function NavigationBar() {
                             id="basic-nav-dropdown"
                             className="custom-dropdown"
                         >
-                            <NavDropdown.Item as={Link} to="/AllWorks" onClick={closeNavbar}>
+                            <NavDropdown.Item onClick={() => handleNavigation('/AllWorks')}>
                                 Theses & Dissertations
                             </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/Authors" onClick={closeNavbar}>
+                            <NavDropdown.Item onClick={() => handleNavigation('/Authors')}>
                                 Authors
                             </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/Keywords" onClick={closeNavbar}>
+                            <NavDropdown.Item onClick={() => handleNavigation('/Keywords')}>
                                 Keywords
                             </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/Departments" onClick={closeNavbar}>
+                            <NavDropdown.Item onClick={() => handleNavigation('/Departments')}>
                                 Departments
                             </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/resources" onClick={closeNavbar}>
+                            <NavDropdown.Item onClick={() => handleNavigation('/resources')}>
                                 Resources
                             </NavDropdown.Item>
                         </NavDropdown>
                         
                         <Nav.Link 
-                            as={Link} 
-                            to="/help"
+                            onClick={() => handleNavigation('/help')}
                             className={isActive('/help') ? 'active' : ''}
-                            onClick={closeNavbar}
                         >
                             Help
                         </Nav.Link>
@@ -126,10 +131,8 @@ function NavigationBar() {
                             </div>
                         ) : (
                             <Nav.Link 
-                                as={Link} 
-                                to="/login"
+                                onClick={() => handleNavigation('/login')}
                                 className="sign-in"
-                                onClick={closeNavbar}
                             >
                                 Sign In
                             </Nav.Link>
