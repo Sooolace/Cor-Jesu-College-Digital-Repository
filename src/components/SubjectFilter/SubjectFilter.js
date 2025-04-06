@@ -2,188 +2,516 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/subjectfilter.css';
 
-const SubjectFilter = ({ selectedCategories, setSelectedCategories, onApply }) => {
+const SubjectFilter = (props) => {
+  console.log("SubjectFilter component rendering", props);
+  
+  // Ensure selectedCategories is always an array
+  const { 
+    selectedCategories: rawSelectedCategories = [], 
+    setSelectedCategories, 
+    onApply 
+  } = props;
+  
+  // Convert selectedCategories to array if it's not already
+  const selectedCategories = Array.isArray(rawSelectedCategories) ? rawSelectedCategories : [];
+  
   const [categories, setCategories] = useState([]);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [expandedResearchArea, setExpandedResearchArea] = useState(null);
   const [selectedResearchAreas, setSelectedResearchAreas] = useState([]);
   const [selectedTopics, setSelectedTopics] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Additional state to store research areas and topics
+  const [researchAreas, setResearchAreas] = useState({});  // Map of categoryId -> research areas
+  const [topics, setTopics] = useState({});  // Map of researchAreaId -> topics
+  const [loadingResearchAreas, setLoadingResearchAreas] = useState(false);
+  const [loadingTopics, setLoadingTopics] = useState(false);
 
-  // Fetch the categories with their research areas and topics
+  // Log expanded states for debugging
   useEffect(() => {
-    const cachedCategories = localStorage.getItem('categories');
+    console.log("Expanded category:", expandedCategory);
+    console.log("Expanded research area:", expandedResearchArea);
+  }, [expandedCategory, expandedResearchArea]);
 
-    if (cachedCategories) {
-      // Use cached data if available
-      const parsedCategories = JSON.parse(cachedCategories);
-      setCategories(parsedCategories);
-    } else {
-      // Fetch data from API and cache it
-      axios.get('/api/categories')
-        .then(response => {
-          const fetchedCategories = response.data;
-          setCategories(fetchedCategories);
-          localStorage.setItem('categories', JSON.stringify(fetchedCategories)); // Cache the categories data
-        })
-        .catch(error => {
-          console.error("Error fetching categories", error);
-        });
-    }
+  // Fetch categories on component mount
+  useEffect(() => {
+    console.log("Fetching categories...");
+    setIsLoading(true);
+    
+    // Fetch all categories
+    axios.get('/api/categories')
+      .then(response => {
+        console.log("Categories fetched:", response.data);
+        setCategories(response.data || []);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching categories:", error);
+        setError("Failed to load categories");
+        setIsLoading(false);
+      });
   }, []);
 
-  // Helper function to toggle selection of a category
-  const toggleCategorySelection = (categoryId) => {
-    setSelectedCategories(prevState => {
-      const isSelected = prevState.includes(categoryId);
-      let newState;
+  // Log categories when they change
+  useEffect(() => {
+    console.log("Categories state updated:", categories);
+    if (categories.length > 0) {
+      console.log("First category:", categories[0]);
+    }
+  }, [categories]);
 
-      if (isSelected) {
-        newState = prevState.filter(id => id !== categoryId);
-        const category = categories.find(cat => cat.category_id === categoryId);
-        const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
-        const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
-
-        setSelectedResearchAreas(prevResearchAreas => prevResearchAreas.filter(ra => !researchAreaIds.includes(ra)));
-        setSelectedTopics(prevTopics => prevTopics.filter(topic => !topicIds.includes(topic)));
-      } else {
-        newState = [...prevState, categoryId];
-        const category = categories.find(cat => cat.category_id === categoryId);
-        const researchAreaIds = category.research_areas.map(ra => ra.research_area_id);
-        const topicIds = category.research_areas.flatMap(ra => ra.topics.map(topic => topic.topic_id));
-
-        setSelectedResearchAreas(prev => [...new Set([...prev, ...researchAreaIds])]);
-        setSelectedTopics(prev => [...new Set([...prev, ...topicIds])]);
+  // Fetch research areas when a category is expanded
+  useEffect(() => {
+    if (expandedCategory) {
+      // Check if we've already fetched research areas for this category
+      if (!researchAreas[expandedCategory]) {
+        setLoadingResearchAreas(true);
+        console.log(`Fetching research areas for category ${expandedCategory}...`);
+        
+        axios.get(`/api/researchAreas/${expandedCategory}`)
+          .then(response => {
+            console.log(`Research areas for category ${expandedCategory}:`, response.data);
+            // Update the research areas map with the new data
+            setResearchAreas(prev => ({
+              ...prev,
+              [expandedCategory]: response.data || []
+            }));
+            setLoadingResearchAreas(false);
+          })
+          .catch(error => {
+            console.error(`Error fetching research areas for category ${expandedCategory}:`, error);
+            // Set empty array if there's an error
+            setResearchAreas(prev => ({
+              ...prev,
+              [expandedCategory]: []
+            }));
+            setLoadingResearchAreas(false);
+          });
       }
+    }
+  }, [expandedCategory, researchAreas]);
 
-      return newState;
-    });
-  };
-
-  // Define the missing functions here:
-
-  // Function to toggle research area selection
-  const toggleResearchAreaSelection = (researchAreaId) => {
-    setSelectedResearchAreas(prevState => {
-      const isSelected = prevState.includes(researchAreaId);
-      const newState = isSelected
-        ? prevState.filter(id => id !== researchAreaId)
-        : [...prevState, researchAreaId];
-
-      const categoryId = categories.find(cat => cat.research_areas.some(ra => ra.research_area_id === researchAreaId))?.category_id;
-      const topics = categories.find(cat => cat.category_id === categoryId)
-        .research_areas.find(ra => ra.research_area_id === researchAreaId).topics;
-
-      if (!isSelected) {
-        // Include all topics in the selected research area
-        setSelectedTopics(prev => [
-          ...new Set([...prev, ...topics.map(topic => topic.topic_id)]),
-        ]);
-      } else {
-        // Remove topics if research area is deselected
-        setSelectedTopics(prev => prev.filter(id => !topics.some(topic => topic.topic_id === id)));
+  // Fetch topics when a research area is expanded
+  useEffect(() => {
+    if (expandedResearchArea) {
+      // Check if we've already fetched topics for this research area
+      if (!topics[expandedResearchArea]) {
+        setLoadingTopics(true);
+        console.log(`Fetching topics for research area ${expandedResearchArea}...`);
+        
+        axios.get(`/api/topics/${expandedResearchArea}`)
+          .then(response => {
+            console.log(`Topics for research area ${expandedResearchArea}:`, response.data);
+            // Update the topics map with the new data
+            setTopics(prev => ({
+              ...prev,
+              [expandedResearchArea]: response.data || []
+            }));
+            setLoadingTopics(false);
+          })
+          .catch(error => {
+            console.error(`Error fetching topics for research area ${expandedResearchArea}:`, error);
+            // Set empty array if there's an error
+            setTopics(prev => ({
+              ...prev,
+              [expandedResearchArea]: []
+            }));
+            setLoadingTopics(false);
+          });
       }
+    }
+  }, [expandedResearchArea, topics]);
 
-      return newState;
-    });
+  // Log selected categories when they change
+  useEffect(() => {
+    if (selectedCategories) {
+      console.log("Selected categories updated:", 
+        Array.isArray(selectedCategories) ? selectedCategories : "Non-array value: " + typeof selectedCategories
+      );
+    }
+  }, [selectedCategories]);
+
+  const toggleCategory = (categoryId) => {
+    console.log("Toggle category:", categoryId);
+    if (expandedCategory === categoryId) {
+      setExpandedCategory(null);
+      setExpandedResearchArea(null);
+    } else {
+      setExpandedCategory(categoryId);
+      setExpandedResearchArea(null);
+    }
   };
 
-  // Function to toggle topic selection
-  const toggleTopicSelection = (topicId) => {
-    setSelectedTopics(prevState => {
-      const isSelected = prevState.includes(topicId);
-      return isSelected
-        ? prevState.filter(id => id !== topicId)
-        : [...prevState, topicId];
-    });
+  const toggleResearchArea = (researchAreaId) => {
+    console.log("Toggle research area:", researchAreaId);
+    if (expandedResearchArea === researchAreaId) {
+      setExpandedResearchArea(null);
+    } else {
+      setExpandedResearchArea(researchAreaId);
+    }
   };
 
-  // Handle expanding categories and research areas
-  const handleExpandCategory = (categoryId) => {
-    setExpandedCategory(prevState => prevState === categoryId ? null : categoryId);
+  const handleCategorySelect = (categoryId) => {
+    console.log("Selecting category:", categoryId);
+    const category = categories.find(cat => cat.category_id === categoryId);
+    
+    if (!category) return;
+    
+    const currentSelectedCategories = Array.isArray(selectedCategories) ? selectedCategories : [];
+    const newSelectedCategories = [...currentSelectedCategories];
+    const existingIndex = newSelectedCategories.findIndex(cat => cat.category_id === categoryId);
+    
+    if (existingIndex !== -1) {
+      newSelectedCategories.splice(existingIndex, 1);
+    } else {
+      newSelectedCategories.push(category);
+    }
+    
+    // Only call setSelectedCategories if it's a function
+    if (typeof setSelectedCategories === 'function') {
+      setSelectedCategories(newSelectedCategories);
+    }
   };
 
-  const handleExpandResearchArea = (researchAreaId) => {
-    setExpandedResearchArea(prevState => prevState === researchAreaId ? null : researchAreaId);
+  const handleResearchAreaSelect = (researchAreaId, categoryId) => {
+    console.log("Selecting research area:", researchAreaId);
+    const currentSelectedResearchAreas = Array.isArray(selectedResearchAreas) ? selectedResearchAreas : [];
+    const updatedAreas = [...currentSelectedResearchAreas];
+    const existingIndex = updatedAreas.findIndex(area => area.research_area_id === researchAreaId);
+    
+    if (existingIndex !== -1) {
+      updatedAreas.splice(existingIndex, 1);
+    } else {
+      const researchArea = researchAreas[categoryId]?.find(area => area.research_area_id === researchAreaId);
+      if (researchArea) {
+        updatedAreas.push(researchArea);
+      }
+    }
+    
+    setSelectedResearchAreas(updatedAreas);
   };
 
-  // Check if all research areas are selected for a category
+  const handleTopicSelect = (topicId, researchAreaId) => {
+    console.log("Selecting topic:", topicId);
+    const currentSelectedTopics = Array.isArray(selectedTopics) ? selectedTopics : [];
+    const updatedTopics = [...currentSelectedTopics];
+    const existingIndex = updatedTopics.findIndex(topic => topic.topic_id === topicId);
+    
+    if (existingIndex !== -1) {
+      updatedTopics.splice(existingIndex, 1);
+    } else {
+      const topic = topics[researchAreaId]?.find(topic => topic.topic_id === topicId);
+      if (topic) {
+        updatedTopics.push(topic);
+      }
+    }
+    
+    setSelectedTopics(updatedTopics);
+  };
+
+  const handleApplyFilters = () => {
+    console.log("Applying filters");
+    
+    // Ensure we have arrays for all selected items
+    const safeSelectedCategories = Array.isArray(selectedCategories) ? selectedCategories : [];
+    const safeSelectedResearchAreas = Array.isArray(selectedResearchAreas) ? selectedResearchAreas : [];
+    const safeSelectedTopics = Array.isArray(selectedTopics) ? selectedTopics : [];
+    
+    console.log("Selected categories:", safeSelectedCategories);
+    console.log("Selected research areas:", safeSelectedResearchAreas);
+    console.log("Selected topics:", safeSelectedTopics);
+    
+    // Only call onApply if it's a function
+    if (typeof onApply === 'function') {
+      onApply({
+        categories: safeSelectedCategories,
+        researchAreas: safeSelectedResearchAreas,
+        topics: safeSelectedTopics
+      });
+    } else {
+      console.warn("onApply is not a function. Cannot apply filters.");
+    }
+  };
+
   const isCategorySelected = (categoryId) => {
-    return selectedCategories.includes(categoryId);
+    return Array.isArray(selectedCategories) && selectedCategories.some(cat => cat.category_id === categoryId);
   };
 
   const isResearchAreaSelected = (researchAreaId) => {
-    return selectedResearchAreas.includes(researchAreaId);
+    return Array.isArray(selectedResearchAreas) && selectedResearchAreas.some(area => area.research_area_id === researchAreaId);
   };
 
   const isTopicSelected = (topicId) => {
-    return selectedTopics.includes(topicId);
+    return Array.isArray(selectedTopics) && selectedTopics.some(topic => topic.topic_id === topicId);
   };
 
-  // Trigger the apply filters action
-  const handleApplyFilters = () => {
-    if (onApply) {
-      onApply(selectedCategories, selectedResearchAreas, selectedTopics);
-    }
-  };
+  if (isLoading) {
+    return <div className="loading">Loading categories...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (categories.length === 0) {
+    return <div className="no-data">No categories available.</div>;
+  }
 
   return (
-    <div className="subject-filter">
-      <h3>Filter by Category</h3>
-      <div className="dropdown-content">
-        {categories.map(category => (
-          <div key={category.category_id} className="category-group filter-item">
-            <div className="category-checkbox">
-              <input
-                type="checkbox"
-                checked={isCategorySelected(category.category_id)}
-                onChange={() => toggleCategorySelection(category.category_id)}
-              />
-              <label onClick={() => handleExpandCategory(category.category_id)}>
-                {category.name} {expandedCategory === category.category_id && "▼"}
-              </label>
-            </div>
-
-            {expandedCategory === category.category_id && category.research_areas && (
-              <div className="subcategories">
-                {category.research_areas.map(researchArea => (
-                  <div key={researchArea.research_area_id} className="filter-item">
-                    <div className="category-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={isResearchAreaSelected(researchArea.research_area_id) || isCategorySelected(category.category_id)}
-                        onChange={() => toggleResearchAreaSelection(researchArea.research_area_id)}
-                      />
-                      <label onClick={() => handleExpandResearchArea(researchArea.research_area_id)}>
-                        {researchArea.name} {expandedResearchArea === researchArea.research_area_id && "▼"}
-                      </label>
-                    </div>
-
-                    {expandedResearchArea === researchArea.research_area_id && researchArea.topics && (
-                      <div className="topic-list">
-                        {researchArea.topics.map(topic => (
-                          <div key={topic.topic_id} className="form-check filter-item">
-                            <input
-                              type="checkbox"
-                              checked={isTopicSelected(topic.topic_id) || isResearchAreaSelected(researchArea.research_area_id) || isCategorySelected(category.category_id)}
-                              onChange={() => toggleTopicSelection(topic.topic_id)}
-                            />
-                            <label>{topic.name}</label>
-                          </div>
-                        ))}
-                      </div>
+    <div className="subject-filter-wrapper" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%'
+    }}>
+      {/* Title outside */}
+      <h3 style={{ 
+        marginTop: 0, 
+        marginBottom: '8px', 
+        color: '#333',
+        padding: '0 5px',
+        fontSize: '18px',
+        fontWeight: '500',
+        textTransform: 'none',
+        letterSpacing: '0.5px'
+      }}>Filter by Category</h3>
+      
+      {/* Main filter content */}
+      <div className="subject-filter" style={{ 
+        border: '1px solid #e0e0e0', 
+        borderRadius: '4px',
+        padding: '8px',
+        backgroundColor: '#f9f9f9',
+        marginBottom: '8px'
+      }}>
+        <div className="dropdown-content">
+          <ul className="categories-list" style={{ 
+            listStyle: 'none', 
+            padding: 0, 
+            margin: 0 
+          }}>
+            {categories.map(category => (
+              <li key={category.category_id} className="category-item" style={{ 
+                marginBottom: '6px',
+                borderBottom: '1px solid #eee',
+                paddingBottom: '6px'
+              }}>
+                <div className="category-header" style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center' 
+                }}>
+                  <label style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    cursor: 'pointer',
+                    fontWeight: isCategorySelected(category.category_id) ? '500' : 'normal',
+                    fontSize: '15px',
+                    color: '#444'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={isCategorySelected(category.category_id)}
+                      onChange={() => handleCategorySelect(category.category_id)}
+                      style={{ marginRight: '8px' }}
+                    />
+                    {category.name}
+                  </label>
+                  <button
+                    className={`expand-button ${expandedCategory === category.category_id ? 'expanded' : ''}`}
+                    onClick={() => toggleCategory(category.category_id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      transition: 'transform 0.2s ease',
+                      transform: expandedCategory === category.category_id ? 'rotate(90deg)' : 'rotate(0deg)',
+                      color: '#555',
+                      width: '22px',
+                      height: '22px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '50%',
+                      marginLeft: '4px'
+                    }}
+                  >
+                    &gt;
+                  </button>
+                </div>
+                
+                {expandedCategory === category.category_id && (
+                  <div className="research-areas-container" style={{
+                    paddingLeft: '20px',
+                    marginTop: '6px'
+                  }}>
+                    {loadingResearchAreas ? (
+                      <div className="loading-indicator" style={{ 
+                        fontSize: '14px', 
+                        color: '#666', 
+                        padding: '4px 0' 
+                      }}>Loading research areas...</div>
+                    ) : (
+                      researchAreas[category.category_id] && researchAreas[category.category_id].length > 0 ? (
+                        <ul className="research-areas-list" style={{ 
+                          listStyle: 'none', 
+                          padding: 0, 
+                          margin: 0 
+                        }}>
+                          {researchAreas[category.category_id].map(researchArea => (
+                            <li key={researchArea.research_area_id} className="research-area-item" style={{
+                              marginBottom: '5px',
+                              paddingBottom: '5px'
+                            }}>
+                              <div className="research-area-header" style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center' 
+                              }}>
+                                <label style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  cursor: 'pointer',
+                                  fontSize: '14px',
+                                  fontWeight: isResearchAreaSelected(researchArea.research_area_id) ? '500' : 'normal',
+                                  color: '#444'
+                                }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isResearchAreaSelected(researchArea.research_area_id)}
+                                    onChange={() => handleResearchAreaSelect(researchArea.research_area_id, category.category_id)}
+                                    style={{ marginRight: '8px' }}
+                                  />
+                                  {researchArea.name}
+                                </label>
+                                <button
+                                  className={`expand-button ${expandedResearchArea === researchArea.research_area_id ? 'expanded' : ''}`}
+                                  onClick={() => toggleResearchArea(researchArea.research_area_id)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    transition: 'transform 0.2s ease',
+                                    transform: expandedResearchArea === researchArea.research_area_id ? 'rotate(90deg)' : 'rotate(0deg)',
+                                    color: '#555',
+                                    width: '22px',
+                                    height: '22px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: '50%',
+                                    marginLeft: '4px'
+                                  }}
+                                >
+                                  &gt;
+                                </button>
+                              </div>
+                              
+                              {expandedResearchArea === researchArea.research_area_id && (
+                                <div className="topics-container" style={{
+                                  paddingLeft: '20px',
+                                  marginTop: '4px'
+                                }}>
+                                  {loadingTopics ? (
+                                    <div className="loading-indicator" style={{ 
+                                      fontSize: '13px', 
+                                      color: '#666', 
+                                      padding: '3px 0' 
+                                    }}>Loading topics...</div>
+                                  ) : (
+                                    topics[researchArea.research_area_id] && topics[researchArea.research_area_id].length > 0 ? (
+                                      <ul className="topics-list" style={{ 
+                                        listStyle: 'none', 
+                                        padding: 0, 
+                                        margin: 0 
+                                      }}>
+                                        {topics[researchArea.research_area_id].map(topic => (
+                                          <li key={topic.topic_id} className="topic-item" style={{ 
+                                            marginBottom: '3px',
+                                            fontSize: '13px'
+                                          }}>
+                                            <label style={{ 
+                                              display: 'flex', 
+                                              alignItems: 'center', 
+                                              cursor: 'pointer',
+                                              fontWeight: isTopicSelected(topic.topic_id) ? '500' : 'normal',
+                                              color: '#444'
+                                            }}>
+                                              <input
+                                                type="checkbox"
+                                                checked={isTopicSelected(topic.topic_id)}
+                                                onChange={() => handleTopicSelect(topic.topic_id, researchArea.research_area_id)}
+                                                style={{ marginRight: '6px' }}
+                                              />
+                                              {topic.name}
+                                            </label>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    ) : (
+                                      <div className="no-data" style={{ 
+                                        fontSize: '13px', 
+                                        color: '#888', 
+                                        padding: '3px 0',
+                                        fontStyle: 'italic'
+                                      }}>No topics available for this research area.</div>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="no-data" style={{ 
+                          fontSize: '14px', 
+                          color: '#888', 
+                          padding: '3px 0',
+                          fontStyle: 'italic'
+                        }}>No research areas available for this category.</div>
+                      )
                     )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-
-      {/* Apply Filters Button Section */}
-      <div className="apply-button-container">
-        <button className="apply-button" onClick={handleApplyFilters}>Apply</button>
-      </div>
+      
+      {/* Apply button outside */}
+      <button 
+        className="apply-button" 
+        onClick={handleApplyFilters}
+        style={{
+          backgroundColor: '#a33307',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          padding: '5px 10px',
+          cursor: 'pointer',
+          fontWeight: '500',
+          width: 'fit-content',
+          minWidth: '60px',
+          alignSelf: 'center',
+          fontSize: '14px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = '#c03f08';
+          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.15)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = '#a33307';
+          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        }}
+      >
+        Apply
+      </button>
     </div>
   );
 };
