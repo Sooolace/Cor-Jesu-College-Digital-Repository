@@ -104,35 +104,43 @@ function AdvancedSearchBar({ onSearch }) {
           min={1900}
           max={new Date().getFullYear()}
           onChange={handleYearRangeChange}
-          renderTrack={({ props, children }) => (
-            <div
-              {...props}
-              style={{
-                ...props.style,
-                height: '6px',
-                width: '100%',
-                background: getTrackBackground({
-                  values: yearRange,
-                  colors: ['#ccc', '#a33307', '#ccc'],
-                  min: 1900,
-                  max: new Date().getFullYear(),
-                }),
-              }}
-            >
-              {children}
-            </div>
-          )}
-          renderThumb={({ props }) => (
-            <div
-              {...props}
-              style={{
-                ...props.style,
-                height: '20px',
-                width: '20px',
-                backgroundColor: '#a33307',
-              }}
-            />
-          )}
+          renderTrack={({ props, children }) => {
+            const { key, ...rest } = props;
+            return (
+              <div
+                key={key}
+                {...rest}
+                style={{
+                  ...props.style,
+                  height: '6px',
+                  width: '100%',
+                  background: getTrackBackground({
+                    values: yearRange,
+                    colors: ['#ccc', '#a33307', '#ccc'],
+                    min: 1900,
+                    max: new Date().getFullYear(),
+                  }),
+                }}
+              >
+                {children}
+              </div>
+            );
+          }}
+          renderThumb={({ props }) => {
+            const { key, ...rest } = props;
+            return (
+              <div
+                key={key}
+                {...rest}
+                style={{
+                  ...props.style,
+                  height: '20px',
+                  width: '20px',
+                  backgroundColor: '#a33307',
+                }}
+              />
+            );
+          }}
         />
         <div className="year-range-values">
           <span>{yearRange[0]}</span> - <span>{yearRange[1]}</span>

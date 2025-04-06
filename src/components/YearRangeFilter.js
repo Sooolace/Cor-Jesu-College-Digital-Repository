@@ -41,37 +41,45 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
           min={minYear}
           max={maxYear}
           onChange={(values) => setValues(values)}
-          renderTrack={({ props, children }) => (
-            <div
-              {...props}
-              style={{
-                ...props.style,
-                height: '6px',
-                width: '100%',
-                background: getTrackBackground({
-                  values,
-                  colors: ['#ccc', '#a33307', '#ccc'],
-                  min: minYear,
-                  max: maxYear,
-                }),
-              }}
-            >
-              {children}
-            </div>
-          )}
-          renderThumb={({ props }) => (
-            <div
-              {...props}
-              style={{
-                ...props.style,
-                height: '20px',
-                width: '20px',
-                backgroundColor: '#a33307',
-                borderRadius: '50%',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-              }}
-            />
-          )}
+          renderTrack={({ props, children }) => {
+            const { key, ...rest } = props;
+            return (
+              <div
+                key={key}
+                {...rest}
+                style={{
+                  ...props.style,
+                  height: '6px',
+                  width: '100%',
+                  background: getTrackBackground({
+                    values,
+                    colors: ['#ccc', '#a33307', '#ccc'],
+                    min: minYear,
+                    max: maxYear,
+                  }),
+                }}
+              >
+                {children}
+              </div>
+            );
+          }}
+          renderThumb={({ props }) => {
+            const { key, ...rest } = props;
+            return (
+              <div
+                key={key}
+                {...rest}
+                style={{
+                  ...props.style,
+                  height: '20px',
+                  width: '20px',
+                  backgroundColor: '#a33307',
+                  borderRadius: '50%',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                }}
+              />
+            );
+          }}
         />
         <div className="year-range-values" style={{
           display: 'flex',

@@ -38,7 +38,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('searchResults');
       return cached ? JSON.parse(cached) : [];
     } catch (error) {
-      console.error('Error parsing cached search results:', error);
+      // Error parsing cached search results
       return [];
     }
   });
@@ -47,7 +47,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('searchTotalCount');
       return cached ? parseInt(cached) : 0;
     } catch (error) {
-      console.error('Error parsing cached total count:', error);
+      // Error parsing cached total count
       return 0;
     }
   });
@@ -58,7 +58,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedAuthors');
       return cached ? JSON.parse(cached) : initialState.authors;
     } catch (error) {
-      console.error('Error parsing cached authors:', error);
+      // Error parsing cached authors
       return initialState.authors;
     }
   });
@@ -67,7 +67,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedCategories');
       return cached ? JSON.parse(cached) : initialState.categories;
     } catch (error) {
-      console.error('Error parsing cached categories:', error);
+      // Error parsing cached categories
       return initialState.categories;
     }
   });
@@ -76,7 +76,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedResearchAreas');
       return cached ? JSON.parse(cached) : initialState.researchAreas;
     } catch (error) {
-      console.error('Error parsing cached research areas:', error);
+      // Error parsing cached research areas
       return initialState.researchAreas;
     }
   });
@@ -85,7 +85,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedTopics');
       return cached ? JSON.parse(cached) : initialState.topics;
     } catch (error) {
-      console.error('Error parsing cached topics:', error);
+      // Error parsing cached topics
       return initialState.topics;
     }
   });
@@ -94,7 +94,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedKeywords');
       return cached ? JSON.parse(cached) : initialState.keywords;
     } catch (error) {
-      console.error('Error parsing cached keywords:', error);
+      // Error parsing cached keywords
       return initialState.keywords;
     }
   });
@@ -103,7 +103,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedYears');
       return cached ? JSON.parse(cached) : initialState.years;
     } catch (error) {
-      console.error('Error parsing cached years:', error);
+      // Error parsing cached years
       return initialState.years;
     }
   });
@@ -191,7 +191,7 @@ function SearchPage() {
         };
       }
 
-      console.log('Sending API request with params:', params);
+      // console.log('Sending API request with params:', params);
       const response = await axios.get(endpoint, { params });
 
       const data = response.data.data || [];
@@ -205,10 +205,10 @@ function SearchPage() {
         sessionStorage.setItem('searchResults', JSON.stringify(data));
         sessionStorage.setItem('searchTotalCount', count.toString());
       } catch (error) {
-        console.error('Error caching search results:', error);
+        // Error caching search results
       }
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      // Error fetching projects
     } finally {
       setLoading(false);
     }
@@ -334,30 +334,27 @@ function SearchPage() {
   }, [searchOption, navigate]);
 
   const handleApplyFilters = useCallback((filterData) => {
-    console.log('Applying Filters (full data):', JSON.stringify(filterData));
-    // Extract the filter data
-    const categories = filterData.categories || [];
-    const researchAreas = filterData.researchAreas || [];
-    const topics = filterData.topics || [];
-    
-    // Store the complete objects for display
-    setSelectedCategories(categories);
-    setSelectedResearchAreas(researchAreas);
-    setSelectedTopics(topics);
-    
-    // Cache filter selections with error handling
+    // Update session storage for filters
     try {
-      sessionStorage.setItem('selectedCategories', JSON.stringify(categories));
-      sessionStorage.setItem('selectedResearchAreas', JSON.stringify(researchAreas));
-      sessionStorage.setItem('selectedTopics', JSON.stringify(topics));
+      // console.log('Applying Filters (full data):', JSON.stringify(filterData));
+      
+      // Store the complete objects for display
+      setSelectedCategories(filterData.categories || []);
+      setSelectedResearchAreas(filterData.researchAreas || []);
+      setSelectedTopics(filterData.topics || []);
+      
+      // Cache filter selections with error handling
+      sessionStorage.setItem('selectedCategories', JSON.stringify(filterData.categories || []));
+      sessionStorage.setItem('selectedResearchAreas', JSON.stringify(filterData.researchAreas || []));
+      sessionStorage.setItem('selectedTopics', JSON.stringify(filterData.topics || []));
     } catch (error) {
-      console.error('Error caching filter selections:', error);
+      // Error caching filter selections
     }
     
     // Extract IDs for the navigation state (these will be passed to the API)
-    const categoryIds = categories.map(cat => typeof cat === 'object' && cat !== null ? cat.category_id : cat);
-    const researchAreaIds = researchAreas.map(area => typeof area === 'object' && area !== null ? area.research_area_id : area);
-    const topicIds = topics.map(topic => typeof topic === 'object' && topic !== null ? topic.topic_id : topic);
+    const categoryIds = (filterData.categories || []).map(cat => typeof cat === 'object' && cat !== null ? cat.category_id : cat);
+    const researchAreaIds = (filterData.researchAreas || []).map(area => typeof area === 'object' && area !== null ? area.research_area_id : area);
+    const topicIds = (filterData.topics || []).map(topic => typeof topic === 'object' && topic !== null ? topic.topic_id : topic);
     
     navigate('/search', { 
       state: { 
@@ -392,22 +389,20 @@ function SearchPage() {
       sessionStorage.removeItem('selectedAuthors');
       sessionStorage.removeItem('selectedKeywords');
       sessionStorage.removeItem('selectedYears');
-      sessionStorage.removeItem('searchResults');
-      sessionStorage.removeItem('searchTotalCount');
     } catch (error) {
-      console.error('Error clearing cached data:', error);
+      // Error clearing cached data
     }
     
     navigate('/search', { state: { query: '', option: 'allfields', page: 1 } });
   }, [navigate]);
 
   const handleApplyAuthorFilters = useCallback((authors) => {
-    console.log('Selected Authors:', authors);
-    setSelectedAuthors(authors);
     try {
+      // console.log('Selected Authors:', authors);
+      setSelectedAuthors(authors);
       sessionStorage.setItem('selectedAuthors', JSON.stringify(authors));
     } catch (error) {
-      console.error('Error caching authors:', error);
+      // Error caching authors
     }
     
     // Extract IDs for navigation
@@ -443,12 +438,12 @@ function SearchPage() {
   }, [searchQuery, searchOption, selectedCategories, selectedResearchAreas, selectedTopics, selectedKeywords, selectedYears, navigate]);
 
   const handleApplyKeywordFilters = useCallback((keywords) => {
-    console.log('Selected Keywords:', keywords);
-    setSelectedKeywords(keywords);
     try {
+      // console.log('Selected Keywords:', keywords);
+      setSelectedKeywords(keywords);
       sessionStorage.setItem('selectedKeywords', JSON.stringify(keywords));
     } catch (error) {
-      console.error('Error caching keywords:', error);
+      // Error caching keywords
     }
     
     // Extract IDs for navigation
@@ -484,12 +479,12 @@ function SearchPage() {
   }, [searchQuery, searchOption, selectedAuthors, selectedCategories, selectedResearchAreas, selectedTopics, selectedYears, navigate]);
 
   const handleApplyYearFilters = useCallback((years) => {
-    console.log('Selected Years:', years);
-    setSelectedYears(years);
     try {
+      // console.log('Selected Years:', years);
+      setSelectedYears(years);
       sessionStorage.setItem('selectedYears', JSON.stringify(years));
     } catch (error) {
-      console.error('Error caching years:', error);
+      // Error caching years
     }
     
     // Extract IDs for navigation

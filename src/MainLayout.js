@@ -53,27 +53,16 @@ function MainLayout({ isAdmin, setIsAdmin }) {
     const role = localStorage.getItem('role');
     const isAdminStorage = localStorage.getItem('isAdmin');
 
-    console.log('MainLayout useEffect - Checking auth state:', { 
-      token: token ? 'Present' : 'Not present', 
-      role, 
-      isAdminStorage,
-      currentPath: location.pathname 
-    });
-
     // Don't check auth state when on login page to avoid redirect loops
     if (location.pathname === '/login') {
-      console.log('On login page, not checking auth state to avoid redirects');
       return;
     }
 
     if (token && (role === 'admin' || isAdminStorage === 'true')) {
-      console.log('Setting isAdmin to true');
       setIsAdmin(true);
     } else if (token) {
-      console.log('User is authenticated but not admin');
       setIsAdmin(false);
     } else {
-      console.log('User is not authenticated');
       setIsAdmin(false);
     }
   }, [setIsAdmin, location.pathname]);
@@ -112,10 +101,8 @@ function MainLayout({ isAdmin, setIsAdmin }) {
     // If there's a token and we're on the root path, redirect based on role
     if (token && location.pathname === '/') {
       if (role === 'admin') {
-        console.log('Admin user at root path, redirecting to admin dashboard');
         navigate('/admindashboard');
       } else {
-        console.log('Regular user at root path, staying on homepage');
         // Regular users stay on the homepage
       }
     }
@@ -125,7 +112,6 @@ function MainLayout({ isAdmin, setIsAdmin }) {
   const handleLogout = () => {
     // Clear all localStorage items
     localStorage.clear();
-    console.log('Logged out, all localStorage items cleared');
     setIsAdmin(false);
     navigate('/');
   };

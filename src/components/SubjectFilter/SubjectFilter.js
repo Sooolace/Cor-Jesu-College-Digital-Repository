@@ -3,8 +3,6 @@ import axios from 'axios';
 import '../styles/subjectfilter.css';
 
 const SubjectFilter = (props) => {
-  console.log("SubjectFilter component rendering", props);
-  
   // Ensure selectedCategories is always an array
   const { 
     selectedCategories: rawSelectedCategories = [], 
@@ -29,38 +27,21 @@ const SubjectFilter = (props) => {
   const [loadingResearchAreas, setLoadingResearchAreas] = useState(false);
   const [loadingTopics, setLoadingTopics] = useState(false);
 
-  // Log expanded states for debugging
-  useEffect(() => {
-    console.log("Expanded category:", expandedCategory);
-    console.log("Expanded research area:", expandedResearchArea);
-  }, [expandedCategory, expandedResearchArea]);
-
   // Fetch categories on component mount
   useEffect(() => {
-    console.log("Fetching categories...");
     setIsLoading(true);
     
     // Fetch all categories
     axios.get('/api/categories')
       .then(response => {
-        console.log("Categories fetched:", response.data);
         setCategories(response.data || []);
         setIsLoading(false);
       })
       .catch(error => {
-        console.error("Error fetching categories:", error);
         setError("Failed to load categories");
         setIsLoading(false);
       });
   }, []);
-
-  // Log categories when they change
-  useEffect(() => {
-    console.log("Categories state updated:", categories);
-    if (categories.length > 0) {
-      console.log("First category:", categories[0]);
-    }
-  }, [categories]);
 
   // Fetch research areas when a category is expanded
   useEffect(() => {
@@ -68,11 +49,9 @@ const SubjectFilter = (props) => {
       // Check if we've already fetched research areas for this category
       if (!researchAreas[expandedCategory]) {
         setLoadingResearchAreas(true);
-        console.log(`Fetching research areas for category ${expandedCategory}...`);
         
         axios.get(`/api/researchAreas/${expandedCategory}`)
           .then(response => {
-            console.log(`Research areas for category ${expandedCategory}:`, response.data);
             // Update the research areas map with the new data
             setResearchAreas(prev => ({
               ...prev,
@@ -81,7 +60,6 @@ const SubjectFilter = (props) => {
             setLoadingResearchAreas(false);
           })
           .catch(error => {
-            console.error(`Error fetching research areas for category ${expandedCategory}:`, error);
             // Set empty array if there's an error
             setResearchAreas(prev => ({
               ...prev,
@@ -99,11 +77,9 @@ const SubjectFilter = (props) => {
       // Check if we've already fetched topics for this research area
       if (!topics[expandedResearchArea]) {
         setLoadingTopics(true);
-        console.log(`Fetching topics for research area ${expandedResearchArea}...`);
         
         axios.get(`/api/topics/${expandedResearchArea}`)
           .then(response => {
-            console.log(`Topics for research area ${expandedResearchArea}:`, response.data);
             // Update the topics map with the new data
             setTopics(prev => ({
               ...prev,
@@ -112,7 +88,6 @@ const SubjectFilter = (props) => {
             setLoadingTopics(false);
           })
           .catch(error => {
-            console.error(`Error fetching topics for research area ${expandedResearchArea}:`, error);
             // Set empty array if there's an error
             setTopics(prev => ({
               ...prev,
@@ -124,17 +99,7 @@ const SubjectFilter = (props) => {
     }
   }, [expandedResearchArea, topics]);
 
-  // Log selected categories when they change
-  useEffect(() => {
-    if (selectedCategories) {
-      console.log("Selected categories updated:", 
-        Array.isArray(selectedCategories) ? selectedCategories : "Non-array value: " + typeof selectedCategories
-      );
-    }
-  }, [selectedCategories]);
-
   const toggleCategory = (categoryId) => {
-    console.log("Toggle category:", categoryId);
     if (expandedCategory === categoryId) {
       setExpandedCategory(null);
       setExpandedResearchArea(null);
@@ -145,7 +110,6 @@ const SubjectFilter = (props) => {
   };
 
   const toggleResearchArea = (researchAreaId) => {
-    console.log("Toggle research area:", researchAreaId);
     if (expandedResearchArea === researchAreaId) {
       setExpandedResearchArea(null);
     } else {
@@ -154,7 +118,6 @@ const SubjectFilter = (props) => {
   };
 
   const handleCategorySelect = (categoryId) => {
-    console.log("Selecting category:", categoryId);
     const category = categories.find(cat => cat.category_id === categoryId);
     
     if (!category) return;
@@ -176,7 +139,6 @@ const SubjectFilter = (props) => {
   };
 
   const handleResearchAreaSelect = (researchAreaId, categoryId) => {
-    console.log("Selecting research area:", researchAreaId);
     const currentSelectedResearchAreas = Array.isArray(selectedResearchAreas) ? selectedResearchAreas : [];
     const updatedAreas = [...currentSelectedResearchAreas];
     const existingIndex = updatedAreas.findIndex(area => area.research_area_id === researchAreaId);
@@ -194,7 +156,6 @@ const SubjectFilter = (props) => {
   };
 
   const handleTopicSelect = (topicId, researchAreaId) => {
-    console.log("Selecting topic:", topicId);
     const currentSelectedTopics = Array.isArray(selectedTopics) ? selectedTopics : [];
     const updatedTopics = [...currentSelectedTopics];
     const existingIndex = updatedTopics.findIndex(topic => topic.topic_id === topicId);
@@ -212,16 +173,10 @@ const SubjectFilter = (props) => {
   };
 
   const handleApplyFilters = () => {
-    console.log("Applying filters");
-    
     // Ensure we have arrays for all selected items
     const safeSelectedCategories = Array.isArray(selectedCategories) ? selectedCategories : [];
     const safeSelectedResearchAreas = Array.isArray(selectedResearchAreas) ? selectedResearchAreas : [];
     const safeSelectedTopics = Array.isArray(selectedTopics) ? selectedTopics : [];
-    
-    console.log("Selected categories:", safeSelectedCategories);
-    console.log("Selected research areas:", safeSelectedResearchAreas);
-    console.log("Selected topics:", safeSelectedTopics);
     
     // Only call onApply if it's a function
     if (typeof onApply === 'function') {
@@ -230,8 +185,6 @@ const SubjectFilter = (props) => {
         researchAreas: safeSelectedResearchAreas,
         topics: safeSelectedTopics
       });
-    } else {
-      console.warn("onApply is not a function. Cannot apply filters.");
     }
   };
 

@@ -39,6 +39,9 @@ const KeywordFilter = ({ selectedKeywords = [], setSelectedKeywords, onApply }) 
   // Handle "See All" click
   const handleSeeAll = () => {
     setShowModal(true);
+    // Reset search results to show all keywords when modal opens
+    setSearchResults(keywords);
+    setSearchTerm('');
   };
 
   // Handle modal close
@@ -56,7 +59,19 @@ const KeywordFilter = ({ selectedKeywords = [], setSelectedKeywords, onApply }) 
 
   // Handle search input change
   const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+    const value = event.target.value;
+    setSearchTerm(value);
+    
+    // If search term is empty, show all keywords
+    if (!value.trim()) {
+      setSearchResults(keywords);
+    } else {
+      // Otherwise filter keywords based on search term
+      const results = keywords.filter((keyword) =>
+        keyword.keyword.toLowerCase().includes(value.toLowerCase())
+      );
+      setSearchResults(results);
+    }
   };
 
   // Handle search submit
@@ -312,6 +327,11 @@ const KeywordFilter = ({ selectedKeywords = [], setSelectedKeywords, onApply }) 
                     </div>
                   </div>
                 ))}
+                {searchResults.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '10px', color: '#666' }}>
+                    No keywords found matching "{searchTerm}"
+                  </div>
+                )}
               </div>
             </div>
             <div className="modal-footer" style={{
