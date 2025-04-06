@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './styles/admindashboard.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolderOpen, faUserFriends, faChartLine, faUpload, faTags, faBuilding } from '@fortawesome/free-solid-svg-icons';
+import { faFolderOpen, faUserFriends, faChartLine, faUpload, faTags, faBuilding, faStar, faArchive, faUsers } from '@fortawesome/free-solid-svg-icons';
 import RecentSubmissions from '../../components/RecentSubmission';
 import HorizontalImageBanner from '../../components/HorizontalImageBanner';
 import MostViewed from '../../components/MostViewed';
@@ -14,6 +14,8 @@ function AdminDashboard() {
   const [totalDepartments, setTotalDepartments] = useState(0);
   const [totalKeywords, setTotalKeywords] = useState(0);
   const [archivedProjectsCount, setArchivedProjectsCount] = useState(0);
+  const [featuredProjectsCount, setFeaturedProjectsCount] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [recentProjects, setRecentProjects] = useState([]);
 
   // Check for authentication on component mount
@@ -25,9 +27,11 @@ function AdminDashboard() {
     } else {
       fetchProjects();
       fetchArchivedProjects();
+      fetchFeaturedProjects();
       fetchTotalAuthors();
       fetchDepartmentsCount();
       fetchKeywordsCount();
+      fetchUsersCount();
     }
   }, [navigate]);
 
@@ -59,6 +63,19 @@ function AdminDashboard() {
     }
   };
 
+  // Fetch featured projects count
+  const fetchFeaturedProjects = async () => {
+    try {
+      const response = await fetch('/api/projects');
+      const data = await response.json();
+      // Count only projects where is_featured is true
+      const featuredCount = data.filter(project => project.is_featured === true).length;
+      setFeaturedProjectsCount(featuredCount);
+    } catch (error) {
+      console.error('Failed to fetch featured projects:', error);
+    }
+  };
+
   const fetchTotalAuthors = async () => {
     const response = await fetch('/api/authors');
     const data = await response.json();
@@ -66,15 +83,42 @@ function AdminDashboard() {
   };
 
   const fetchDepartmentsCount = async () => {
-    const response = await fetch('/api/categories');
-    const data = await response.json();
-    setTotalDepartments(data.length);
+    try {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error('Failed to fetch departments');
+      }
+      const data = await response.json();
+      // Simply count all departments since we want total count
+      setTotalDepartments(data.length);
+    } catch (error) {
+      console.error('Failed to fetch departments:', error);
+      setTotalDepartments(0); // Set to 0 on error
+    }
   };
 
   const fetchKeywordsCount = async () => {
     const response = await fetch('/api/keywords');
     const data = await response.json();
     setTotalKeywords(data.length);
+  };
+
+  const fetchUsersCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTotalUsers(data.length);
+      }
+    } catch (error) {
+      console.error('Failed to fetch users count:', error);
+      setTotalUsers(0);
+    }
   };
 
   const itemsPerPage = 5;
@@ -111,14 +155,17 @@ function AdminDashboard() {
       </header>
 
       <div className="centered-content">
-        <div className="metrics">
-          {/* Metric for Total Works */}
-          <MetricItem title="Manage Works" link="/admin/TotalWorks" value={totalProjects} icon={faFolderOpen} />
-          <MetricItem title="Manage Authors" link="/admin/TotalAuthors" value={totalAuthors} icon={faUserFriends} />
-          <MetricItem title="Manage Featured" link="/Featured_Projects" value={totalDepartments} icon={faBuilding} />
-          <MetricItem title="Manage Keywords" link="/admin/TotalKeywords" value={totalKeywords} icon={faTags} />
-          <MetricItem title="Manage Departments" link="/admin/edit-departments" value={totalDepartments} icon={faBuilding} />
-          <MetricItem title="Archived Works" link="/Archived_Projects"value={archivedProjectsCount}icon={faTags} />
+        <div className="metrics-container">
+          <div className="metrics">
+            {/* Metric for Total Works */}
+            <MetricItem title="Manage Works" link="/admin/TotalWorks" value={totalProjects} icon={faFolderOpen} />
+            <MetricItem title="Manage Authors" link="/admin/TotalAuthors" value={totalAuthors} icon={faUserFriends} />
+            <MetricItem title="Featured Works" link="/Featured_Projects" value={featuredProjectsCount} icon={faStar} />
+            <MetricItem title="Archived Works" link="/Archived_Projects" value={archivedProjectsCount} icon={faArchive} />
+            <MetricItem title="Manage Keywords" link="/admin/TotalKeywords" value={totalKeywords} icon={faTags} />
+            <MetricItem title="Manage Departments" link="/admin/edit-departments" value={totalDepartments} icon={faBuilding} />
+            <MetricItem title="Manage Users" link="/admin/users" value={totalUsers} icon={faUsers} />
+          </div>
         </div>
 
         <div className="two-column-section">
@@ -137,8 +184,11 @@ function AdminDashboard() {
 // Reusable MetricItem component
 const MetricItem = ({ title, link, value, icon }) => (
   <Link to={link} className="metric-item">
-    <h4><FontAwesomeIcon icon={icon} /> {title}</h4>
-    <p>{value}</p>
+    <div className="icon-container">
+      <FontAwesomeIcon icon={icon} className="metric-icon" />
+    </div>
+    <h4>{title}</h4>
+    <p>{value !== undefined ? value : "-"}</p>
   </Link>
 );
 

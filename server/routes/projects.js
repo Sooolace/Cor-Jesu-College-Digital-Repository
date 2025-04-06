@@ -19,6 +19,213 @@ const parseStudyUrl = (study_url) => {
     }
 };
 
+// Helper function to get client IP address
+const getClientIp = (req) => {
+    return req.headers['x-forwarded-for']?.split(',')[0] || 
+           req.connection.remoteAddress || 
+           req.socket.remoteAddress || 
+           req.connection.socket?.remoteAddress;
+};
+
+// POST - Start tracking a view for a project
+router.post('/startview/:project_id', async (req, res) => {
+    const { project_id } = req.params;
+    const userId = req.user?.id || null;
+    const sessionId = req.session?.id || req.headers['x-session-id'] || req.cookies?.sessionId || Math.random().toString(36).substring(2);
+    const ipAddress = getClientIp(req);
+    
+    try {
+        // 1. Check for rate limiting (prevents spam views)
+        // If there are too many view attempts from the same IP in the last minute, block it
+        const rateLimitQuery = `
+            SELECT COUNT(*) as recent_views
+            FROM project_views
+            WHERE ip_address = $1
+              AND view_timestamp > NOW() - INTERVAL '1 minute'
+        `;
+        const rateLimitResult = await pool.query(rateLimitQuery, [ipAddress]);
+        const recentViewCount = parseInt(rateLimitResult.rows[0].recent_views);
+        
+        // If more than 5 view attempts in the last minute, apply rate limiting
+        if (recentViewCount > 5) {
+            return res.status(429).json({
+                error: 'Rate limit exceeded',
+                message: 'Too many view requests. Please try again later.'
+            });
+        }
+        
+        // 2. Check for existing valid view in the current day
+        // YouTube-like approach: count only one valid view per user/IP per day per video
+        const todayViewQuery = `
+            SELECT view_id
+            FROM project_views
+            WHERE project_id = $1
+              AND (
+                  (user_id IS NOT NULL AND user_id = $2) OR
+                  (session_id = $3) OR
+                  (ip_address = $4 AND user_id IS NULL)
+              )
+              AND is_valid = TRUE
+              AND view_timestamp > NOW() - INTERVAL '1 day'
+        `;
+        const todayViewResult = await pool.query(todayViewQuery, [project_id, userId, sessionId, ipAddress]);
+        
+        // If there's already a valid view today from this user/session/IP
+        if (todayViewResult.rows.length > 0) {
+            return res.status(200).json({
+                view_id: todayViewResult.rows[0].view_id,
+                message: 'Already counted a view for this project today',
+                alreadyCounted: true
+            });
+        }
+        
+        // 3. Check for an existing incomplete view session (view started but not completed)
+        // This prevents multiple view records for the same viewing session
+        const activeViewQuery = `
+            SELECT view_id
+            FROM project_views
+            WHERE project_id = $1
+              AND (
+                  (user_id IS NOT NULL AND user_id = $2) OR
+                  (session_id = $3) OR
+                  (ip_address = $4 AND user_id IS NULL)
+              )
+              AND is_valid = FALSE
+              AND view_timestamp > NOW() - INTERVAL '15 minutes'
+        `;
+        const activeViewResult = await pool.query(activeViewQuery, [project_id, userId, sessionId, ipAddress]);
+        
+        if (activeViewResult.rows.length > 0) {
+            // Return the existing view ID for the active session
+            return res.status(200).json({
+                view_id: activeViewResult.rows[0].view_id,
+                message: 'Continuing existing view session'
+            });
+        }
+        
+        // 4. Start a new view tracking session
+        const query = `
+            INSERT INTO project_views (project_id, user_id, session_id, ip_address, is_valid)
+            VALUES ($1, $2, $3, $4, FALSE)
+            RETURNING view_id
+        `;
+        const result = await pool.query(query, [project_id, userId, sessionId, ipAddress]);
+        
+        // Return the view_id to the client
+        res.status(201).json({ 
+            view_id: result.rows[0].view_id,
+            message: 'View tracking started'
+        });
+    } catch (error) {
+        console.error('Error starting view tracking:', error);
+        res.status(500).json({ error: 'Failed to start view tracking' });
+    }
+});
+
+// POST - Complete a view (after 10+ seconds of viewing)
+router.post('/completeview/:view_id', async (req, res) => {
+    const { view_id } = req.params;
+    const { duration } = req.body; // Duration in seconds
+    
+    if (!duration || duration < 10) {
+        return res.status(400).json({ 
+            error: 'Invalid view duration', 
+            message: 'View must be at least 10 seconds to count' 
+        });
+    }
+    
+    try {
+        // First, check if this view has already been marked as valid
+        const checkViewQuery = `
+            SELECT is_valid, project_id 
+            FROM project_views 
+            WHERE view_id = $1
+        `;
+        const checkResult = await pool.query(checkViewQuery, [view_id]);
+        
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'View record not found' });
+        }
+        
+        // If view is already valid, don't count it again
+        if (checkResult.rows[0].is_valid) {
+            return res.status(200).json({ 
+                success: true, 
+                message: 'View already counted previously',
+                alreadyCounted: true
+            });
+        }
+        
+        const projectId = checkResult.rows[0].project_id;
+        
+        // Update the view as valid and record the duration
+        const updateViewQuery = `
+            UPDATE project_views 
+            SET is_valid = TRUE, view_duration = $1
+            WHERE view_id = $2
+            RETURNING project_id
+        `;
+        await pool.query(updateViewQuery, [duration, view_id]);
+        
+        // Increment the view_count in the projects table
+        const updateProjectQuery = `
+            UPDATE projects
+            SET view_count = view_count + 1
+            WHERE project_id = $1
+        `;
+        await pool.query(updateProjectQuery, [projectId]);
+        
+        // Clear the cache after updating the view count
+        cache.del('allProjectsCache');
+        cache.del('topViewedCache');
+        
+        res.status(200).json({ 
+            success: true, 
+            message: 'View completed and counted successfully' 
+        });
+    } catch (error) {
+        console.error('Error completing view:', error);
+        res.status(500).json({ error: 'Failed to complete view' });
+    }
+});
+
+// GET - Get project view statistics
+router.get('/viewstats/:project_id', async (req, res) => {
+    const { project_id } = req.params;
+    
+    try {
+        // Get total valid views for the project
+        const viewsQuery = `
+            SELECT COUNT(*) as total_views
+            FROM project_views
+            WHERE project_id = $1 AND is_valid = TRUE
+        `;
+        const viewsResult = await pool.query(viewsQuery, [project_id]);
+        
+        // Get daily view counts for the last 30 days
+        const dailyViewsQuery = `
+            SELECT 
+                DATE_TRUNC('day', view_timestamp) as view_date,
+                COUNT(*) as count
+            FROM project_views
+            WHERE project_id = $1 
+              AND is_valid = TRUE
+              AND view_timestamp > NOW() - INTERVAL '30 days'
+            GROUP BY DATE_TRUNC('day', view_timestamp)
+            ORDER BY view_date DESC
+        `;
+        const dailyViewsResult = await pool.query(dailyViewsQuery, [project_id]);
+        
+        res.status(200).json({
+            total_views: parseInt(viewsResult.rows[0].total_views),
+            daily_views: dailyViewsResult.rows
+        });
+    } catch (error) {
+        console.error('Error fetching view statistics:', error);
+        res.status(500).json({ error: 'Failed to fetch view statistics' });
+    }
+});
+
 // POST - Add a new project
 router.post('/upload', async (req, res) => { 
     const { title, description_type, abstract, publication_date, study_urls, category_id, authors, keywords } = req.body;
@@ -180,7 +387,8 @@ router.get('/mostviewed', async (req, res) => {
         LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id 
         WHERE p.is_archived = false
         GROUP BY p.project_id 
-        ORDER BY p.view_count DESC;
+        ORDER BY p.view_count DESC
+        LIMIT 10;
     `;
 
     try {

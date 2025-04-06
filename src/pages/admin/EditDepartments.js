@@ -25,16 +25,17 @@ function EditDepartments() {
 
   const fetchDepartments = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/categories');
       if (!response.ok) {
-        throw new Error('Failed to fetch departments');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       setDepartments(data);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setError('Failed to load departments');
+      setError('Failed to load departments. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -46,13 +47,13 @@ function EditDepartments() {
   };
 
   const handleSaveChanges = async () => {
-    const formData = new FormData();
-    formData.append('name', currentDepartment.name);
-    if (currentDepartment.image) {
-      formData.append('image', currentDepartment.image);
-    }
-
     try {
+      const formData = new FormData();
+      formData.append('name', currentDepartment.name);
+      if (currentDepartment.image) {
+        formData.append('image', currentDepartment.image);
+      }
+
       const response = await fetch(`/api/categories/${currentDepartment.category_id}`, {
         method: 'PUT',
         body: formData,
@@ -63,10 +64,10 @@ function EditDepartments() {
       }
 
       setShowEditModal(false);
-      fetchDepartments(); // Refresh the list of departments
+      fetchDepartments(); // Refresh the list
     } catch (error) {
       console.error('Error updating department:', error);
-      setError('Failed to update department');
+      setError('Failed to update department. Please try again.');
     }
   };
 
@@ -87,13 +88,13 @@ function EditDepartments() {
   };
 
   const handleAddDepartment = async () => {
-    const formData = new FormData();
-    formData.append('name', newDepartment.name);
-    if (newDepartment.image) {
-      formData.append('image', newDepartment.image);
-    }
-
     try {
+      const formData = new FormData();
+      formData.append('name', newDepartment.name);
+      if (newDepartment.image) {
+        formData.append('image', newDepartment.image);
+      }
+
       const response = await fetch('/api/categories', {
         method: 'POST',
         body: formData,
@@ -105,10 +106,10 @@ function EditDepartments() {
 
       setShowAddModal(false);
       setNewDepartment({ name: '', image: null });
-      fetchDepartments(); // Refresh the list of departments
+      fetchDepartments(); // Refresh the list
     } catch (error) {
       console.error('Error adding department:', error);
-      setError('Failed to add department');
+      setError('Failed to add department. Please try again.');
     }
   };
 
@@ -159,13 +160,23 @@ function EditDepartments() {
         {loading && (
           <div className="text-center mt-4">
             <Spinner animation="border" role="status" />
-            <span className="visually-hidden">Loading...</span>
+            <span className="ms-2">Loading departments...</span>
           </div>
         )}
-        {error && <p className="text-danger text-center">{error}</p>}
-        {!loading && !error && departments.length === 0 && <p className="text-center">No departments available.</p>}
 
-        {departments.length > 0 && (
+        {error && (
+          <div className="alert alert-danger text-center mt-4">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && departments.length === 0 && (
+          <div className="alert alert-info text-center mt-4">
+            No departments available. Add a new department to get started.
+          </div>
+        )}
+
+        {!loading && !error && departments.length > 0 && (
           <Table striped bordered hover className="custom-table">
             <thead>
               <tr>

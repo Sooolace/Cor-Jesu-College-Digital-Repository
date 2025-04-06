@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
-import { FaArrowLeft, FaBookmark, FaPrint, FaDownload } from 'react-icons/fa';  // Add FaDownload for the download icon
+import { FaArrowLeft, FaBookmark, FaPrint, FaDownload, FaLock } from 'react-icons/fa';  // Add FaLock for the lock icon
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf'; 
 import './styles/documentoverview.css';
@@ -24,8 +24,67 @@ function DocumentOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Hidden view tracking variables - these stay in the background
+  const [viewInfo, setViewInfo] = useState(null);
+  const [viewStatus, setViewStatus] = useState('pending');
+  const [viewCompleted, setViewCompleted] = useState(false);
+
+  // Function to track views in the background
+  const trackPageView = async () => {
+    try {
+      // Start view tracking
+      const response = await fetch(`/api/projects/startview/${projectId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      if (data.alreadyCounted) return;
+      
+      // Record view info for completion
+      const viewId = data.view_id;
+      setViewInfo({ viewId, startTime: Date.now() });
+      setViewStatus('tracking');
+      
+      // Set up completion after 10 seconds
+      setTimeout(() => {
+        completeView(viewId);
+      }, 10000);
+    } catch (error) {
+      console.error('Error tracking view:', error);
+    }
+  };
+  
+  // Function to complete the view tracking
+  const completeView = async (viewId) => {
+    if (viewCompleted || !viewInfo) return;
+    
+    try {
+      setViewCompleted(true);
+      const duration = Math.floor((Date.now() - viewInfo.startTime) / 1000);
+      
+      if (duration >= 10) {
+        await fetch(`/api/projects/completeview/${viewId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration })
+        });
+      }
+    } catch (error) {
+      console.error('Error completing view:', error);
+    }
+  };
 
   useEffect(() => {
+    // Check if user is logged in by looking for token in localStorage
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    setIsLoggedIn(!!token && (role === 'user' || role === 'admin'));
+    
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -74,7 +133,9 @@ function DocumentOverview() {
           const departmentData = await departmentRes.json();
           setDepartment(departmentData);
         }
-
+        
+        // Track the page view after data is loaded
+        trackPageView();
       } catch (err) {
         console.error(err);
         setError('Failed to load project or related data');
@@ -84,7 +145,40 @@ function DocumentOverview() {
     };
 
     fetchData();
+    
+    // Cleanup function for view tracking
+    return () => {
+      if (viewInfo && !viewCompleted && viewStatus === 'tracking') {
+        completeView(viewInfo.viewId);
+      }
+    };
   }, [projectId]);
+
+  // Add beforeunload event listener to complete view when navigating away
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (viewInfo && !viewCompleted && viewStatus === 'tracking') {
+        completeView(viewInfo.viewId);
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [viewInfo, viewCompleted, viewStatus]);
+
+  // Check if we're returning from login
+  useEffect(() => {
+    // If we have state indicating we're returning from login with preserved state
+    if (location.state?.preserveLogin) {
+      // Check if the user is now logged in
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      setIsLoggedIn(!!token && (role === 'user' || role === 'admin'));
+      
+      // Clear the navigation state to prevent issues with future navigation
+      window.history.replaceState({}, '');
+    }
+  }, [location]);
 
   const handlePrintSummary = () => {
     const printContents = document.querySelector('.document-container').outerHTML;
@@ -130,7 +224,6 @@ function DocumentOverview() {
     });
   };
   
-
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked); 
   };
@@ -141,6 +234,18 @@ function DocumentOverview() {
     } else {
       navigate('/search');
     }
+  };
+
+  // Function to redirect to login page
+  const redirectToLogin = () => {
+    // Navigate to login page with information about where to return to
+    navigate('/login', { 
+      state: { 
+        from: location.pathname,
+        preserveLogin: true,
+        returnToDocument: true
+      } 
+    });
   };
 
   if (loading) {
@@ -180,45 +285,50 @@ function DocumentOverview() {
             <p className="abstract">{project.abstract}</p>
 
             {/* Keywords */}
-              <div className="project-detail-item">
-                <p className="detail-title"><strong>Keywords:</strong></p>
-                <p className="detail-content">
-                  {keywords.length > 0 ? keywords.map((keyword, index) => (
-                    <span key={keyword.keyword_id}>
-                      <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword)}`} className="keyword-link">
-                        {keyword.keyword}
-                      </Link>
-                      {index < keywords.length - 1 && ', '}
-                    </span>
-                  )) : 'N/A'}
-                </p>
-              </div>
-
-          <div className="project-detail-item">
-                        <p className="detail-title"><strong>Study Url:</strong></p>
-                        <p className="detail-content">
-                          {project.study_url ? <a href={project.study_url} target="_blank" rel="noopener noreferrer">{project.study_url}</a> : 'No Link Available'}
-                        </p>
+            <div className="project-detail-item">
+              <p className="detail-title"><strong>Keywords:</strong></p>
+              <p className="detail-content">
+                {keywords.length > 0 ? keywords.map((keyword, index) => (
+                  <span key={keyword.keyword_id}>
+                    <Link to={`/KeywordOverview/${encodeURIComponent(keyword.keyword)}`} className="keyword-link">
+                      {keyword.keyword}
+                    </Link>
+                    {index < keywords.length - 1 && ', '}
+                  </span>
+                )) : 'N/A'}
+              </p>
             </div>
-                      <div className="project-detail-item">
-            <p className="detail-title"><strong>Downloadable File:</strong></p>
-            <p className="detail-content">
-              {project.file_path ? (
-                <a 
-  href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
-                download
->
-  {project.file_path.split('/').pop()}
-</a>
 
-
-
-
-              ) : (
-                'No Document Available'
-              )}
-            </p>
-          </div>
+            <div className="project-detail-item">
+              <p className="detail-title"><strong>Study Url:</strong></p>
+              <p className="detail-content">
+                {project.study_url ? <a href={project.study_url} target="_blank" rel="noopener noreferrer">{project.study_url}</a> : 'No Link Available'}
+              </p>
+            </div>
+            
+            {/* Downloadable File - Only shown if logged in */}
+            <div className="project-detail-item">
+              <p className="detail-title"><strong>Downloadable File:</strong></p>
+              <p className="detail-content">
+                {isLoggedIn ? (
+                  project.file_path ? (
+                    <a 
+                      href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
+                      download
+                    >
+                      {project.file_path.split('/').pop()}
+                    </a>
+                  ) : (
+                    'No Document Available'
+                  )
+                ) : (
+                  <div className="login-prompt">
+                    <FaLock /> <span>Please <Link to="/login" className="login-link" state={{ from: location.pathname }}>login</Link> to access downloadable files</span>
+                  </div>
+                )}
+              </p>
+            </div>
+            
             <div className="buttons-container">
               <div className="print-button">
                 <Button onClick={handlePrintSummary}>

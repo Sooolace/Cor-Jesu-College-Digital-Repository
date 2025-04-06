@@ -2,3 +2,36 @@
     margin-top: 150px; /* Adjust the value as needed */
   }
   
+/* Role Badge Styles */
+.role-badge {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 50px;
+}
+
+.role-admin {
+  background-color: #dc3545;
+  color: white;
+}
+
+.role-user {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Inline badges for modal */
+.role-badge-inline {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 15px;
+  text-transform: uppercase;
+  margin: 0 5px;
+}
+  

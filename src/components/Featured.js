@@ -4,8 +4,11 @@ import axios from 'axios';
 import '../pages/user/styles/Featured.css';
 
 function Featured() {
-    const [featuredDocuments, setFeaturedDocuments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [featuredDocuments, setFeaturedDocuments] = useState(() => {
+        const cached = sessionStorage.getItem('featuredDocuments');
+        return cached ? JSON.parse(cached) : [];
+    });
+    const [loading, setLoading] = useState(() => !sessionStorage.getItem('featuredDocuments'));
     const [error, setError] = useState(null);
 
     const navigate = useNavigate();
@@ -13,20 +16,28 @@ function Featured() {
     // Fetch featured documents from the API
     useEffect(() => {
         const fetchFeaturedDocuments = async () => {
+            // Check for cached data
+            const cached = sessionStorage.getItem('featuredDocuments');
+            if (cached) {
+                setFeaturedDocuments(JSON.parse(cached));
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await axios.get('/api/projects/projects/active-featured');
                 const data = response.data;
                 setFeaturedDocuments(data);
+                sessionStorage.setItem('featuredDocuments', JSON.stringify(data));
             } catch (error) {
                 setError('Failed to fetch featured documents');
-                // console.error('API call error:', error); // Remove or comment out this line
             } finally {
                 setLoading(false);
             }
         };
 
         fetchFeaturedDocuments();
-    }, []);
+    }, []); // Remove dependency on featuredDocuments.length
 
     if (loading) {
         return (

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import logo from '../src/CJCREPOLOGO.png';
 import '../styles/adminheader.css';
 import { Link, useNavigate } from 'react-router-dom';
 
 function AdminNavbar({ handleLogout }) {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [expanded, setExpanded] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState('');
     const navigate = useNavigate(); // Hook to navigate programmatically
@@ -38,55 +39,65 @@ function AdminNavbar({ handleLogout }) {
     };
 
     return (
-        <header>
-            <div className="header-container">
-                <Link to="/admindashboard">
+        <Navbar expanded={expanded} expand="lg" className="header-background" variant="dark">
+            <Container className="header-container">
+                <Navbar.Brand as={Link} to="/admindashboard">
                     <img src={logo} alt="CJC Repository Logo" className="logo" />
-                </Link>
+                </Navbar.Brand>
 
-                <nav>
-                    <Link to="/admindashboard">Home</Link>
-                    <Link to="/Search">Search</Link>
+                <Navbar.Toggle 
+                    aria-controls="responsive-navbar-nav"
+                    onClick={() => setExpanded(!expanded)}
+                />
 
-                    {/* Academics Dropdown */}
-                    <div
-                        className="dropdown"
-                        onMouseEnter={() => setIsDropdownOpen(true)}
-                        onMouseLeave={() => setIsDropdownOpen(false)}
-                    >
-                        <span className="dropdown-link">Research Resources</span>
-                        {isDropdownOpen && (
-                            <div className="dropdown-menu">
-                                <Link to="/Authors">Authors</Link>
-                                <Link to="/Keywords">Keywords</Link>
-                                <Link to="/Departments">Departments</Link>
-                                <Link to="/AllWorks">Capstone & Thesis</Link>
-                                <Link to="/resources">Resources</Link>
+                <Navbar.Collapse id="responsive-navbar-nav">
+                    <Nav className="ms-auto d-flex align-items-center">
+                        <Nav.Link as={Link} to="/admindashboard" onClick={() => setExpanded(false)}>Home</Nav.Link>
+                        <Nav.Link as={Link} to="/Search" onClick={() => setExpanded(false)}>Search</Nav.Link>
+
+                        <NavDropdown 
+                            title="Research Resources" 
+                            id="admin-nav-dropdown"
+                            className="custom-dropdown"
+                        >
+                            <NavDropdown.Item as={Link} to="/Authors" onClick={() => setExpanded(false)}>
+                                Authors
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/Keywords" onClick={() => setExpanded(false)}>
+                                Keywords
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/Departments" onClick={() => setExpanded(false)}>
+                                Departments
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/AllWorks" onClick={() => setExpanded(false)}>
+                                Capstone & Thesis
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/resources" onClick={() => setExpanded(false)}>
+                                Resources
+                            </NavDropdown.Item>
+                        </NavDropdown>
+
+                        <Nav.Link as={Link} to="/help" onClick={() => setExpanded(false)}>Help</Nav.Link>
+                        {isAuthenticated ? (
+                            <div className="welcome-container">
+                                <div className="welcome-message">
+                                    <span className="welcome-text">
+                                        <i className="fas fa-user-circle"></i> Hi, {username}
+                                    </span>
+                                    <button onClick={handleLogoutAndRedirect} className="logout-btn">
+                                        <i className="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
                             </div>
+                        ) : (
+                            <Nav.Link as={Link} to="/login" className="sign-in-btn">
+                                <i className="fas fa-sign-in-alt"></i> Sign in
+                            </Nav.Link>
                         )}
-                    </div>
-
-                    <Link to="/help">Help</Link>
-
-                    {isAuthenticated ? (
-                        <div className="welcome-container">
-                            <div className="welcome-message">
-                                <span className="welcome-text">
-                                    <i className="fas fa-user-circle"></i> Hi, {username}
-                                </span>
-                                <button onClick={handleLogoutAndRedirect} className="logout-btn">
-                                    <i className="fas fa-sign-out-alt"></i> Logout
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <Link to="/login" className="sign-in-btn">
-                            <i className="fas fa-sign-in-alt"></i> Sign in
-                        </Link>
-                    )}
-                </nav>
-            </div>
-        </header>
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
     );
 }
 

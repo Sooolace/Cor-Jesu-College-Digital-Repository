@@ -1,185 +1,237 @@
-/* Overall header container */
-header {
-  display: flex;
-  justify-content: center;  /* Center the content horizontally */
+.custom-navbar {
   background-color: #a33307;
-  color: #fff;
-  box-sizing: border-box;
-  padding: 10px 0; /* Add padding for a more consistent look */
+  padding: 10px 0;
 }
 
-/* The container that holds both logo and navigation */
-.header-container {
-  display: flex;
-  justify-content: space-between;  /* Keep logo on the left and nav on the right */
-  align-items: center;
-  width: 100%;                  /* Ensure it takes up the full available width */
-  max-width: 1200px;            /* Align with the home page width */
-  padding: 0 20px;              /* Padding to keep things from touching the edges */
-  box-sizing: border-box;      /* Prevent overflow */
-}
-
-/* Logo styling */
-.logo {
+.navbar-logo {
   width: 300px;
   height: auto;
-  max-width: 100%;  /* Ensure logo is responsive and doesn't exceed container width */
+  max-width: 100%;
 }
 
-/* Navigation styling */
-nav {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-nav a {
-  color: #fff;
-  text-decoration: none;
-  padding: 1rem 1.5rem;
-  font-weight: bold;
-  font-family: 'Segoe UI';
+/* Navigation links styling */
+.custom-navbar .nav-link {
+  color: #fff !important;
+  padding: 0.5rem 1rem !important;
+  margin: 0 0.25rem;
+  font-weight: 600;
   border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
+  transition: all 0.3s ease;
 }
 
-nav a:hover {
+.custom-navbar .nav-link.sign-in {
   background-color: #fff;
-  color: black;
-  text-decoration: underline;
-}
-
-nav .sign-in-btn {
-  padding: 10px 20px;
-  border: 1px solid rgb(223, 223, 223);
+  color: #a33307 !important;
+  padding: 0.5rem 1rem !important;
+  margin: 0 0.25rem;
+  font-weight: 600;
   border-radius: 5px;
-  background-color: transparent;
-  transition: background-color 0.3s ease, color 0.3s;
+  transition: all 0.3s ease;
 }
 
-nav .sign-in-btn:hover {
-  background-color: #fff;
-  color: black;
+.custom-navbar .nav-link:hover,
+.custom-navbar .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
-/* Dropdown styling for Academics menu */
-.dropdown {
-  position: relative;
+.custom-navbar .nav-link.sign-in:hover {
+  background-color: #f8f9fa;
+  color: #a33307;
+  transform: translateY(-1px);
 }
 
-.dropdown-link {
-  color: #fff;
-  padding: 1rem 1.5rem;
-  font-weight: bold;
-  font-family: 'Segoe UI';
+/* Dropdown styling */
+.custom-dropdown .dropdown-toggle {
+  color: #fff !important;
+  padding: 0.5rem 1rem !important;
+  margin: 0 0.25rem;
+  font-weight: 600;
   border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
+  transition: all 0.3s ease;
 }
 
-.dropdown-link:hover {
-  background-color: #fff;
-  color: black;
-  text-decoration: underline;
+.custom-dropdown .dropdown-toggle::after {
+  transition: transform 0.3s ease;
 }
 
-.dropdown-arrow {
-  margin-left: 5px;
-  font-size: 0.8em;
+.custom-dropdown .dropdown-toggle:hover::after {
+  transform: translateY(2px);
 }
 
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  background-color: #fff;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  min-width: 160px;
-  border-radius: 5px;
+.custom-dropdown .dropdown-menu {
+  margin-top: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.dropdown:hover .dropdown-menu {
-  display: block;
+.custom-dropdown .dropdown-item {
+  padding: 0.75rem 1.5rem;
+  color: #333;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.dropdown-menu a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+.custom-dropdown .dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #a33307;
+  padding-left: 2rem;
 }
 
-.dropdown-menu a:hover {
-  background-color: #ddd;
+/* Hamburger menu styling */
+.navbar-toggler {
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
 }
 
-/* Media Queries for responsiveness */
+.navbar-toggler:hover {
+  border-color: #fff !important;
+}
 
-/* For tablets (width <= 768px) */
-@media (max-width: 768px) {
-  .logo {
-    width: 200px; /* Smaller logo for tablets */
+.navbar-toggler:focus {
+  box-shadow: none !important;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Mobile styles */
+@media (max-width: 991px) {
+  .navbar-logo {
+    width: 200px;
   }
 
-  nav {
-    gap: 15px; /* Space between links */
+  .navbar-collapse {
+    background-color: #a33307;
+    margin: 0 -12px;
+    padding: 1rem;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
-  nav a {
-    padding: 0.75rem 1rem;
+  .custom-navbar .nav-link,
+  .custom-dropdown .dropdown-toggle {
+    padding: 0.75rem 1rem !important;
+    margin: 0.25rem 0;
+  }
+
+  .custom-navbar .nav-link.sign-in {
+    padding: 0.75rem 1rem !important;
+    margin: 0.25rem 0;
+  }
+
+  .custom-dropdown .dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0;
+    border-radius: 5px;
+    box-shadow: none;
+  }
+
+  .custom-dropdown .dropdown-item {
+    color: #fff;
+    padding: 0.75rem 2rem;
+  }
+
+  .custom-dropdown .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+}
+
+/* Animation for mobile menu */
+.navbar-collapse {
+  transition: all 0.3s ease-in-out;
+}
+
+.navbar-collapse.collapsing {
+  height: auto;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.navbar-collapse.show {
+  height: auto;
+}
+
+/* Small mobile devices */
+@media (max-width: 576px) {
+  .navbar-logo {
+    width: 150px;
+  }
+
+  .custom-navbar .nav-link,
+  .custom-dropdown .dropdown-toggle {
+    font-size: 0.95rem;
+  }
+
+  .custom-navbar .nav-link.sign-in {
+    font-size: 0.95rem;
+  }
+
+  .custom-dropdown .dropdown-item {
     font-size: 0.9rem;
   }
+}
 
-  nav .sign-in-btn {
-    padding: 8px 16px;
+/* Touch device optimizations */
+@media (hover: none) {
+  .custom-navbar .nav-link:hover,
+  .custom-dropdown .dropdown-toggle:hover,
+  .custom-dropdown .dropdown-item:hover {
+    background-color: transparent;
+    transform: none;
   }
 
-  .dropdown-menu {
-    min-width: 120px;
+  .custom-navbar .nav-link:active,
+  .custom-dropdown .dropdown-toggle:active,
+  .custom-dropdown .dropdown-item:active {
+    background-color: rgba(255, 255, 255, 0.2);
   }
 }
 
-/* For mobile phones (width <= 480px) */
-@media (max-width: 480px) {
-  .logo {
-    width: 150px; /* Smaller logo for mobile */
-  }
+/* Add styles for welcome message and logout button */
+.welcome-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  nav {
-    flex-direction: column;  /* Stack nav items vertically */
-    align-items: center;     /* Center the nav items */
-    gap: 10px;  /* Smaller gap for mobile */
-  }
+.welcome-message {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 8px 15px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
 
-  nav a {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
+.welcome-message:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
 
-  nav .sign-in-btn {
-    padding: 8px 12px;
-  }
+.welcome-text {
+  font-size: 14px;
+  font-weight: 500;
+}
 
-  .dropdown-menu {
-    min-width: 100px;
-  }
+.logout-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
 
-  /* Toggle dropdown on click for mobile */
-  .dropdown-menu {
-    display: none;  /* Hide menu by default */
-    position: static; /* Position it relative to the container */
-    background-color: #fff;
-    box-shadow: none;
-    width: 100%; /* Take full width */
-  }
-
-  .dropdown.open .dropdown-menu {
-    display: block;  /* Show dropdown when open class is added */
-  }
-  
-  /* Add a toggle button for the dropdown menu */
-  .dropdown-link {
-    display: block;  /* Make the dropdown link a block element */
-    text-align: center;
-  }
+.logout-btn:hover {
+  opacity: 1;
 }

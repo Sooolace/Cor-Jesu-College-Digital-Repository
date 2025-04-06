@@ -6,7 +6,7 @@ const logActivity = require('../middlewares/logActivity'); // Import log activit
 
 // GET - Fetch all projects without any search conditions, with total count and pagination
 router.get('/allprojs', async (req, res, next) => {
-    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [], authors = [], fromYear, toYear } = req.query;
+    const { page = 1, itemsPerPage = 5, query = '', categories = [], researchAreas = [], topics = [], authors = [], fromYear, toYear, advancedSearchInputs = [], yearRange = [] } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(itemsPerPage);
 
     let searchQuery = `SELECT p.*, 
@@ -40,8 +40,8 @@ router.get('/allprojs', async (req, res, next) => {
     const authorsParams = [];
 
     // Handle text search
-    if (query) {
-        queryParams.push(`%${query}%`);
+    if (query.trim() !== '') {
+        queryParams.push(`%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`);
         searchQuery += ` AND (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length})`;
         countQuery += ` AND (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length})`;
     }
@@ -94,6 +94,33 @@ router.get('/allprojs', async (req, res, next) => {
         countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
     }
 
+    // Handle advanced search inputs
+    if (advancedSearchInputs.length > 0) {
+        advancedSearchInputs.forEach((input, index) => {
+            const { query, option, condition } = input;
+            const searchCondition = condition === 'AND' ? 'AND' : 'OR';
+            queryParams.push(`%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`);
+            if (option === 'allfields') {
+                searchQuery += ` ${searchCondition} (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length} OR p.abstract ILIKE $${queryParams.length})`;
+                countQuery += ` ${searchCondition} (p.title ILIKE $${queryParams.length} OR a.name ILIKE $${queryParams.length} OR k.keyword ILIKE $${queryParams.length} OR p.abstract ILIKE $${queryParams.length})`;
+            } else {
+                searchQuery += ` ${searchCondition} p.${option} ILIKE $${queryParams.length}`;
+                countQuery += ` ${searchCondition} p.${option} ILIKE $${queryParams.length}`;
+            }
+        });
+    }
+
+    // Handle year range filter
+    if (yearRange.length === 2) {
+        queryParams.push(yearRange[0]);
+        searchQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        
+        queryParams.push(yearRange[1]);
+        searchQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+    }
+
     searchQuery += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
     const finalParams = [...queryParams, itemsPerPage, offset];
 
@@ -113,12 +140,12 @@ router.get('/allprojs', async (req, res, next) => {
 
 // GET - Search projects across all fields (title, abstract, authors, keywords) with pagination and total count
 router.get('/allfields', async (req, res) => {
-    const { query, page = 1, itemsPerPage = 5 } = req.query;
+    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query;
     const offset = (page - 1) * itemsPerPage;
 
-    const searchQuery = query.trim() === '' ? '%' : `%${query}%`;  // Handle empty query
+    const searchQuery = query.trim() === '' ? '%' : `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Handle empty query
 
-    const sqlQuery = `
+    let sqlQuery = `
         SELECT p.*, 
                STRING_AGG(DISTINCT a.name, ', ') AS authors, 
                STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
@@ -129,12 +156,9 @@ router.get('/allfields', async (req, res) => {
         LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
         WHERE (p.title ILIKE $1 OR p.abstract ILIKE $1 OR a.name ILIKE $1 OR k.keyword ILIKE $1)
         AND p.is_archived = false
-        GROUP BY p.project_id
-        ORDER BY p.publication_date DESC
-        LIMIT $2 OFFSET $3;
     `;
 
-    const countQuery = `
+    let countQuery = `
         SELECT COUNT(DISTINCT p.project_id) AS total_count
         FROM projects p
         LEFT JOIN project_authors pa ON p.project_id = pa.project_id
@@ -142,16 +166,33 @@ router.get('/allfields', async (req, res) => {
         LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
         LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
         WHERE (p.title ILIKE $1 OR p.abstract ILIKE $1 OR a.name ILIKE $1 OR k.keyword ILIKE $1)
-        AND p.is_archived = false;
+        AND p.is_archived = false
     `;
+
+    const queryParams = [searchQuery];
+
+    if (fromYear) {
+        queryParams.push(fromYear);
+        sqlQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+    }
+
+    if (toYear) {
+        queryParams.push(toYear);
+        sqlQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        countQuery += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+    }
+
+    sqlQuery += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    queryParams.push(itemsPerPage, offset);
 
     try {
         // Run the COUNT query to get the total count of matching projects
-        const countResult = await pool.query(countQuery, [searchQuery]);
+        const countResult = await pool.query(countQuery, queryParams.slice(0, -2));
         const totalCount = parseInt(countResult.rows[0].total_count, 10);
 
         // Run the SEARCH query to fetch the matching projects
-        const result = await pool.query(sqlQuery, [searchQuery, itemsPerPage, offset]);
+        const result = await pool.query(sqlQuery, queryParams);
 
         // Log the activity (User searched across all fields)
         req.activity = 'User searched across all fields';
@@ -179,13 +220,13 @@ router.get('/allfields', async (req, res) => {
 
 // GET - Search projects by title
 router.get('/search/title', async (req, res, next) => {
-    const { query, page = 1, itemsPerPage = 5 } = req.query;
+    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query;
     const offset = (page - 1) * itemsPerPage;
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
-        const searchQuerySQL = `
+        let searchQuerySQL = `
             SELECT p.*, 
                    STRING_AGG(DISTINCT k.keyword, ', ') AS keywords,
                    STRING_AGG(DISTINCT a.name, ', ') AS authors
@@ -195,27 +236,41 @@ router.get('/search/title', async (req, res, next) => {
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id
             LEFT JOIN authors a ON pa.author_id = a.author_id
             WHERE LOWER(p.title) LIKE LOWER($1) AND p.is_archived = false
-            GROUP BY p.project_id
-            ORDER BY p.publication_date DESC
-            LIMIT $2 OFFSET $3;
         `;
 
-        const countQuerySQL = `
+        let countQuerySQL = `
             SELECT COUNT(DISTINCT p.project_id) AS total_count
             FROM projects p
             LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
             LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id
             LEFT JOIN authors a ON pa.author_id = a.author_id
-            WHERE LOWER(p.title) LIKE LOWER($1) AND p.is_archived = false;
+            WHERE LOWER(p.title) LIKE LOWER($1) AND p.is_archived = false
         `;
 
+        const queryParams = [searchQuery];
+
+        if (fromYear) {
+            queryParams.push(fromYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        }
+
+        if (toYear) {
+            queryParams.push(toYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        }
+
+        searchQuerySQL += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+        queryParams.push(itemsPerPage, offset);
+
         // Run the COUNT query to get the total count of projects matching the search
-        const countResult = await pool.query(countQuerySQL, [searchQuery]);
+        const countResult = await pool.query(countQuerySQL, queryParams.slice(0, -2));
         const totalCount = parseInt(countResult.rows[0].total_count, 10);
 
         // Run the SEARCH query to fetch the projects that match the search title
-        const result = await pool.query(searchQuerySQL, [searchQuery, itemsPerPage, offset]);
+        const result = await pool.query(searchQuerySQL, queryParams);
 
         // Log the activity (User searched by title)
         req.activity = 'User searched by title';
@@ -243,13 +298,13 @@ router.get('/search/title', async (req, res, next) => {
 
 // GET - Search projects by author with pagination and total count
 router.get('/search/author', async (req, res) => {
-    const { query, page = 1, itemsPerPage = 5 } = req.query; // Pagination params
+    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query; // Pagination params
     const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
-        const searchQuerySQL = `
+        let searchQuerySQL = `
             SELECT p.*, 
                    STRING_AGG(DISTINCT a.name, ', ') AS authors, 
                    STRING_AGG(DISTINCT k.keyword, ', ') AS keywords
@@ -259,25 +314,39 @@ router.get('/search/author', async (req, res) => {
             LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
             LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
             WHERE LOWER(a.name) LIKE LOWER($1) AND p.is_archived = false
-            GROUP BY p.project_id
-            ORDER BY p.publication_date DESC
-            LIMIT $2 OFFSET $3;
         `;
 
-        const countQuerySQL = `
+        let countQuerySQL = `
             SELECT COUNT(DISTINCT p.project_id) AS total_count
             FROM projects p
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id
             LEFT JOIN authors a ON pa.author_id = a.author_id
-            WHERE LOWER(a.name) LIKE LOWER($1) AND p.is_archived = false;
+            WHERE LOWER(a.name) LIKE LOWER($1) AND p.is_archived = false
         `;
 
+        const queryParams = [searchQuery];
+
+        if (fromYear) {
+            queryParams.push(fromYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        }
+
+        if (toYear) {
+            queryParams.push(toYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        }
+
+        searchQuerySQL += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+        queryParams.push(itemsPerPage, offset);
+
         // Run the COUNT query to get the total count of projects matching the search
-        const countResult = await pool.query(countQuerySQL, [searchQuery]);
+        const countResult = await pool.query(countQuerySQL, queryParams.slice(0, -2));
         const totalCount = parseInt(countResult.rows[0].total_count, 10);
 
         // Run the SEARCH query to fetch the projects that match the search author
-        const result = await pool.query(searchQuerySQL, [searchQuery, itemsPerPage, offset]);
+        const result = await pool.query(searchQuerySQL, queryParams);
 
         // Log the activity (User searched by author)
         req.activity = 'User searched by author';
@@ -306,13 +375,13 @@ router.get('/search/author', async (req, res) => {
 
 // GET - Search projects by keywords with pagination and total count
 router.get('/search/keywords', async (req, res) => {
-    const { query, page = 1, itemsPerPage = 5 } = req.query; // Pagination params
+    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query; // Pagination params
     const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
-        const searchQuerySQL = `
+        let searchQuerySQL = `
             SELECT p.*, 
                    STRING_AGG(DISTINCT k.keyword, ', ') AS keywords,
                    STRING_AGG(DISTINCT a.name, ', ') AS authors
@@ -322,25 +391,39 @@ router.get('/search/keywords', async (req, res) => {
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id
             LEFT JOIN authors a ON pa.author_id = a.author_id
             WHERE LOWER(k.keyword) LIKE LOWER($1) AND p.is_archived = false
-            GROUP BY p.project_id
-            ORDER BY p.publication_date DESC
-            LIMIT $2 OFFSET $3;
         `;
 
-        const countQuerySQL = `
+        let countQuerySQL = `
             SELECT COUNT(DISTINCT p.project_id) AS total_count
             FROM projects p
             LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
             LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
-            WHERE LOWER(k.keyword) LIKE LOWER($1) AND p.is_archived = false;
+            WHERE LOWER(k.keyword) LIKE LOWER($1) AND p.is_archived = false
         `;
 
+        const queryParams = [searchQuery];
+
+        if (fromYear) {
+            queryParams.push(fromYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        }
+
+        if (toYear) {
+            queryParams.push(toYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        }
+
+        searchQuerySQL += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+        queryParams.push(itemsPerPage, offset);
+
         // Run the COUNT query to get the total count of projects matching the search
-        const countResult = await pool.query(countQuerySQL, [searchQuery]);
+        const countResult = await pool.query(countQuerySQL, queryParams.slice(0, -2));
         const totalCount = parseInt(countResult.rows[0].total_count, 10);
 
         // Run the SEARCH query to fetch the projects that match the search keyword
-        const result = await pool.query(searchQuerySQL, [searchQuery, itemsPerPage, offset]);
+        const result = await pool.query(searchQuerySQL, queryParams);
 
         // Log the activity (User searched by keywords)
         req.activity = 'User searched by keywords';
@@ -477,13 +560,13 @@ router.get('/advanced', async (req, res) => {
 });
 
 router.get('/search/abstract', async (req, res) => {
-    const { query, page = 1, itemsPerPage = 5 } = req.query; // Pagination params
+    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query; // Pagination params
     const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination
 
     try {
-        const searchQuery = `%${query}%`;  // Prepare the search query
+        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
 
-        const searchQuerySQL = `
+        let searchQuerySQL = `
             SELECT p.*, 
                    STRING_AGG(DISTINCT k.keyword, ', ') AS keywords,
                    STRING_AGG(DISTINCT a.name, ', ') AS authors
@@ -493,27 +576,41 @@ router.get('/search/abstract', async (req, res) => {
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id
             LEFT JOIN authors a ON pa.author_id = a.author_id
             WHERE LOWER(p.abstract) LIKE LOWER($1) AND p.is_archived = false
-            GROUP BY p.project_id
-            ORDER BY p.publication_date DESC
-            LIMIT $2 OFFSET $3;
         `;
 
-        const countQuerySQL = `
+        let countQuerySQL = `
             SELECT COUNT(DISTINCT p.project_id) AS total_count
             FROM projects p
             LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
             LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id
             LEFT JOIN authors a ON pa.author_id = a.author_id
-            WHERE LOWER(p.abstract) LIKE LOWER($1) AND p.is_archived = false;
+            WHERE LOWER(p.abstract) LIKE LOWER($1) AND p.is_archived = false
         `;
 
+        const queryParams = [searchQuery];
+
+        if (fromYear) {
+            queryParams.push(fromYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
+        }
+
+        if (toYear) {
+            queryParams.push(toYear);
+            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
+        }
+
+        searchQuerySQL += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+        queryParams.push(itemsPerPage, offset);
+
         // Run the COUNT query to get the total count of projects matching the search
-        const countResult = await pool.query(countQuerySQL, [searchQuery]);
+        const countResult = await pool.query(countQuerySQL, queryParams.slice(0, -2));
         const totalCount = parseInt(countResult.rows[0].total_count, 10);
 
         // Run the SEARCH query to fetch the projects that match the search abstract
-        const result = await pool.query(searchQuerySQL, [searchQuery, itemsPerPage, offset]);
+        const result = await pool.query(searchQuerySQL, queryParams);
 
         // Log the activity (User searched by abstract)
         req.activity = 'User searched by abstract';

@@ -7,6 +7,7 @@ import Form from 'react-bootstrap/Form';
 import { CiViewList } from "react-icons/ci";
 import Breadcrumb from '../../components/BreadCrumb';
 import PaginationComponent from '../../components/PaginationComponent';
+import axios from 'axios'; // Add axios import
 
 function AllWorks() {
   const navigate = useNavigate();
@@ -14,36 +15,43 @@ function AllWorks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
   const [filterYear, setFilterYear] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // Single search query state
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [sortOrder, setSortOrder] = useState('latest');
+  const [totalCount, setTotalCount] = useState(0);
 
+  // Effect for search and filter changes
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when search or filter changes
+  }, [searchQuery, filterYear]);
+
+  // Effect for fetching projects
   useEffect(() => {
     fetchProjects();
-  }, [currentPage]);
+  }, [currentPage, searchQuery, filterYear]); // Include all dependencies that affect the fetch
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/search/allfields?query=${searchQuery}&page=${currentPage}&itemsPerPage=${itemsPerPage}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (Array.isArray(data.data)) {
-        const projectsWithAuthors = await Promise.all(data.data.map(async (project) => {
-          const authorsResponse = await fetch(`/api/project_authors/${project.project_id}`);
-          const authors = await authorsResponse.json();
-          return { ...project, authors: authors.map(author => author.name) };
-        }));
-        setProjects(projectsWithAuthors);
-        setFilteredProjects(projectsWithAuthors);
-      } else {
-        console.error('Fetched data is not an array:', data);
-        setError('Failed to load projects');
-      }
+      const params = {
+        page: currentPage,
+        itemsPerPage,
+        ...(searchQuery && { query: searchQuery }),
+        ...(filterYear && { fromYear: filterYear, toYear: filterYear }),
+      };
+
+      const response = await axios.get('/api/search/allprojs', { params });
+
+      const projectsWithAuthors = response.data.data.map(project => ({
+        ...project,
+        authors: project.authors ? project.authors.split(', ') : []
+      }));
+
+      setProjects(projectsWithAuthors || []);
+      setTotalCount(response.data.totalCount);
+      setFilteredProjects(projectsWithAuthors || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
       setError('Failed to load projects');
@@ -73,7 +81,24 @@ function AllWorks() {
     return normalizedAuthors;
   };
 
+  const applyFilters = (allProjects) => {
+    let filtered = allProjects;
+    if (searchQuery) {
+      filtered = filtered.filter(project => 
+        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (project.authors && project.authors.join(', ').toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+    if (filterYear) {
+      filtered = filtered.filter(project => 
+        new Date(project.publication_date).getFullYear().toString() === filterYear
+      );
+    }
+    return filtered;
+  };
+
   const handleFilter = () => {
+    setCurrentPage(1);
     fetchProjects();
   };
 
@@ -92,13 +117,8 @@ function AllWorks() {
     setFilteredProjects(sortedFilteredProjects);
   };
 
-  const indexOfLastProject = currentPage * itemsPerPage;
-  const indexOfFirstProject = indexOfLastProject - itemsPerPage;
-  const currentProjects = Array.isArray(filteredProjects)
-    ? filteredProjects.slice(indexOfFirstProject, indexOfLastProject)
-    : [];
-
-  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const currentProjects = filteredProjects;
 
   const handleNext = () => {
     if (currentPage < totalPages) {

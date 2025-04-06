@@ -5,6 +5,17 @@ import { Link } from 'react-router-dom';
 import '../pages/user/styles/searchbar.css';
 
 function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }) {
+  // Load initial state from localStorage if available
+  useEffect(() => {
+    const storedState = JSON.parse(localStorage.getItem('searchState')) || {};
+    if (storedState.query) {
+      onChange(storedState.query);
+    }
+    if (storedState.option) {
+      onOptionChange(storedState.option);
+    }
+  }, [onChange, onOptionChange]);
+
   // Function to handle pressing the Enter key
   const handleKeyPressInput = (e) => {
     if (e.key === 'Enter') {
@@ -23,7 +34,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
   };
 
   return (
-    <section className="search-section">
+    <section className={`search-section ${className}`}>
       <div className="search-container">
         <select
           id="searchOptions"
@@ -39,13 +50,14 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
           <option value="category">Category</option>
         </select>
 
+        {/* Input field with onKeyPress event */}
         <input
           type="text"
           id="searchBar"
           className="searchBar"
           placeholder="Search for..."
-          value={query || ''}
-          onChange={handleInputChange}
+          value={query}
+          onChange={(e) => onChange(e.target.value)}
           onKeyPress={handleKeyPressInput}
         />
 
@@ -54,7 +66,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
         </button>
 
         <Link to="/advanced-search" className="advanced-search-link">
-          Advanced Search
+          Advanced
         </Link>
       </div>
     </section>

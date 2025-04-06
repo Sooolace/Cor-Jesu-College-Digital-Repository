@@ -107,7 +107,7 @@ a:hover {
 
 /* Filters Container */
 .filters-container {
-    width: 500px; /* Fixed width for filters */
+    width:  350px; /* Adjusted width for filters */
     height: auto; /* Adjust height to auto */
     background-color: #f9f9f9; /* Light background color */
     border: 1px solid #ddd; /* Subtle border */
@@ -283,4 +283,9 @@ a:hover {
   justify-content: space-between;
   margin-top: 10px;
   font-size: 14px;
+}
+
+/* Sidebar Layout */
+.sidebar {
+    width: 350px; /* Adjusted width for sidebar */
 }

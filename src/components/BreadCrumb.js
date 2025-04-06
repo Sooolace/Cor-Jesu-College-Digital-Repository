@@ -5,6 +5,13 @@ import './styles/breadcrumb.css';
 const Breadcrumb = ({ items }) => {
   const navigate = useNavigate();
 
+  // Handle back navigation while preserving login state
+  const handleBackNavigation = (e) => {
+    e.preventDefault();
+    // Navigate back but with state preservation
+    navigate(-1, { state: { preserveLogin: true } });
+  };
+
   return (
     <div className="breadcrumb-page">
       <div className="centered-content">
@@ -14,7 +21,7 @@ const Breadcrumb = ({ items }) => {
           <div className="back-button-container">
             <button 
               className="back-button" 
-              onClick={() => navigate(-1)} // Go back to the previous page
+              onClick={handleBackNavigation}
             >
               ← Back {/* Arrow followed by the word "Back" */}
             </button>
@@ -31,7 +38,18 @@ const Breadcrumb = ({ items }) => {
                       {isCurrentPage ? (
                         <span>{item.label}</span> // Non-clickable and styled as gray
                       ) : (
-                        <Link to={item.link}>{item.label}</Link> // Clickable
+                        // Use navigate for links to preserve state
+                        <Link 
+                          to={item.link}
+                          onClick={(e) => {
+                            if (item.link !== '#') {
+                              e.preventDefault();
+                              navigate(item.link, { state: { preserveLogin: true } });
+                            }
+                          }}
+                        >
+                          {item.label}
+                        </Link>
                       )}
                       {index < items.length - 1 && <span> &gt; </span>}
                     </li>

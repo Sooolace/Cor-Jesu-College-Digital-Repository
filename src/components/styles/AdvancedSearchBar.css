@@ -1,0 +1,208 @@
+.adv-searchbar-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  justify-content: space-between;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.adv-searchbar-container:hover {
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.adv-searchbar-options, .adv-searchbar-condition-options {
+  min-width: 120px;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  background-color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-right: 12px;
+}
+
+.adv-searchbar-options:hover, .adv-searchbar-condition-options:hover {
+  border-color: #a33307;
+}
+
+.adv-searchbar-options:focus, .adv-searchbar-condition-options:focus {
+  border-color: #a33307;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(163, 51, 7, 0.1);
+}
+
+.adv-searchbar-searchBar {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.adv-searchbar-searchBar:focus {
+  border-color: #a33307;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(163, 51, 7, 0.1);
+}
+
+.adv-searchbar-add-button, .adv-searchbar-remove-button {
+  background: none;
+  border: 2px solid transparent;
+  cursor: pointer;
+  margin-left: 12px;
+  color: #a33307;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adv-searchbar-add-button:hover, .adv-searchbar-remove-button:hover {
+  background-color: rgba(163, 51, 7, 0.1);
+  transform: scale(1.1);
+}
+
+.adv-searchbar-remove-button {
+  color: #dc3545;
+}
+
+.adv-searchbar-remove-button:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.adv-searchbar-year-range {
+  margin: 30px auto;
+  width: 50%;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .adv-searchbar-year-range {
+    width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .adv-searchbar-year-range {
+    width: 100%;
+  }
+}
+
+.adv-searchbar-year-range h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.year-range-values {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  color: #666;
+  font-weight: 500;
+}
+
+.adv-searchbar-search-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.adv-searchbar-btn-search {
+  background-color: #a33307;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(163, 51, 7, 0.2);
+}
+
+.adv-searchbar-btn-search:hover {
+  background-color: #872a05;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(163, 51, 7, 0.3);
+}
+
+.adv-searchbar-btn-search:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(163, 51, 7, 0.2);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .adv-searchbar-container {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 10px;
+  }
+
+  .adv-searchbar-options,
+  .adv-searchbar-condition-options {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .adv-searchbar-searchBar {
+    width: 100%;
+  }
+
+  .adv-searchbar-add-button,
+  .adv-searchbar-remove-button {
+    margin: 5px;
+  }
+
+  .adv-searchbar-year-range {
+    padding: 15px;
+  }
+
+  .adv-searchbar-btn-search {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .adv-searchbar-container {
+    padding: 10px;
+  }
+
+  .adv-searchbar-year-range {
+    padding: 10px;
+  }
+
+  .adv-searchbar-year-range h3 {
+    font-size: 16px;
+  }
+
+  .year-range-values {
+    font-size: 14px;
+  }
+
+  .adv-searchbar-btn-search {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
