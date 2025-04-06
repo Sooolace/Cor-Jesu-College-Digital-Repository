@@ -69,9 +69,23 @@
 
 .buttons-container {
   display: flex;
+  margin-top: 20px;
   gap: 10px;
-  justify-content: center; /* Align buttons in the center */
-  margin-top: 80px; /* Optional: space above the buttons */
+}
+
+.print-button, .bookmark-button-container {
+  margin-right: 10px;
+}
+
+.bookmark-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.bookmark-btn svg {
+  margin-right: 5px;
 }
 
 .print-button button,

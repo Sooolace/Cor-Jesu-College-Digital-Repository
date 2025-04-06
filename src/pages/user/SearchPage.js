@@ -9,7 +9,7 @@ import AuthorFilter from '../../components/UniqueAuthorFilter';
 import KeywordFilter from '../../components/KeywordFilter';
 import YearRangeFilter from '../../components/YearRangeFilter';
 import './styles/filter.css';
-import { FaTag } from 'react-icons/fa';
+import { FaTag, FaFilter, FaTimes } from 'react-icons/fa';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -616,6 +616,44 @@ function SearchPage() {
               {/* Search Bar */}
               <div className="search-bar-wrapper">
                 {MemoizedSearchBar}
+              </div>
+
+              {/* Clear All Filters Button - Repositioned below search bar */}
+              <div style={{ 
+                marginBottom: '15px',
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}>
+                <button
+                  onClick={handleClearFilters}
+                  className="clear-all-filters-button"
+                  style={{
+                    backgroundColor: '#a33307',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '6px 12px',
+                    fontWeight: '400',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#c03f08';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = '#a33307';
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                  }}
+                >
+                  <FaTimes size={12} /> Clear All Filters
+                </button>
               </div>
 
               {/* Year Range Filter */}

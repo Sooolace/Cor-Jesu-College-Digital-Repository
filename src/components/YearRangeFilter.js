@@ -4,10 +4,43 @@ import './styles/yearRangeFilter.css';
 
 const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), onApply }) => {
   const [values, setValues] = useState([minYear, maxYear]);
+  const [inputStartYear, setInputStartYear] = useState(minYear.toString());
+  const [inputEndYear, setInputEndYear] = useState(maxYear.toString());
 
   const handleApplyFilters = () => {
     if (onApply) {
       onApply(values);
+    }
+  };
+
+  const handleInputChange = (e, isStart) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (isStart) {
+      setInputStartYear(value);
+    } else {
+      setInputEndYear(value);
+    }
+  };
+
+  const applyInputValues = () => {
+    const startYear = parseInt(inputStartYear, 10);
+    const endYear = parseInt(inputEndYear, 10);
+    
+    const validStartYear = !isNaN(startYear) ? Math.max(minYear, Math.min(maxYear, startYear)) : values[0];
+    const validEndYear = !isNaN(endYear) ? Math.max(validStartYear, Math.min(maxYear, endYear)) : values[1];
+    
+    setValues([validStartYear, validEndYear]);
+    setInputStartYear(validStartYear.toString());
+    setInputEndYear(validEndYear.toString());
+  };
+
+  const handleInputBlur = () => {
+    applyInputValues();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      applyInputValues();
     }
   };
 
@@ -31,16 +64,63 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
       <div style={{ 
         border: '1px solid #e0e0e0', 
         borderRadius: '4px',
-        padding: '8px',
+        padding: '8px 12px',
         backgroundColor: '#f9f9f9',
         marginBottom: '8px'
       }}>
+        {/* Input fields */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '12px'
+        }}>
+          <div>
+            <label style={{ fontSize: '14px', marginRight: '8px' }}>From:</label>
+            <input
+              type="text" 
+              value={inputStartYear}
+              onChange={(e) => handleInputChange(e, true)}
+              onBlur={handleInputBlur}
+              onKeyDown={handleKeyDown}
+              style={{
+                width: '60px',
+                padding: '4px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                textAlign: 'center'
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: '14px', marginRight: '8px' }}>To:</label>
+            <input
+              type="text"
+              value={inputEndYear}
+              onChange={(e) => handleInputChange(e, false)}
+              onBlur={handleInputBlur}
+              onKeyDown={handleKeyDown}
+              style={{
+                width: '60px',
+                padding: '4px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                textAlign: 'center'
+              }}
+            />
+          </div>
+        </div>
+        
+        {/* Range slider */}
         <Range
           values={values}
           step={1}
           min={minYear}
           max={maxYear}
-          onChange={(values) => setValues(values)}
+          onChange={(newValues) => {
+            setValues(newValues);
+            setInputStartYear(newValues[0].toString());
+            setInputEndYear(newValues[1].toString());
+          }}
           renderTrack={({ props, children }) => {
             const { key, ...rest } = props;
             return (
@@ -81,6 +161,7 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
             );
           }}
         />
+        
         <div className="year-range-values" style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -88,7 +169,8 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
           fontSize: '14px',
           color: '#444'
         }}>
-          <span>{values[0]}</span> - <span>{values[1]}</span>
+          <span>{values[0]}</span>
+          <span>{values[1]}</span>
         </div>
       </div>
       

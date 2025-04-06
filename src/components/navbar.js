@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
+import { Navbar, Nav, Container, NavDropdown, Button } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../assets/CJCREPOLOGO.png';
 import '../pages/user/styles/header.css';
+import BookmarkModal from './BookmarkModal';
 
 function NavigationBar() {
     const [expanded, setExpanded] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState('');
     const [profilePicture, setProfilePicture] = useState('');
+    const [showBookmarkModal, setShowBookmarkModal] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -113,114 +115,151 @@ function NavigationBar() {
         navigate(path, { state: { preserveLogin: true } });
     };
 
+    // Open bookmark modal
+    const openBookmarkModal = () => {
+        setShowBookmarkModal(true);
+        closeNavbar();
+    };
+
     return (
-        <Navbar 
-            expanded={expanded}
-            expand="lg" 
-            className="custom-navbar"
-            variant="dark"
-        >
-            <Container>
-                <Navbar.Brand as={Link} to="/" onClick={() => handleNavigation('/')}>
-                    <img
-                        src={logo}
-                        alt="CJC Repository Logo"
-                        className="navbar-logo"
+        <>
+            <Navbar 
+                expanded={expanded}
+                expand="lg" 
+                className="custom-navbar"
+                variant="dark"
+            >
+                <Container>
+                    <Navbar.Brand as={Link} to="/" onClick={() => handleNavigation('/')}>
+                        <img
+                            src={logo}
+                            alt="CJC Repository Logo"
+                            className="navbar-logo"
+                        />
+                    </Navbar.Brand>
+                    
+                    <Navbar.Toggle 
+                        aria-controls="responsive-navbar-nav"
+                        onClick={() => setExpanded(!expanded)}
                     />
-                </Navbar.Brand>
-                
-                <Navbar.Toggle 
-                    aria-controls="responsive-navbar-nav"
-                    onClick={() => setExpanded(!expanded)}
-                />
-                
-                <Navbar.Collapse id="responsive-navbar-nav">
-                    <Nav className="ms-auto">
-                        <Nav.Link 
-                            onClick={() => handleNavigation('/')}
-                            className={isActive('/') ? 'active' : ''}
-                        >
-                            Home
-                        </Nav.Link>
-                        
-                        <Nav.Link 
-                            onClick={() => handleNavigation('/search')}
-                            className={isActive('/search') ? 'active' : ''}
-                        >
-                            Search
-                        </Nav.Link>
-                        
-                        <NavDropdown 
-                            title="Resources" 
-                            id="basic-nav-dropdown"
-                            className="custom-dropdown"
-                        >
-                            <NavDropdown.Item onClick={() => handleNavigation('/AllWorks')}>
-                                Theses & Dissertations
-                            </NavDropdown.Item>
-                            <NavDropdown.Item onClick={() => handleNavigation('/Authors')}>
-                                Authors
-                            </NavDropdown.Item>
-                            <NavDropdown.Item onClick={() => handleNavigation('/Keywords')}>
-                                Keywords
-                            </NavDropdown.Item>
-                            <NavDropdown.Item onClick={() => handleNavigation('/Departments')}>
-                                Departments
-                            </NavDropdown.Item>
-                            <NavDropdown.Item onClick={() => handleNavigation('/resources')}>
-                                Resources
-                            </NavDropdown.Item>
-                        </NavDropdown>
-                        
-                        <Nav.Link 
-                            onClick={() => handleNavigation('/help')}
-                            className={isActive('/help') ? 'active' : ''}
-                        >
-                            Help
-                        </Nav.Link>
-                        
-                        {isAuthenticated ? (
-                            <NavDropdown 
-                                title={
-                                    profilePicture ? 
-                                    <img 
-                                        src={profilePicture} 
-                                        alt="Profile" 
-                                        className="profile-image" 
-                                        referrerPolicy="no-referrer"
-                                        crossOrigin="anonymous"
-                                        onError={(e) => {
-                                            console.log('Image failed to load, falling back to icon');
-                                            e.target.style.display = 'none';
-                                            // Force re-render with icon only
-                                            setProfilePicture('');
-                                        }}
-                                    /> : 
-                                    <i className="fas fa-user-circle" style={{ color: 'white', fontSize: '24px' }}></i>
-                                }
-                                id="user-dropdown"
-                                className="custom-dropdown user-dropdown"
+                    
+                    <Navbar.Collapse id="responsive-navbar-nav">
+                        <Nav className="ms-auto">
+                            <Nav.Link 
+                                onClick={() => handleNavigation('/')}
+                                className={isActive('/') ? 'active' : ''}
                             >
-                                <NavDropdown.Item onClick={() => handleNavigation('/profile')}>
-                                    <i className="fas fa-id-card"></i> Profile
+                                Home
+                            </Nav.Link>
+                            
+                            <Nav.Link 
+                                onClick={() => handleNavigation('/search')}
+                                className={isActive('/search') ? 'active' : ''}
+                            >
+                                Search
+                            </Nav.Link>
+                            
+                            <NavDropdown 
+                                title="Resources" 
+                                id="basic-nav-dropdown"
+                                className="custom-dropdown"
+                            >
+                                <NavDropdown.Item onClick={() => handleNavigation('/AllWorks')}>
+                                    Theses & Dissertations
                                 </NavDropdown.Item>
-                                <NavDropdown.Divider />
-                                <NavDropdown.Item onClick={handleLogout}>
-                                    <i className="fas fa-sign-out-alt"></i> Logout
+                                <NavDropdown.Item onClick={() => handleNavigation('/Authors')}>
+                                    Authors
+                                </NavDropdown.Item>
+                                <NavDropdown.Item onClick={() => handleNavigation('/Keywords')}>
+                                    Keywords
+                                </NavDropdown.Item>
+                                <NavDropdown.Item onClick={() => handleNavigation('/Departments')}>
+                                    Departments
+                                </NavDropdown.Item>
+                                <NavDropdown.Item onClick={() => handleNavigation('/resources')}>
+                                    Resources
                                 </NavDropdown.Item>
                             </NavDropdown>
-                        ) : (
+                            
                             <Nav.Link 
-                                onClick={() => handleNavigation('/login')}
-                                className="sign-in"
+                                onClick={() => handleNavigation('/help')}
+                                className={isActive('/help') ? 'active' : ''}
                             >
-                                Sign In
+                                Help
                             </Nav.Link>
-                        )}
-                    </Nav>
-                </Navbar.Collapse>
-            </Container>
-        </Navbar>
+                            
+                            {isAuthenticated && (
+                                <Nav.Link 
+                                    onClick={openBookmarkModal}
+                                    className="bookmark-nav-link"
+                                    title="My Bookmarks"
+                                    style={{ color: '#FACC15' }}
+                                >
+                                    <i className="fas fa-bookmark"></i>
+                                </Nav.Link>
+                            )}
+                            
+                            {isAuthenticated ? (
+                                <NavDropdown 
+                                    title={
+                                        profilePicture ? 
+                                        <img 
+                                            src={profilePicture} 
+                                            alt="Profile" 
+                                            className="profile-image" 
+                                            referrerPolicy="no-referrer"
+                                            crossOrigin="anonymous"
+                                            onError={(e) => {
+                                                console.log('Image failed to load, falling back to icon');
+                                                e.target.style.display = 'none';
+                                                // Force re-render with icon only
+                                                setProfilePicture('');
+                                            }}
+                                        /> : 
+                                        <i className="fas fa-user-circle" style={{ color: 'white', fontSize: '24px' }}></i>
+                                    }
+                                    id="user-dropdown"
+                                    className="custom-dropdown user-dropdown"
+                                >
+                                    <NavDropdown.Item onClick={() => handleNavigation('/profile')}>
+                                        <i className="fas fa-id-card"></i> Profile
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => handleNavigation('/settings')}>
+                                        <i className="fas fa-cog"></i> Settings
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => handleNavigation('/language')}>
+                                        <i className="fas fa-globe"></i> Language
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => handleNavigation('/activity')}>
+                                        <i className="fas fa-history"></i> Activity History
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => handleNavigation('/notifications')}>
+                                        <i className="fas fa-bell"></i> Notifications
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Divider />
+                                    <NavDropdown.Item onClick={handleLogout}>
+                                        <i className="fas fa-sign-out-alt"></i> Logout
+                                    </NavDropdown.Item>
+                                </NavDropdown>
+                            ) : (
+                                <Nav.Link 
+                                    onClick={() => handleNavigation('/login')}
+                                    className="sign-in"
+                                >
+                                    Sign In
+                                </Nav.Link>
+                            )}
+                        </Nav>
+                    </Navbar.Collapse>
+                </Container>
+            </Navbar>
+            
+            {/* Bookmark Modal */}
+            <BookmarkModal 
+                show={showBookmarkModal} 
+                onHide={() => setShowBookmarkModal(false)} 
+            />
+        </>
     );
 }
 

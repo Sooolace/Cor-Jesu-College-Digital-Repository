@@ -1,0 +1,60 @@
+.bookmark-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.bookmark-item {
+  padding: 12px 15px;
+  transition: background-color 0.2s ease;
+  border-left: 3px solid #FACC15;
+}
+
+.bookmark-item:hover {
+  background-color: #fffbeb;
+}
+
+.bookmark-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+  flex: 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.bookmark-title:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* Remove button styling */
+.bookmark-item .btn-link {
+  color: #dc3545;
+  opacity: 0.7;
+}
+
+.bookmark-item .btn-link:hover {
+  opacity: 1;
+}
+
+/* Modal header styling */
+#bookmark-modal {
+  display: flex;
+  align-items: center;
+}
+
+#bookmark-modal i {
+  color: #FACC15;
+}
+
+@media (max-width: 768px) {
+  .bookmark-list {
+    max-height: 50vh;
+  }
+  
+  .bookmark-title {
+    font-size: 0.9rem;
+  }
+} 

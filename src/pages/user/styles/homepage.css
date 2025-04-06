@@ -175,3 +175,11 @@ opacity: 1;
 transform: translateX(0);
 transition: opacity 0.5s ease, transform 0.5s ease;
 }
+
+/* World Map Section */
+.world-map-section {
+  margin-top: 30px;
+  min-height: 500px; /* Ensure space is reserved while loading */
+  width: 100%;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}

@@ -5,6 +5,7 @@ import Featured from '../../components/Featured';
 import MostViewed from '../../components/MostViewed';
 import RecentSubmissions from '../../components/RecentSubmission';
 import HorizontalImageBanner from '../../components/HorizontalImageBanner';
+import ReactWorldMap from '../../components/ReactWorldMap';
 import './styles/homepage.css';
 import './styles/transition.css'; // Import the new CSS file for transitions
 
@@ -64,11 +65,14 @@ function Home() {
   const MemoizedFeatured = useMemo(() => <Featured />, []);
   const MemoizedRecentSubmissions = useMemo(() => <RecentSubmissions />, []);
   const MemoizedMostViewed = useMemo(() => <MostViewed />, []);
+  const MemoizedReactWorldMap = useMemo(() => <ReactWorldMap />, []);
 
   const recentSubmissionsRef = useRef(null);
   const mostViewedRef = useRef(null);
+  const worldMapRef = useRef(null);
   const [recentSubmissionsInView, setRecentSubmissionsInView] = useState(false);
   const [mostViewedInView, setMostViewedInView] = useState(false);
+  const [worldMapInView, setWorldMapInView] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,11 +88,17 @@ function Home() {
           setMostViewedInView(true);
         }
       }
+      if (worldMapRef.current && !worldMapInView) {
+        const rect = worldMapRef.current.getBoundingClientRect();
+        if (rect.top <= window.innerHeight) {
+          setWorldMapInView(true);
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [recentSubmissionsInView, mostViewedInView]);
+  }, [recentSubmissionsInView, mostViewedInView, worldMapInView]);
 
   return (
     <>
@@ -117,6 +127,12 @@ function Home() {
               {MemoizedMostViewed}
             </section>
           </div>
+          <section
+            ref={worldMapRef}
+            className={`world-map-section ${worldMapInView ? 'transition-bottom-to-top' : 'opacity-0'}`}
+          >
+            {MemoizedReactWorldMap}
+          </section>
         </div>
       </div>
     </>

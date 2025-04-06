@@ -3,12 +3,14 @@ import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import logo from '../src/CJCREPOLOGO.png';
 import '../styles/adminheader.css';
 import { Link, useNavigate } from 'react-router-dom';
+import BookmarkModal from '../../../components/BookmarkModal';
 
 function AdminNavbar({ handleLogout }) {
     const [expanded, setExpanded] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState('');
     const [profilePicture, setProfilePicture] = useState('');
+    const [showBookmarkModal, setShowBookmarkModal] = useState(false);
     const navigate = useNavigate(); // Hook to navigate programmatically
 
     useEffect(() => {
@@ -106,85 +108,123 @@ function AdminNavbar({ handleLogout }) {
         navigate('/login'); // Use useNavigate to redirect to login page
     };
 
+    // Open bookmark modal
+    const openBookmarkModal = () => {
+        setShowBookmarkModal(true);
+        setExpanded(false);
+    };
+
     return (
-        <Navbar expanded={expanded} expand="lg" className="header-background" variant="dark">
-            <Container className="header-container">
-                <Navbar.Brand as={Link} to="/admindashboard">
-                    <img src={logo} alt="CJC Repository Logo" className="logo" />
-                </Navbar.Brand>
+        <>
+            <Navbar expanded={expanded} expand="lg" className="header-background" variant="dark">
+                <Container className="header-container">
+                    <Navbar.Brand as={Link} to="/admindashboard">
+                        <img src={logo} alt="CJC Repository Logo" className="logo" />
+                    </Navbar.Brand>
 
-                <Navbar.Toggle 
-                    aria-controls="responsive-navbar-nav"
-                    onClick={() => setExpanded(!expanded)}
-                />
+                    <Navbar.Toggle 
+                        aria-controls="responsive-navbar-nav"
+                        onClick={() => setExpanded(!expanded)}
+                    />
 
-                <Navbar.Collapse id="responsive-navbar-nav">
-                    <Nav className="ms-auto d-flex align-items-center">
-                        <Nav.Link as={Link} to="/admindashboard" onClick={() => setExpanded(false)}>Home</Nav.Link>
-                        <Nav.Link as={Link} to="/Search" onClick={() => setExpanded(false)}>Search</Nav.Link>
+                    <Navbar.Collapse id="responsive-navbar-nav">
+                        <Nav className="ms-auto d-flex align-items-center">
+                            <Nav.Link as={Link} to="/admindashboard" onClick={() => setExpanded(false)}>Home</Nav.Link>
+                            <Nav.Link as={Link} to="/Search" onClick={() => setExpanded(false)}>Search</Nav.Link>
 
-                        <NavDropdown 
-                            title="Resources" 
-                            id="admin-nav-dropdown"
-                            className="custom-dropdown"
-                        >
-                            <NavDropdown.Item as={Link} to="/Authors" onClick={() => setExpanded(false)}>
-                                Authors
-                            </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/Keywords" onClick={() => setExpanded(false)}>
-                                Keywords
-                            </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/Departments" onClick={() => setExpanded(false)}>
-                                Departments
-                            </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/AllWorks" onClick={() => setExpanded(false)}>
-                                Capstone & Thesis
-                            </NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to="/resources" onClick={() => setExpanded(false)}>
-                                Resources
-                            </NavDropdown.Item>
-                        </NavDropdown>
-
-                        <Nav.Link as={Link} to="/help" onClick={() => setExpanded(false)}>Help</Nav.Link>
-                        {isAuthenticated ? (
                             <NavDropdown 
-                                title={
-                                    profilePicture ? 
-                                    <img 
-                                        src={profilePicture} 
-                                        alt="Profile" 
-                                        className="profile-image" 
-                                        referrerPolicy="no-referrer"
-                                        crossOrigin="anonymous"
-                                        onError={(e) => {
-                                            console.log('Admin image failed to load, falling back to icon');
-                                            e.target.style.display = 'none';
-                                            // Force re-render with icon only
-                                            setProfilePicture('');
-                                        }}
-                                    /> : 
-                                    <i className="fas fa-user-circle" style={{ color: 'white', fontSize: '24px' }}></i>
-                                }
-                                id="admin-user-dropdown"
-                                className="custom-dropdown user-dropdown"
+                                title="Resources" 
+                                id="admin-nav-dropdown"
+                                className="custom-dropdown"
                             >
-                                <NavDropdown.Item as={Link} to="/admin/profile" onClick={() => setExpanded(false)}>
-                                    <i className="fas fa-id-card"></i> Profile
+                                <NavDropdown.Item as={Link} to="/Authors" onClick={() => setExpanded(false)}>
+                                    Authors
                                 </NavDropdown.Item>
-                                <NavDropdown.Divider />
-                                <NavDropdown.Item onClick={handleLogoutAndRedirect}>
-                                    <i className="fas fa-sign-out-alt"></i> Logout
+                                <NavDropdown.Item as={Link} to="/Keywords" onClick={() => setExpanded(false)}>
+                                    Keywords
+                                </NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/Departments" onClick={() => setExpanded(false)}>
+                                    Departments
+                                </NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/AllWorks" onClick={() => setExpanded(false)}>
+                                    Capstone & Thesis
+                                </NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/resources" onClick={() => setExpanded(false)}>
+                                    Resources
                                 </NavDropdown.Item>
                             </NavDropdown>
-                        ) : (
-                            <Nav.Link as={Link} to="/login" className="sign-in-btn">
-                                <i className="fas fa-sign-in-alt"></i> Sign in
-                            </Nav.Link>
-                        )}
-                    </Nav>
-                </Navbar.Collapse>
-            </Container>
-        </Navbar>
+
+                            <Nav.Link as={Link} to="/help" onClick={() => setExpanded(false)}>Help</Nav.Link>
+                            
+                            {isAuthenticated && (
+                                <Nav.Link 
+                                    onClick={openBookmarkModal}
+                                    className="bookmark-nav-link"
+                                    title="My Bookmarks"
+                                    style={{ color: '#FACC15' }}
+                                >
+                                    <i className="fas fa-bookmark"></i>
+                                </Nav.Link>
+                            )}
+                            
+                            {isAuthenticated ? (
+                                <NavDropdown 
+                                    title={
+                                        profilePicture ? 
+                                        <img 
+                                            src={profilePicture} 
+                                            alt="Profile" 
+                                            className="profile-image" 
+                                            referrerPolicy="no-referrer"
+                                            crossOrigin="anonymous"
+                                            onError={(e) => {
+                                                console.log('Admin image failed to load, falling back to icon');
+                                                e.target.style.display = 'none';
+                                                // Force re-render with icon only
+                                                setProfilePicture('');
+                                            }}
+                                        /> : 
+                                        <i className="fas fa-user-circle" style={{ color: 'white', fontSize: '24px' }}></i>
+                                    }
+                                    id="admin-user-dropdown"
+                                    className="custom-dropdown user-dropdown"
+                                >
+                                    <NavDropdown.Item as={Link} to="/admin/profile" onClick={() => setExpanded(false)}>
+                                        <i className="fas fa-id-card"></i> Profile
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/admin/settings" onClick={() => setExpanded(false)}>
+                                        <i className="fas fa-cog"></i> Settings
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/admin/language" onClick={() => setExpanded(false)}>
+                                        <i className="fas fa-globe"></i> Language
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/admin/activity" onClick={() => setExpanded(false)}>
+                                        <i className="fas fa-history"></i> Activity History
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/admin/notifications" onClick={() => setExpanded(false)}>
+                                        <i className="fas fa-bell"></i> Notifications
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Divider />
+                                    <NavDropdown.Item onClick={handleLogoutAndRedirect}>
+                                        <i className="fas fa-sign-out-alt"></i> Logout
+                                    </NavDropdown.Item>
+                                </NavDropdown>
+                            ) : (
+                                <Nav.Link as={Link} to="/login" className="sign-in-btn">
+                                    <i className="fas fa-sign-in-alt"></i> Sign in
+                                </Nav.Link>
+                            )}
+                        </Nav>
+                    </Navbar.Collapse>
+                </Container>
+            </Navbar>
+            
+            {/* Bookmark Modal */}
+            <BookmarkModal 
+                show={showBookmarkModal} 
+                onHide={() => setShowBookmarkModal(false)} 
+            />
+        </>
     );
 }
 

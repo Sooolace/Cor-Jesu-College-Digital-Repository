@@ -1,0 +1,37 @@
+.bookmark-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  transition: all 0.2s ease;
+  margin-right: 10px;
+}
+
+.bookmark-button .fa-bookmark {
+  margin-right: 5px;
+}
+
+.bookmark-button .fa-bookmark.bookmarked {
+  color: white;
+}
+
+/* For smaller screens */
+@media (max-width: 576px) {
+  .bookmark-button {
+    min-width: 100px;
+    font-size: 0.9rem;
+    padding: 0.375rem 0.5rem;
+  }
+}
+
+/* Additional style for navbar bookmark button */
+.bookmark-nav-link {
+  font-size: 1.1rem;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.bookmark-nav-link:hover {
+  color: #fff !important;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+} 

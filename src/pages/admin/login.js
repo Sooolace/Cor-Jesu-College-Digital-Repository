@@ -55,9 +55,6 @@ function Login({ setIsAdmin }) {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const role = 'admin';  // or get the role from the server response
-    const token = 'your-jwt-token';  // the token from your API response
-
     try {
       // Make API request to backend for authentication
       const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -72,13 +69,17 @@ function Login({ setIsAdmin }) {
 
       if (response.ok) {
         // If login is successful, store token and user data in localStorage
-        const { token } = data; // Assume token is sent in the response
+        const { token, user } = data; // Get both token and user data
 
-        localStorage.setItem('role', role);
-        localStorage.setItem('username', username); // Store the username in localStorage
+        console.log('Login successful:', user);
+
+        // Store user data in localStorage
         localStorage.setItem('token', token);
+        localStorage.setItem('username', user.username || username);
+        localStorage.setItem('role', user.role || 'admin');
+        localStorage.setItem('user_id', user.id.toString());
 
-        if (role === 'admin') {
+        if (user.role === 'admin') {
           localStorage.setItem('isAdmin', 'true');
           setIsAdmin(true); // set isAdmin state
           navigate('/admindashboard'); // Navigate to admin dashboard
@@ -92,6 +93,7 @@ function Login({ setIsAdmin }) {
         setErrorMessage(data.message || 'Login failed. Please try again.');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setErrorMessage('Login failed. Please try again.');
     }
   };
@@ -132,9 +134,11 @@ function Login({ setIsAdmin }) {
       localStorage.setItem('email', user.email);
       localStorage.setItem('picture', user.picture);
       localStorage.setItem('role', user.role); // Use actual role from server
+      localStorage.setItem('user_id', user.id.toString()); // Make sure to store user ID
       localStorage.setItem('isAdmin', user.role === 'admin' ? 'true' : 'false'); // Set isAdmin based on role
       
-      console.log('Local storage set with role:', user.role, {
+      console.log('Local storage set with user data:', {
+        id: localStorage.getItem('user_id'),
         role: localStorage.getItem('role'),
         isAdmin: localStorage.getItem('isAdmin'),
         token: localStorage.getItem('token') ? 'Set' : 'Not set'
@@ -192,7 +196,7 @@ function Login({ setIsAdmin }) {
                       className="btn btn-link text-decoration-none fw-bold text-primary"
                       onClick={goToHome}
                     >
-                      ← Go Back to Home
+                      ← Return to Homepage
                     </button>
                   </div>
 

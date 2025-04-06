@@ -25,6 +25,7 @@ function DocumentOverview() {
   const [error, setError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const userId = localStorage.getItem('user_id');
   
   // Hidden view tracking variables - these stay in the background
   const [viewInfo, setViewInfo] = useState(null);
@@ -76,6 +77,22 @@ function DocumentOverview() {
       }
     } catch (error) {
       console.error('Error completing view:', error);
+    }
+  };
+
+  // Check bookmark status
+  const checkBookmarkStatus = async () => {
+    if (!isLoggedIn || !userId) return;
+    
+    try {
+      const response = await fetch(`http://localhost:5000/api/bookmarks/check/${userId}/${projectId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsBookmarked(data.isBookmarked);
+        return data.isBookmarked;
+      }
+    } catch (error) {
+      console.error('Error checking bookmark status:', error);
     }
   };
 
@@ -153,6 +170,13 @@ function DocumentOverview() {
       }
     };
   }, [projectId]);
+  
+  // Check bookmark status when logged in status changes
+  useEffect(() => {
+    if (isLoggedIn && projectId) {
+      checkBookmarkStatus();
+    }
+  }, [isLoggedIn, projectId]);
 
   // Add beforeunload event listener to complete view when navigating away
   useEffect(() => {
@@ -173,7 +197,28 @@ function DocumentOverview() {
       // Check if the user is now logged in
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
-      setIsLoggedIn(!!token && (role === 'user' || role === 'admin'));
+      const loggedIn = !!token && (role === 'user' || role === 'admin');
+      setIsLoggedIn(loggedIn);
+      
+      // Check if there was a pending bookmark request
+      const pendingBookmarkProjectId = sessionStorage.getItem('pendingBookmarkProjectId');
+      
+      if (loggedIn && pendingBookmarkProjectId && pendingBookmarkProjectId === projectId) {
+        console.log('Processing pending bookmark after login');
+        
+        // Clear the pending bookmark
+        sessionStorage.removeItem('pendingBookmarkProjectId');
+        
+        // Check bookmark status first, then bookmark if needed
+        checkBookmarkStatus().then(isAlreadyBookmarked => {
+          if (!isAlreadyBookmarked) {
+            // Small delay to ensure userId is available
+            setTimeout(() => {
+              handleBookmark();
+            }, 500);
+          }
+        });
+      }
       
       // Clear the navigation state to prevent issues with future navigation
       window.history.replaceState({}, '');
@@ -224,8 +269,86 @@ function DocumentOverview() {
     });
   };
   
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked); 
+  const handleBookmark = async () => {
+    // Check if user is logged in
+    if (!isLoggedIn || !userId) {
+      console.log('User not logged in or user ID missing. Login status:', isLoggedIn, 'User ID:', userId);
+      
+      // Store the current project ID in sessionStorage so we can bookmark it after login
+      sessionStorage.setItem('pendingBookmarkProjectId', projectId);
+      
+      // Show a more specific message or redirect to login
+      alert('Please log in to bookmark this project');
+      redirectToLogin();
+      return;
+    }
+    
+    // Validate userId and projectId
+    if (!projectId) {
+      console.error('Missing project ID:', { projectId });
+      return;
+    }
+    
+    console.log('Bookmark data:', { 
+      userId, 
+      projectId, 
+      isBookmarked,
+      apiUrl: isBookmarked 
+        ? `http://localhost:5000/api/bookmarks/${userId}/${projectId}`
+        : 'http://localhost:5000/api/bookmarks'
+    });
+    
+    try {
+      if (isBookmarked) {
+        // Remove bookmark
+        console.log('Attempting to remove bookmark...');
+        const response = await fetch(`http://localhost:5000/api/bookmarks/${userId}/${projectId}`, {
+          method: 'DELETE'
+        });
+
+        const responseData = await response.json();
+        console.log('Delete bookmark response:', responseData);
+
+        if (!response.ok) {
+          throw new Error(`Failed to remove bookmark: ${responseData.error || response.statusText}`);
+        }
+        setIsBookmarked(false);
+      } else {
+        // Add bookmark
+        console.log('Attempting to add bookmark...');
+        // Make sure we're sending integers, not strings
+        const postData = {
+          admin_id: parseInt(userId),
+          project_id: parseInt(projectId)
+        };
+        
+        console.log('POST data:', postData);
+        
+        const response = await fetch('http://localhost:5000/api/bookmarks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(postData)
+        });
+
+        try {
+          const responseData = await response.json();
+          console.log('Add bookmark response:', responseData);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to add bookmark: ${responseData.error || responseData.message || response.statusText}`);
+          }
+        } catch (jsonError) {
+          console.error('Error parsing response JSON:', jsonError);
+          throw new Error(`Failed to add bookmark: ${response.statusText}`);
+        }
+        
+        setIsBookmarked(true);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    }
   };
 
   const handleBackToSearch = () => {
@@ -238,12 +361,20 @@ function DocumentOverview() {
 
   // Function to redirect to login page
   const redirectToLogin = () => {
+    console.log('Redirecting to login. Current auth status:', {
+      token: localStorage.getItem('token') ? 'exists' : 'missing',
+      role: localStorage.getItem('role'),
+      userId: localStorage.getItem('user_id'),
+      username: localStorage.getItem('username')
+    });
+    
     // Navigate to login page with information about where to return to
     navigate('/login', { 
       state: { 
         from: location.pathname,
         preserveLogin: true,
-        returnToDocument: true
+        returnToDocument: true,
+        projectToBookmark: projectId
       } 
     });
   };
@@ -342,6 +473,21 @@ function DocumentOverview() {
               <div className="print-button">
                 <Button onClick={handlePrintSummary}>
                   <FaPrint /> Print
+                </Button>
+              </div>
+              <div className="bookmark-button-container">
+                <Button 
+                  onClick={handleBookmark}
+                  variant={isBookmarked ? "warning" : "outline-warning"}
+                  className="bookmark-btn"
+                  title={isLoggedIn ? (isBookmarked ? "Remove from bookmarks" : "Add to bookmarks") : "Sign in to bookmark"}
+                  style={{
+                    backgroundColor: isBookmarked ? '#FACC15' : 'transparent',
+                    borderColor: '#FACC15',
+                    color: isBookmarked ? '#000' : '#000'
+                  }}
+                >
+                  <FaBookmark /> {isBookmarked ? "Bookmarked" : "Bookmark"}
                 </Button>
               </div>
             </div>

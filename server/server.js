@@ -19,6 +19,7 @@ const projectsCategoryRouter = require('./routes/project_category');
 const activityLogRouter = require('./routes/activitylog');
 const uploadRouter = require('./routes/upload'); // Import the upload route
 const usersRouter = require('./routes/users'); // Import the users route
+const bookmarksRouter = require('./routes/bookmark'); // Import the bookmarks route (note the singular filename)
 const { OAuth2Client } = require('google-auth-library');
 
 require('dotenv').config();
@@ -78,6 +79,7 @@ app.use('/api/featured-documents', featuredDocumentsRouter);
 app.use('/api/search', searchRouter);
 app.use('/api', uploadRouter);
 app.use('/api/users', usersRouter); // Add the users routes
+app.use('/api/bookmarks', bookmarksRouter); // Add the bookmarks routes
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -108,7 +110,7 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user.id, username: user.username },
+            { userId: user.id, username: user.username, role: user.role },
             process.env.JWT_SECRET || 'your_default_secret', // Ensure the secret is available
             { expiresIn: '1h' }
         );
@@ -122,7 +124,15 @@ app.post('/api/auth/login', async (req, res) => {
         req.activity = 'User logged in';
         req.additionalInfo = { username: user.username };
 
-        return res.json({ token });
+        // Return the token and user data (including ID)
+        return res.json({
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                role: user.role
+            }
+        });
 
     } catch (err) {
         console.error('Error during login:', err.message);
