@@ -4,6 +4,7 @@ const path = require('path');
 const pool = require('../db'); // Database connection
 const NodeCache = require('node-cache'); // In-memory cache
 const logActivity = require('../middlewares/logActivity'); // Import log activity middleware
+const fs = require('fs');
 
 const router = express.Router();
 
@@ -97,6 +98,62 @@ router.post('/upload', upload.single('file_path'), async (req, res) => {
         console.error('Error adding project:', error.message);
         res.status(500).json({ error: 'Server error', details: error.message });
     }
+});
+
+// Configure storage for department images
+const departmentStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // Save to public/assets folder
+    const uploadPath = path.join(__dirname, '../../public/assets');
+    
+    // Create the directory if it doesn't exist
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    // Use the filename provided in the request or generate one
+    const filename = req.body.filename || `department-${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, filename);
+  }
+});
+
+const departmentUpload = multer({ 
+  storage: departmentStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: function (req, file, cb) {
+    // Accept only image files
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+  }
+});
+
+// Route to handle department image uploads
+router.post('/department-image', departmentUpload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    // Return the path to be stored in the database
+    // This is the public URL path, not the full file system path
+    const imagePath = `/assets/${req.file.filename}`;
+    
+    res.json({
+      success: true,
+      message: 'File uploaded successfully',
+      imagePath: imagePath,
+      originalname: req.file.originalname,
+      filename: req.file.filename
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'File upload failed', details: error.message });
+  }
 });
 
 module.exports = router;

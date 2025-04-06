@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import '../pages/user/styles/searchbar.css';
 
-function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }) {
+function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch, className = '' }) {
   // Load initial state from localStorage if available
   useEffect(() => {
     const storedState = JSON.parse(localStorage.getItem('searchState')) || {};
@@ -57,7 +57,7 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch }
           className="searchBar"
           placeholder="Search for..."
           value={query}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPressInput}
         />
 
