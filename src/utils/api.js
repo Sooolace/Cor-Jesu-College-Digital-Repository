@@ -9,12 +9,47 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    
+    // Add more detailed token debugging
+    console.log('Auth Token Debug:', {
+      exists: !!token,
+      token: token ? `${token.substring(0, 15)}...` : 'No token found',
+      tokenLength: token ? token.length : 0,
+      isAdmin: localStorage.getItem('isAdmin'),
+      role: localStorage.getItem('role'),
+      username: localStorage.getItem('username')
+    });
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('No auth token found in localStorage - this will cause 401 errors for protected routes');
     }
+    
+    console.log('API Request Config:', {
+      url: config.url,
+      method: config.method,
+      hasToken: !!token,
+      headers: config.headers
+    });
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.error('Authentication error (401):', error.response.data);
+      // Could redirect to login page here if needed
+      // window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

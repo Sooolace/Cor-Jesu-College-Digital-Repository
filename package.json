@@ -50,10 +50,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start:main": "cross-env PORT=3000 react-app-rewired start --entry ./src/App.js",
-    "start:admin": "cross-env PORT=3001 react-app-rewired start --entry ./src/AdminApp.js",
-    "build:main": "react-app-rewired build --entry ./src/App.js",
-    "build:admin": "react-app-rewired build --entry ./src/AdminApp.js",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

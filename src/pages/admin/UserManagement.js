@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Spinner, Alert, Container, Row, Col, Modal } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './styles/TotalAuthors.css'; // Reuse the same styling as TotalAuthors
 import { getUsers, updateUserRole } from '../../utils/api';
 
@@ -13,9 +13,35 @@ function UserManagement() {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newRole, setNewRole] = useState('');
+  const navigate = useNavigate();
+
+  // Function to check if user is authenticated as admin
+  const checkAdminAuth = () => {
+    const token = localStorage.getItem('token');
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const role = localStorage.getItem('role');
+    
+    console.log('Auth check:', { token: !!token, isAdmin, role });
+    
+    if (!token || !isAdmin || role !== 'admin') {
+      console.warn('User not authenticated as admin, redirecting to login');
+      // Redirect to login with current location for return after login
+      navigate('/login', { 
+        state: { 
+          from: '/usermanagement', 
+          preserveLogin: false 
+        } 
+      });
+      return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
-    fetchUsers();
+    // Check authentication before fetching users
+    if (checkAdminAuth()) {
+      fetchUsers();
+    }
   }, []);
 
   const fetchUsers = async () => {
@@ -26,7 +52,22 @@ function UserManagement() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching users:', error);
-      setError('Failed to load users. Please try again later.');
+      
+      // Handle unauthorized error specifically
+      if (error.response && error.response.status === 401) {
+        setError('You are not authorized to view this page. Please log in as administrator.');
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          navigate('/login', { 
+            state: { 
+              from: '/usermanagement', 
+              preserveLogin: false 
+            } 
+          });
+        }, 2000);
+      } else {
+        setError('Failed to load users. Please try again later.');
+      }
       setLoading(false);
     }
   };
@@ -40,6 +81,9 @@ function UserManagement() {
 
   const confirmRoleChange = async () => {
     try {
+      // Check authentication before updating
+      if (!checkAdminAuth()) return;
+      
       await updateUserRole(selectedUser.id, newRole);
       
       // Update local state
@@ -52,9 +96,26 @@ function UserManagement() {
       setShowModal(false);
     } catch (error) {
       console.error('Error updating user role:', error);
-      setError('Failed to update user role. Please try again.');
-      setTimeout(() => setError(null), 3000);
-      setShowModal(false);
+      
+      // Handle unauthorized error specifically
+      if (error.response && error.response.status === 401) {
+        setError('You are not authorized to perform this action. Please log in as administrator.');
+        setShowModal(false);
+        
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          navigate('/login', { 
+            state: { 
+              from: '/usermanagement', 
+              preserveLogin: false 
+            } 
+          });
+        }, 2000);
+      } else {
+        setError('Failed to update user role. Please try again.');
+        setTimeout(() => setError(null), 3000);
+        setShowModal(false);
+      }
     }
   };
 
