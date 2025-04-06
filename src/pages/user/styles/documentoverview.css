@@ -90,6 +90,27 @@
   opacity: 0.8;
 }
 
+/* Download button styling */
+.download-button-container {
+  display: inline-block;
+}
+
+.download-link {
+  text-decoration: none;
+}
+
+.download-btn {
+  background-color: #a33307;
+  border-color: #a33307;
+  padding: 8px 16px;
+  color: white;
+}
+
+.download-btn:hover {
+  opacity: 0.8;
+  color: white;
+}
+
 .bookmark-button button {
   padding: 8px 16px;
   width: 200px;

@@ -312,18 +312,26 @@ function DocumentOverview() {
               <p className="detail-content">
                 {isLoggedIn ? (
                   project.file_path ? (
-                    <a 
-                      href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
-                      download
-                    >
-                      {project.file_path.split('/').pop()}
-                    </a>
+                    <div className="download-button-container">
+                      <a 
+                        href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
+                        download
+                        className="download-link"
+                      >
+                        <Button className="download-btn">
+                          <FaDownload /> Download {project.file_path.split('/').pop()}
+                        </Button>
+                      </a>
+                    </div>
                   ) : (
                     'No Document Available'
                   )
                 ) : (
                   <div className="login-prompt">
-                    <FaLock /> <span>Please <Link to="/login" className="login-link" state={{ from: location.pathname }}>login</Link> to access downloadable files</span>
+                    <FaLock /> <span>Please <a onClick={(e) => {
+                      e.preventDefault();
+                      redirectToLogin();
+                    }} className="login-link" style={{cursor: 'pointer'}}>login</a> to access downloadable files</span>
                   </div>
                 )}
               </p>
