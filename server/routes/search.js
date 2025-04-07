@@ -375,13 +375,15 @@ router.get('/search/author', async (req, res) => {
 
 // GET - Search projects by keywords with pagination and total count
 router.get('/search/keywords', async (req, res) => {
-    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query; // Pagination params
-    const offset = (page - 1) * itemsPerPage; // Calculate offset for pagination
+    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(itemsPerPage);
 
     try {
-        const searchQuery = `%${query.replace(/[^a-zA-Z0-9]/g, '%')}%`;  // Prepare the search query
-
-        let searchQuerySQL = `
+        // Simple query pattern
+        const searchPattern = `%${query}%`;
+        
+        // Build query
+        let sql = `
             SELECT p.*, 
                    STRING_AGG(DISTINCT k.keyword, ', ') AS keywords,
                    STRING_AGG(DISTINCT a.name, ', ') AS authors
@@ -390,62 +392,71 @@ router.get('/search/keywords', async (req, res) => {
             LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
             LEFT JOIN project_authors pa ON p.project_id = pa.project_id
             LEFT JOIN authors a ON pa.author_id = a.author_id
-            WHERE LOWER(k.keyword) LIKE LOWER($1) AND p.is_archived = false
+            WHERE p.is_archived = false
+            AND k.keyword ILIKE $1
         `;
-
-        let countQuerySQL = `
+        
+        // Add parameters array
+        const params = [searchPattern];
+        
+        // Add year filters if provided
+        if (fromYear) {
+            params.push(fromYear);
+            sql += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${params.length}`;
+        }
+        
+        if (toYear) {
+            params.push(toYear);
+            sql += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${params.length}`;
+        }
+        
+        // Add GROUP BY, ORDER BY, LIMIT, and OFFSET
+        sql += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+        params.push(parseInt(itemsPerPage), offset);
+        
+        // Execute query
+        const result = await pool.query(sql, params);
+        
+        // Count total projects matching this search (without limit/offset)
+        let countSql = `
             SELECT COUNT(DISTINCT p.project_id) AS total_count
             FROM projects p
             LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
             LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
-            WHERE LOWER(k.keyword) LIKE LOWER($1) AND p.is_archived = false
+            WHERE p.is_archived = false
+            AND k.keyword ILIKE $1
         `;
-
-        const queryParams = [searchQuery];
-
-        if (fromYear) {
-            queryParams.push(fromYear);
-            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
-            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`;
-        }
-
-        if (toYear) {
-            queryParams.push(toYear);
-            searchQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
-            countQuerySQL += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`;
-        }
-
-        searchQuerySQL += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
-        queryParams.push(itemsPerPage, offset);
-
-        // Run the COUNT query to get the total count of projects matching the search
-        const countResult = await pool.query(countQuerySQL, queryParams.slice(0, -2));
-        const totalCount = parseInt(countResult.rows[0].total_count, 10);
-
-        // Run the SEARCH query to fetch the projects that match the search keyword
-        const result = await pool.query(searchQuerySQL, queryParams);
-
-        // Log the activity (User searched by keywords)
-        req.activity = 'User searched by keywords';
         
-        // Capture the search query as additional info
+        const countParams = [searchPattern];
+        
+        if (fromYear) {
+            countParams.push(fromYear);
+            countSql += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${countParams.length}`;
+        }
+        
+        if (toYear) {
+            countParams.push(toYear);
+            countSql += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${countParams.length}`;
+        }
+        
+        const countResult = await pool.query(countSql, countParams);
+        const totalCount = parseInt(countResult.rows[0]?.total_count || 0, 10);
+        
+        // Log activity data but return response directly
+        req.activity = 'User searched by keywords';
         req.additionalInfo = JSON.stringify({ searchQuery: query });
-
-        // Ensure req.user is set for logging
-        req.user = req.user || { id: 0, role: 'normal' };
-
-        // Proceed with the logActivity middleware
-        logActivity(req, res, () => {
-            // Send response after logging the activity
-            res.status(200).json({
-                totalCount,
-                data: result.rows
-            });
+        
+        return res.json({
+            totalCount,
+            data: result.rows
         });
-
     } catch (error) {
-        console.error('Error searching projects by keywords:', error);
-        res.status(500).json({ error: 'Failed to search projects by keywords' });
+        console.error('Error in keyword search:', error);
+        return res.status(500).json({
+            error: 'Failed to search projects by keywords',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
@@ -453,7 +464,85 @@ router.get('/search/keywords', async (req, res) => {
 // GET - Search projects by abstract with pagination and total count
 // GET - Advanced search with AND/OR operators
 router.get('/advanced', async (req, res) => {
-  const { page = 1, itemsPerPage = 5, searchFields = [], dateRange = {} } = req.query;
+  console.log('Advanced search request received');
+  
+  // Parse inputs from the query string
+  let searchFields = [];
+  
+  try {
+    if (req.query.searchFields) {
+      try {
+        // First try to parse as JSON
+        searchFields = JSON.parse(req.query.searchFields);
+        console.log('Successfully parsed searchFields as JSON:', searchFields);
+      } catch (jsonError) {
+        console.error('Error parsing searchFields as JSON:', jsonError);
+        
+        // If JSON parsing fails, try to extract the fields directly
+        if (typeof req.query.searchFields === 'object') {
+          searchFields = req.query.searchFields;
+        } else {
+          // If all else fails, look for parameters like searchFields[0][query]
+          searchFields = [];
+          Object.keys(req.query).forEach(key => {
+            if (key.startsWith('searchFields[') || key.startsWith('advancedSearchInputs[')) {
+              const matches = key.match(/\[(\d+)\]\[([^\]]+)\]/);
+              if (matches) {
+                const index = parseInt(matches[1]);
+                const field = matches[2];
+                const value = req.query[key];
+                
+                if (!searchFields[index]) {
+                  searchFields[index] = {};
+                }
+                
+                searchFields[index][field] = value;
+              }
+            }
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error processing searchFields:', error);
+    searchFields = [];
+  }
+  
+  // Extract other parameters with defaults
+  const page = parseInt(req.query.page || 1);
+  const itemsPerPage = parseInt(req.query.itemsPerPage || 5);
+  
+  // Extract date range with defaults
+  let dateRange = {};
+  
+  try {
+    if (req.query.dateRange) {
+      try {
+        // Try to parse as JSON
+        dateRange = JSON.parse(req.query.dateRange);
+      } catch (jsonError) {
+        console.error('Error parsing dateRange as JSON:', jsonError);
+        
+        // If JSON parsing fails, check if it's already an object
+        if (typeof req.query.dateRange === 'object') {
+          dateRange = req.query.dateRange;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error processing dateRange:', error);
+    dateRange = {};
+  }
+  
+  // Fallback to fromYear/toYear if dateRange is not present
+  if (!dateRange.startDate && req.query.fromYear) {
+    dateRange.startDate = req.query.fromYear;
+  }
+  if (!dateRange.endDate && req.query.toYear) {
+    dateRange.endDate = req.query.toYear;
+  }
+  
+  // Calculate offset
   const offset = (page - 1) * itemsPerPage;
 
   try {
@@ -466,6 +555,7 @@ router.get('/advanced', async (req, res) => {
       LEFT JOIN authors a ON pa.author_id = a.author_id
       LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
       LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
       WHERE p.is_archived = false
     `;
 
@@ -476,6 +566,7 @@ router.get('/advanced', async (req, res) => {
       LEFT JOIN authors a ON pa.author_id = a.author_id
       LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
       LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
       WHERE p.is_archived = false
     `;
 
@@ -483,45 +574,57 @@ router.get('/advanced', async (req, res) => {
     let conditions = [];
 
     // Process each search field
-    searchFields.forEach((field, index) => {
-      if (field.value.trim()) {
-        queryParams.push(`%${field.value}%`);
-        let condition = '';
-        
-        switch (field.field) {
-          case 'title':
-            condition = `p.title ILIKE $${queryParams.length}`;
-            break;
-          case 'author':
-            condition = `a.name ILIKE $${queryParams.length}`;
-            break;
-          case 'keywords':
-            condition = `k.keyword ILIKE $${queryParams.length}`;
-            break;
-          case 'abstract':
-            condition = `p.abstract ILIKE $${queryParams.length}`;
-            break;
-          case 'category':
-            condition = `c.name ILIKE $${queryParams.length}`;
-            break;
-        }
+    if (Array.isArray(searchFields)) {
+      searchFields.forEach((field, index) => {
+        if (field && field.query && field.query.trim()) {
+          // Use simple pattern for better keyword matches
+          queryParams.push(`%${field.query}%`);
+          let condition = '';
+          
+          console.log(`Processing field: ${field.option} with query: ${field.query}`);
+          
+          switch (field.option) {
+            case 'title':
+              condition = `p.title ILIKE $${queryParams.length}`;
+              break;
+            case 'author':
+              condition = `a.name ILIKE $${queryParams.length}`;
+              break;
+            case 'keywords':
+              condition = `k.keyword ILIKE $${queryParams.length}`;
+              break;
+            case 'abstract':
+              condition = `p.abstract ILIKE $${queryParams.length}`;
+              break;
+            case 'category':
+              condition = `c.name ILIKE $${queryParams.length}`;
+              break;
+            case 'allfields':
+            default:
+              condition = `(p.title ILIKE $${queryParams.length} OR 
+                         a.name ILIKE $${queryParams.length} OR 
+                         k.keyword ILIKE $${queryParams.length} OR 
+                         p.abstract ILIKE $${queryParams.length})`;
+              break;
+          }
 
-        if (index === 0) {
-          conditions.push(condition);
-        } else {
-          conditions.push(`${field.operator} ${condition}`);
+          if (index === 0) {
+            conditions.push(condition);
+          } else {
+            conditions.push(`${field.condition || 'AND'} ${condition}`);
+          }
         }
-      }
-    });
+      });
+    }
 
     // Add date range conditions if provided
     if (dateRange.startDate) {
       queryParams.push(dateRange.startDate);
-      conditions.push(`AND p.publication_date >= $${queryParams.length}`);
+      conditions.push(`AND EXTRACT(YEAR FROM p.publication_date) >= $${queryParams.length}`);
     }
     if (dateRange.endDate) {
       queryParams.push(dateRange.endDate);
-      conditions.push(`AND p.publication_date <= $${queryParams.length}`);
+      conditions.push(`AND EXTRACT(YEAR FROM p.publication_date) <= $${queryParams.length}`);
     }
 
     // Add conditions to queries
@@ -535,27 +638,28 @@ router.get('/advanced', async (req, res) => {
     searchQuery += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
     
     // Add limit and offset params
-    queryParams.push(itemsPerPage, offset);
+    queryParams.push(parseInt(itemsPerPage), offset);
+
+    console.log('Advanced search query:', searchQuery);
+    console.log('Parameters:', queryParams);
 
     // Execute queries
     const countResult = await pool.query(countQuery, queryParams.slice(0, -2));
     const result = await pool.query(searchQuery, queryParams);
 
-    // Log the activity
-    req.activity = 'User performed advanced search';
-    req.additionalInfo = JSON.stringify({ searchFields, dateRange });
-    req.user = req.user || { id: 0, role: 'normal' };
-
-    logActivity(req, res, () => {
-      res.status(200).json({
-        totalCount: parseInt(countResult.rows[0].total_count, 10),
-        data: result.rows
-      });
+    // Return results directly to avoid middleware issues
+    return res.status(200).json({
+      totalCount: parseInt(countResult.rows[0]?.total_count || 0, 10),
+      data: result.rows || []
     });
 
   } catch (error) {
     console.error('Error performing advanced search:', error);
-    res.status(500).json({ error: 'Failed to perform advanced search', details: error.message });
+    return res.status(500).json({
+      error: 'Failed to perform advanced search',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -636,8 +740,88 @@ router.get('/search/abstract', async (req, res) => {
     }
 });
 
+// New simplified route for keyword search - less complex to eliminate possible error sources
+router.get('/keyword-simple', async (req, res) => {
+    const { query, page = 1, itemsPerPage = 5, fromYear, toYear } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(itemsPerPage);
 
-
-
+    try {
+        // Simple query pattern
+        const searchPattern = `%${query}%`;
+        
+        // Build query
+        let sql = `
+            SELECT p.*, 
+                   STRING_AGG(DISTINCT k.keyword, ', ') AS keywords,
+                   STRING_AGG(DISTINCT a.name, ', ') AS authors
+            FROM projects p
+            LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
+            LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
+            LEFT JOIN project_authors pa ON p.project_id = pa.project_id
+            LEFT JOIN authors a ON pa.author_id = a.author_id
+            WHERE p.is_archived = false
+            AND k.keyword ILIKE $1
+        `;
+        
+        // Add parameters array
+        const params = [searchPattern];
+        
+        // Add year filters if provided
+        if (fromYear) {
+            params.push(fromYear);
+            sql += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${params.length}`;
+        }
+        
+        if (toYear) {
+            params.push(toYear);
+            sql += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${params.length}`;
+        }
+        
+        // Add GROUP BY, ORDER BY, LIMIT, and OFFSET
+        sql += ` GROUP BY p.project_id ORDER BY p.publication_date DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+        params.push(parseInt(itemsPerPage), offset);
+        
+        // Execute query
+        const result = await pool.query(sql, params);
+        
+        // Count total projects matching this search (without limit/offset)
+        let countSql = `
+            SELECT COUNT(DISTINCT p.project_id) AS total_count
+            FROM projects p
+            LEFT JOIN project_keywords pk ON p.project_id = pk.project_id
+            LEFT JOIN keywords k ON pk.keyword_id = k.keyword_id
+            WHERE p.is_archived = false
+            AND k.keyword ILIKE $1
+        `;
+        
+        const countParams = [searchPattern];
+        
+        if (fromYear) {
+            countParams.push(fromYear);
+            countSql += ` AND EXTRACT(YEAR FROM p.publication_date) >= $${countParams.length}`;
+        }
+        
+        if (toYear) {
+            countParams.push(toYear);
+            countSql += ` AND EXTRACT(YEAR FROM p.publication_date) <= $${countParams.length}`;
+        }
+        
+        const countResult = await pool.query(countSql, countParams);
+        const totalCount = parseInt(countResult.rows[0]?.total_count || 0, 10);
+        
+        // Simple response
+        return res.json({
+            totalCount,
+            data: result.rows
+        });
+    } catch (error) {
+        console.error('Error in simplified keyword search:', error);
+        return res.status(500).json({
+            error: 'Failed to search projects by keywords',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
 
 module.exports = router;

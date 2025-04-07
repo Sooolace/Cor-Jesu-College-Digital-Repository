@@ -9,7 +9,7 @@ import AuthorFilter from '../../components/UniqueAuthorFilter';
 import KeywordFilter from '../../components/KeywordFilter';
 import YearRangeFilter from '../../components/YearRangeFilter';
 import './styles/filter.css';
-import { FaTag, FaFilter, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaTag, FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaSpinner } from 'react-icons/fa';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -156,18 +156,30 @@ function SearchPage() {
       // Check if this is an advanced search
       if (location.state?.advancedSearch) {
         endpoint = '/api/search/advanced';
+        
+        // Prepare advanced search parameters
+        const searchFields = location.state.advancedSearchInputs || [];
+        const dateRange = {
+          startDate: years[0],
+          endDate: years[1]
+        };
+        
+        // Serialize search fields to avoid complex nested objects in query params
+        const serializedSearchFields = JSON.stringify(searchFields);
+        
         params = {
           page,
           itemsPerPage,
-          searchFields: location.state.searchParams.searchFields,
-          dateRange: location.state.searchParams.dateRange,
-          ...(categoryIds.length > 0 && { categories: categoryIds }),
-          ...(researchAreaIds.length > 0 && { researchAreas: researchAreaIds }),
-          ...(topicIds.length > 0 && { topics: topicIds }),
-          ...(authorIds.length > 0 && { authors: authorIds }),
-          ...(keywordIds.length > 0 && { keywords: keywordIds }),
-          ...(years.length === 2 && { fromYear: years[0], toYear: years[1] })
+          searchFields: serializedSearchFields,
+          dateRange: JSON.stringify(dateRange)
         };
+        
+        // Add filter IDs if any
+        if (categoryIds.length > 0) params.categories = categoryIds;
+        if (researchAreaIds.length > 0) params.researchAreas = researchAreaIds;
+        if (topicIds.length > 0) params.topics = topicIds;
+        if (authorIds.length > 0) params.authors = authorIds;
+        if (keywordIds.length > 0) params.keywords = keywordIds;
       } else {
         const endpointMap = {
           allfields: '/api/search/allfields',
@@ -178,23 +190,36 @@ function SearchPage() {
           category: '/api/search/allprojs',
         };
 
-        endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
-
-        params = {
-          page,
-          itemsPerPage,
-          ...(query && { query }),
-          ...(categoryIds.length > 0 && { categories: categoryIds }),
-          ...(researchAreaIds.length > 0 && { researchAreas: researchAreaIds }),
-          ...(topicIds.length > 0 && { topics: topicIds }),
-          ...(authorIds.length > 0 && { authors: authorIds }),
-          ...(keywordIds.length > 0 && { keywords: keywordIds }),
-          ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }),
-          ...(advancedSearchInputs.length > 0 && { advancedSearchInputs }),
-        };
+        // If query is empty and no filters are applied, show all projects
+        if (!query.trim() && 
+            categoryIds.length === 0 && 
+            researchAreaIds.length === 0 && 
+            topicIds.length === 0 && 
+            authorIds.length === 0 && 
+            keywordIds.length === 0 && 
+            advancedSearchInputs.length === 0) {
+          endpoint = '/api/search/allprojs';
+          params = {
+            page,
+            itemsPerPage
+          };
+        } else {
+          endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
+          params = {
+            page,
+            itemsPerPage,
+            ...(query && { query }),
+            ...(categoryIds.length > 0 && { categories: categoryIds }),
+            ...(researchAreaIds.length > 0 && { researchAreas: researchAreaIds }),
+            ...(topicIds.length > 0 && { topics: topicIds }),
+            ...(authorIds.length > 0 && { authors: authorIds }),
+            ...(keywordIds.length > 0 && { keywords: keywordIds }),
+            ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }),
+            ...(advancedSearchInputs.length > 0 && { advancedSearchInputs }),
+          };
+        }
       }
 
-      // console.log('Sending API request with params:', params);
       const response = await axios.get(endpoint, { params });
 
       const data = response.data.data || [];
@@ -212,6 +237,8 @@ function SearchPage() {
       }
     } catch (error) {
       // Error fetching projects
+      setFilteredData([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -589,20 +616,32 @@ function SearchPage() {
       typeof keyword === 'object' && keyword !== null ? keyword.keyword_id : keyword
     );
     
-    navigate('/search', { 
-      state: { 
-        query: searchQuery, 
-        option: searchOption, 
-        page: newPage, 
-        authors: authorIds, 
-        categories: categoryIds, 
-        researchAreas: researchAreaIds, 
-        topics: topicIds, 
-        keywords: keywordIds, 
-        years: selectedYears,
-        advancedSearchInputs: initialState.advancedSearchInputs
-      } 
-    });
+    // Check if this is an advanced search
+    if (location.state?.advancedSearch) {
+      // Preserve all advanced search parameters when changing page
+      navigate('/search', { 
+        state: { 
+          ...location.state,
+          page: newPage
+        } 
+      });
+    } else {
+      // For regular search
+      navigate('/search', { 
+        state: { 
+          query: searchQuery, 
+          option: searchOption, 
+          page: newPage, 
+          authors: authorIds, 
+          categories: categoryIds, 
+          researchAreas: researchAreaIds, 
+          topics: topicIds, 
+          keywords: keywordIds, 
+          years: selectedYears,
+          advancedSearchInputs: initialState.advancedSearchInputs
+        } 
+      });
+    }
   };
 
   // Add toggle function for mobile filters
@@ -682,16 +721,21 @@ function SearchPage() {
 
             {/* Search Results */}
             <div className="results-list-container">
-              {filteredData.length > 0 ? (
+              {loading ? (
+                <div className="loading-message">
+                  <FaSpinner className="spinner" />
+                  <span>Searching...</span>
+                </div>
+              ) : filteredData.length > 0 ? (
                 <>
                   {/* Search Result Information */}
                   <div className="results-count">
                     <p>
                       {`Found `}
                       <b>{totalCount}</b>
-                      {` results for '`}
-                      <b>{searchQuery}</b>
-                      {`'. Showing page `}<b>{indexOfFirstItem + 1}</b> {` to `}<b>{Math.min(indexOfLastItem, totalCount)}</b>.
+                      {` results`}
+                      {searchQuery ? ` for '${searchQuery}'` : ''}
+                      {`. Showing page `}<b>{indexOfFirstItem + 1}</b> {` to `}<b>{Math.min(indexOfLastItem, totalCount)}</b>.
                     </p>
                   </div>
 
@@ -779,9 +823,24 @@ function SearchPage() {
                     handlePageChange={handlePageChange}
                   />
                 </>
-              ) : !loading && (
+              ) : (
                 <div className="no-results-message">
-                  No results found.
+                  {searchQuery || selectedAuthors.length > 0 || selectedCategories.length > 0 || 
+                   selectedResearchAreas.length > 0 || selectedTopics.length > 0 || 
+                   selectedKeywords.length > 0 ? (
+                    <>
+                      <p>No results found for your search criteria.</p>
+                      <p className="suggestion-text">Try:</p>
+                      <ul className="suggestion-list">
+                        <li>Using different keywords</li>
+                        <li>Removing some filters</li>
+                        <li>Checking your spelling</li>
+                        <li>Using more general terms</li>
+                      </ul>
+                    </>
+                  ) : (
+                    <p>Start your search by entering keywords or using the filters above.</p>
+                  )}
                 </div>
               )}
             </div>

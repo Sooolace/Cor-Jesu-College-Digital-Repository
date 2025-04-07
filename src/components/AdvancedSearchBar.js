@@ -31,19 +31,21 @@ function AdvancedSearchBar({ onSearch }) {
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    const inputsWithYearRange = searchInputs.map(input => ({
-      ...input,
-      yearRange
+    
+    // Map inputs to the correct format for the API
+    const cleanedInputs = searchInputs.map(input => ({
+      query: input.query.trim(),
+      option: input.option,
+      condition: input.condition
     }));
-    onSearch({ inputs: inputsWithYearRange, yearRange });
-    navigate('/search', { 
-      state: { 
-        advancedSearchInputs: inputsWithYearRange,
-        yearRange: yearRange,
-        years: yearRange, // Add this to match the expected format in SearchPage
-        page: 1
-      } 
+    
+    // Call the parent component's onSearch callback
+    onSearch({ 
+      inputs: cleanedInputs, 
+      yearRange 
     });
+    
+    // No need to navigate here as the parent component will handle this
   };
 
   return (
