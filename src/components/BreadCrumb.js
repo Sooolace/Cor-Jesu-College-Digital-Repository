@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FaHome, FaAngleRight } from 'react-icons/fa';
 import './styles/breadcrumb.css';
 
 const Breadcrumb = ({ items }) => {
@@ -13,51 +14,56 @@ const Breadcrumb = ({ items }) => {
   };
 
   return (
-    <div className="breadcrumb-page">
-      <div className="centered-content">
-        {/* Breadcrumb Wrapper */}
-        <div className="breadcrumb-wrapper">
-          {/* Back Button Container */}
-          <div className="back-button-container">
-            <button 
-              className="back-button" 
-              onClick={handleBackNavigation}
-            >
-              ← Back {/* Arrow followed by the word "Back" */}
-            </button>
-          </div>
+    <div className="breadcrumb-wrapper">
+      <div className="breadcrumb-content">
+        {/* Home link on left */}
+        <div className="breadcrumb-home">
+          <Link 
+            to="/"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/', { state: { preserveLogin: true } });
+            }}
+            className="home-link"
+          >
+            <FaHome /> Home
+          </Link>
+          <button 
+            className="back-button" 
+            onClick={handleBackNavigation}
+          >
+            ← Back
+          </button>
+        </div>
           
-          {/* Breadcrumb Navigation Container */}
-          <div className="breadcrumb-nav-container">
-            <nav className="breadcrumb-container">
-              <ul className="breadcrumb">
-                {items.map((item, index) => {
-                  const isCurrentPage = index === items.length - 1; // Check if it's the last item
-                  return (
-                    <li key={index} className={isCurrentPage ? 'breadcrumb-current' : ''}>
-                      {isCurrentPage ? (
-                        <span>{item.label}</span> // Non-clickable and styled as gray
-                      ) : (
-                        // Use navigate for links to preserve state
-                        <Link 
-                          to={item.link}
-                          onClick={(e) => {
-                            if (item.link !== '#') {
-                              e.preventDefault();
-                              navigate(item.link, { state: { preserveLogin: true } });
-                            }
-                          }}
-                        >
-                          {item.label}
-                        </Link>
-                      )}
-                      {index < items.length - 1 && <span> &gt; </span>}
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </div>
+        {/* Navigation items on right */}
+        <div className="breadcrumb-nav">
+          <ul className="breadcrumb-list">
+            {items.map((item, index) => {
+              const isCurrentPage = index === items.length - 1; // Check if it's the last item
+              return (
+                <li key={index} className={`breadcrumb-item ${isCurrentPage ? 'breadcrumb-current' : ''}`}>
+                  {index > 0 && <FaAngleRight className="breadcrumb-separator" />}
+                  {isCurrentPage ? (
+                    <span className="current-page">{item.label}</span>
+                  ) : (
+                    <Link 
+                      to={item.link}
+                      className="breadcrumb-link"
+                      onClick={(e) => {
+                        if (item.link !== '#') {
+                          e.preventDefault();
+                          navigate(item.link, { state: { preserveLogin: true } });
+                        }
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
     </div>

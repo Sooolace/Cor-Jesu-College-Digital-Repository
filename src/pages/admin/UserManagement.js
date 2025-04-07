@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Spinner, Alert, Container, Row, Col, Modal } from 'react-bootstrap';
-import { FaArrowLeft } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
-import './styles/TotalAuthors.css'; // Reuse the same styling as TotalAuthors
+import { Table, Button, Spinner, Alert, Container, Row, Col, Modal, Badge } from 'react-bootstrap';
+import { FaUserShield, FaUser, FaEdit } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import './styles/TotalAuthors.css';
 import { getUsers, updateUserRole } from '../../utils/api';
+import Breadcrumb from '../../components/BreadCrumb';
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -14,6 +15,12 @@ function UserManagement() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [newRole, setNewRole] = useState('');
   const navigate = useNavigate();
+
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: 'Dashboard', link: '/admindashboard' },
+    { label: 'User Management', link: '/admin/users' }
+  ];
 
   // Function to check if user is authenticated as admin
   const checkAdminAuth = () => {
@@ -125,102 +132,146 @@ function UserManagement() {
     setNewRole('');
   };
 
-  return (
-    <Container className="py-4">
-      <Row className="mb-4">
-        <Col>
-          <div className="d-flex align-items-center mb-3">
-            <Link to="/admindashboard" className="btn btn-link text-decoration-none">
-              <FaArrowLeft className="me-2" /> Back to Dashboard
-            </Link>
-          </div>
-          <h2 className="mb-4">Manage Users</h2>
-          {successMessage && (
-            <Alert variant="success" className="mb-3">
-              {successMessage}
-            </Alert>
-          )}
-          {error && (
-            <Alert variant="danger" className="mb-3">
-              {error}
-            </Alert>
-          )}
-        </Col>
-      </Row>
-
-      {loading ? (
-        <div className="text-center my-5">
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
+  if (loading) {
+    return (
+      <div>
+        <div className="breadcrumb-page">
+          <Breadcrumb items={breadcrumbItems} />
         </div>
-      ) : (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Current Role</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length === 0 ? (
+        <div className="container mt-4">
+          <div className="text-center my-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-2">Loading users...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <div className="breadcrumb-page">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
+        <div className="container mt-4">
+          <Alert variant="danger" className="mb-3">
+            {error}
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="breadcrumb-page">
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
+      
+      <div className="container mt-4" style={{ maxWidth: '1200px', padding: '1rem' }}>
+        <h2 className="mb-4 text-center">
+          <FaUserShield className="me-2" />
+          User Management
+        </h2>
+        
+        {successMessage && (
+          <Alert variant="success" className="mb-3" dismissible onClose={() => setSuccessMessage('')}>
+            {successMessage}
+          </Alert>
+        )}
+        
+        <div className="table-responsive">
+          <Table striped bordered hover className="align-middle">
+            <thead className="table-dark">
               <tr>
-                <td colSpan="4" className="text-center">No users found</td>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Current Role</th>
+                <th>Actions</th>
               </tr>
-            ) : (
-              users.map(user => (
-                <tr key={user.id}>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td className="text-center">
-                    <span className={`role-badge ${user.role === 'admin' ? 'role-admin' : 'role-user'}`}>
-                      {user.role.toUpperCase()}
-                    </span>
-                  </td>
-                  <td>
-                    <Button 
-                      variant={user.role === 'admin' ? 'outline-primary' : 'outline-danger'}
-                      onClick={() => handleRoleChange(user.id, user.username, user.role)}
-                    >
-                      {user.role === 'admin' ? 'Change to User' : 'Change to Admin'}
-                    </Button>
+            </thead>
+            <tbody>
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4">
+                    <FaUser className="mb-2" style={{ fontSize: '2rem' }} />
+                    <p className="mb-0">No users found</p>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </Table>
-      )}
+              ) : (
+                users.map(user => (
+                  <tr key={user.id}>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <FaUser className="me-2" />
+                        {user.username}
+                      </div>
+                    </td>
+                    <td>{user.email}</td>
+                    <td className="text-center">
+                      <Badge 
+                        bg={user.role === 'admin' ? 'primary' : 'secondary'}
+                        className="px-3 py-2"
+                      >
+                        {user.role.toUpperCase()}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Button 
+                        variant={user.role === 'admin' ? 'outline-danger' : 'outline-primary'}
+                        size="sm"
+                        onClick={() => handleRoleChange(user.id, user.username, user.role)}
+                        className="d-flex align-items-center mx-auto"
+                      >
+                        <FaEdit className="me-1" />
+                        {user.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        </div>
 
-      {/* Confirmation Modal */}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Role Change</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to change <strong>{selectedUser?.username}</strong>'s role from 
-          <span className={`role-badge-inline ${selectedUser?.currentRole === 'admin' ? 'role-admin' : 'role-user'}`}>
-            {selectedUser?.currentRole?.toUpperCase()}
-          </span> to 
-          <span className={`role-badge-inline ${newRole === 'admin' ? 'role-admin' : 'role-user'}`}>
-            {newRole.toUpperCase()}
-          </span>?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
-          </Button>
-          <Button 
-            variant={newRole === 'admin' ? 'danger' : 'primary'} 
-            onClick={confirmRoleChange}
-          >
-            Confirm Change
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+        {/* Confirmation Modal */}
+        <Modal show={showModal} onHide={handleCloseModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <FaEdit className="me-2" />
+              Confirm Role Change
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              Are you sure you want to change <strong>{selectedUser?.username}</strong>'s role from{' '}
+              <Badge bg={selectedUser?.currentRole === 'admin' ? 'primary' : 'secondary'}>
+                {selectedUser?.currentRole?.toUpperCase()}
+              </Badge>{' '}
+              to{' '}
+              <Badge bg={newRole === 'admin' ? 'primary' : 'secondary'}>
+                {newRole.toUpperCase()}
+              </Badge>?
+            </p>
+            <p className="text-muted">
+              This action will affect the user's access privileges immediately.
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal}>
+              Cancel
+            </Button>
+            <Button 
+              variant={newRole === 'admin' ? 'primary' : 'danger'} 
+              onClick={confirmRoleChange}
+            >
+              Confirm Change
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    </div>
   );
 }
 

@@ -6,6 +6,7 @@ import { faFolderOpen, faUserFriends, faChartLine, faUpload, faTags, faBuilding,
 import RecentSubmissions from '../../components/RecentSubmission';
 import HorizontalImageBanner from '../../components/HorizontalImageBanner';
 import MostViewed from '../../components/MostViewed';
+import ReactWorldMap from '../../components/ReactWorldMap';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -168,6 +169,8 @@ function AdminDashboard() {
           </div>
         </div>
 
+
+
         <div className="two-column-section">
           <section className="recent-submissions">
             <RecentSubmissions />
@@ -175,6 +178,9 @@ function AdminDashboard() {
           <section className="most-viewed">
             <MostViewed />
           </section>
+        </div>
+        <div className="world-map-section">
+          <ReactWorldMap />
         </div>
       </div>
     </div>
