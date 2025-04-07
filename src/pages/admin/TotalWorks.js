@@ -7,10 +7,13 @@ import Spinner from 'react-bootstrap/Spinner';
 import Form from 'react-bootstrap/Form';
 import { MdEditSquare, MdArchive } from 'react-icons/md';
 import { CiViewList } from "react-icons/ci";
+import { FaUserPlus, FaTag, FaEye } from 'react-icons/fa';
 import Breadcrumb from '../../components/BreadCrumb';
 import Modal from 'react-bootstrap/Modal';
 import PaginationComponent from '../../components/PaginationComponent';
-import EditProjectForm from './components/EditProjectForm'; // Import the new component
+import EditProjectForm from './components/EditProjectForm';
+import AddNewAuthor from './components/addNewAuthor';
+import AddNewKeyword from './components/AddNewKeyword';
 
 function TotalWorks() {
   const navigate = useNavigate();
@@ -26,8 +29,11 @@ function TotalWorks() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [projectIdToDelete, setProjectIdToDelete] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false); // State to control edit modal visibility
-  const [projectIdToEdit, setProjectIdToEdit] = useState(null); // State to store the project ID to edit
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [projectIdToEdit, setProjectIdToEdit] = useState(null);
+  const [showAuthorModal, setShowAuthorModal] = useState(false);
+  const [showKeywordModal, setShowKeywordModal] = useState(false);
+  const [showEditSuccessModal, setShowEditSuccessModal] = useState(false);
 
   // Fetch projects from the API
   useEffect(() => {
@@ -199,6 +205,21 @@ function TotalWorks() {
     setProjectIdToEdit(null);
   };
 
+  const handleShowAuthorModal = () => setShowAuthorModal(true);
+  const handleCloseAuthorModal = () => setShowAuthorModal(false);
+  const handleShowKeywordModal = () => setShowKeywordModal(true);
+  const handleCloseKeywordModal = () => setShowKeywordModal(false);
+
+  const handleEditSuccess = () => {
+    setShowEditSuccessModal(true);
+    setShowEditModal(false);
+  };
+
+  const handleCloseEditSuccessModal = () => {
+    setShowEditSuccessModal(false);
+    fetchProjects(); // Refresh the projects list
+  };
+
   return (
     <>
       <div className="breadcrumb-container">
@@ -256,7 +277,7 @@ function TotalWorks() {
                 <th>Title</th>
                 <th>Authors</th>
                 <th>Date Published</th>
-                <th style={{ width: '170px' }}>Action</th> {/* Increase the width here */}
+                <th style={{ width: '170px' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -266,21 +287,20 @@ function TotalWorks() {
                   <td>{removeDuplicateAuthors(project.authors).join(', ')}</td>
                   <td>{new Date(project.publication_date).toLocaleDateString()}</td>
                   <td>
-                  <span onClick={() => goToDocumentOverview(project.project_id)}
-                    style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
-                <CiViewList size={35} title="View" style={{ color: 'blue' }} />
-              </span>
+                    <span onClick={() => goToDocumentOverview(project.project_id)}
+                      style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
+                      <CiViewList size={35} title="View" style={{ color: 'blue' }} />
+                    </span>
 
-              <span onClick={() => handleShowEditModal(project.project_id)}
-                    style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
-                <MdEditSquare size={35} title="Edit" style={{ color: 'green' }} />
-              </span>
+                    <span onClick={() => handleShowEditModal(project.project_id)}
+                      style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
+                      <MdEditSquare size={35} title="Edit" style={{ color: 'green' }} />
+                    </span>
 
-              <span onClick={() => handleShowModal(project.project_id)}
-                    style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
-                <MdArchive size={35} title="Archive" style={{ color: 'red' }} />
-              </span>
-
+                    <span onClick={() => handleShowModal(project.project_id)}
+                      style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
+                      <MdArchive size={35} title="Archive" style={{ color: 'red' }} />
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -288,11 +308,11 @@ function TotalWorks() {
           </Table>
         )}
 
-              <PaginationComponent
-                currentPage={currentPage}
-                totalPages={totalPages}
-                handlePageChange={newPage => setCurrentPage(newPage)}
-              />
+        <PaginationComponent
+          currentPage={currentPage}
+          totalPages={totalPages}
+          handlePageChange={newPage => setCurrentPage(newPage)}
+        />
       </div>
 
       <Modal show={showDeleteModal} onHide={handleCancelArchive} centered>
@@ -310,14 +330,224 @@ function TotalWorks() {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showEditModal} onHide={handleCloseEditModal} dialogClassName="modal-custom-width" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Project Details</Modal.Title> {/* Update the title here */}
+      <Modal 
+        show={showEditModal} 
+        onHide={handleCloseEditModal} 
+        size="lg"
+        backdrop="static"
+        className="project-edit-modal"
+        centered
+      >
+        <Modal.Header closeButton className="edit-modal-header">
+          <Modal.Title>
+            <span className="edit-icon me-2"></span>
+            Edit Project
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <EditProjectForm projectId={projectIdToEdit} onClose={handleCloseEditModal} />
+          <EditProjectForm 
+            projectId={projectIdToEdit} 
+            onClose={handleCloseEditModal}
+            onShowAuthorModal={handleShowAuthorModal}
+            onShowKeywordModal={handleShowKeywordModal}
+            onEditSuccess={handleEditSuccess}
+          />
         </Modal.Body>
       </Modal>
+
+      <Modal
+        show={showAuthorModal}
+        onHide={handleCloseAuthorModal}
+        centered
+        backdrop="static"
+        className="add-author-modal"
+      >
+        <Modal.Header closeButton className="bg-primary text-white">
+          <Modal.Title>
+            <FaUserPlus className="me-2" /> Add New Author
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <AddNewAuthor onHide={handleCloseAuthorModal} />
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        show={showKeywordModal}
+        onHide={handleCloseKeywordModal}
+        centered
+        backdrop="static"
+        className="add-keyword-modal"
+      >
+        <Modal.Header closeButton className="bg-info text-white">
+          <Modal.Title>
+            <FaTag className="me-2" /> Add New Keyword
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <AddNewKeyword onHide={handleCloseKeywordModal} />
+        </Modal.Body>
+      </Modal>
+
+      <Modal 
+        show={showEditSuccessModal} 
+        onHide={handleCloseEditSuccessModal}
+        centered
+        className="success-modal"
+      >
+        <Modal.Header closeButton className="bg-success text-white">
+          <Modal.Title>Success</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div className="text-center mb-3">
+            <div className="success-icon mb-3" style={{ fontSize: '48px', color: '#28a745' }}>
+              <i className="fas fa-check-circle"></i>
+            </div>
+            <p className="lead">Your project has been successfully updated!</p>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseEditSuccessModal}>
+            Close
+          </Button>
+          <Button variant="success" onClick={() => goToDocumentOverview(projectIdToEdit)}>
+            <FaEye className="me-2" /> View Study
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <style>{`
+        .project-edit-modal .modal-dialog {
+          max-width: 800px;
+          margin: 1.75rem auto;
+        }
+        
+        .project-edit-modal .modal-content {
+          border-radius: 8px;
+          border: none;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-modal-header {
+          background-color: #a33307;
+          color: white;
+          padding: 1rem 1.5rem;
+          border-bottom: none;
+        }
+
+        .edit-modal-header .modal-title {
+          font-size: 1.25rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+        }
+
+        .edit-modal-header .btn-close {
+          color: white;
+          opacity: 1;
+        }
+
+        .edit-modal-header .btn-close:hover {
+          opacity: 0.75;
+        }
+
+        .project-edit-modal .modal-body {
+          padding: 1.5rem;
+        }
+
+        .edit-icon {
+          font-size: 1.2rem;
+        }
+
+        /* Theme-colored buttons */
+        .btn-primary {
+          background-color: #a33307;
+          border-color: #a33307;
+        }
+
+        .btn-primary:hover {
+          background-color: #8a2b06;
+          border-color: #8a2b06;
+        }
+
+        .btn-primary:focus {
+          background-color: #8a2b06;
+          border-color: #8a2b06;
+          box-shadow: 0 0 0 0.25rem rgba(163, 51, 7, 0.25);
+        }
+
+        .btn-primary:active {
+          background-color: #8a2b06;
+          border-color: #8a2b06;
+        }
+
+        @media (max-width: 992px) {
+          .project-edit-modal .modal-dialog {
+            max-width: 95%;
+            margin: 1rem auto;
+          }
+        }
+
+        .add-author-modal .modal-content,
+        .add-keyword-modal .modal-content {
+          border-radius: 8px;
+          border: none;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-author-modal .modal-header,
+        .add-keyword-modal .modal-header {
+          background-color: #a33307;
+          color: white;
+          border-bottom: none;
+        }
+
+        .add-author-modal .btn-close,
+        .add-keyword-modal .btn-close {
+          color: white;
+          opacity: 1;
+        }
+
+        .add-author-modal .btn-close:hover,
+        .add-keyword-modal .btn-close:hover {
+          opacity: 0.75;
+        }
+
+        .success-modal .modal-content {
+          border-radius: 8px;
+          border: none;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-modal .modal-header {
+          background-color: #28a745;
+          color: white;
+          border-bottom: none;
+        }
+
+        .success-modal .modal-footer {
+          border-top: none;
+        }
+
+        .success-modal .btn-close {
+          color: white;
+          opacity: 1;
+        }
+
+        .success-modal .btn-close:hover {
+          opacity: 0.75;
+        }
+
+        .success-modal .btn-success {
+          background-color: #28a745;
+          border-color: #28a745;
+        }
+
+        .success-modal .btn-success:hover {
+          background-color: #218838;
+          border-color: #1e7e34;
+        }
+      `}</style>
     </>
   );
 }

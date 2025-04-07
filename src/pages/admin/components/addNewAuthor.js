@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { FaSave, FaUserPlus } from 'react-icons/fa';
 
 function AddNewAuthor({ onHide }) {
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -33,9 +35,11 @@ function AddNewAuthor({ onHide }) {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    setSubmitting(true);
 
     if (!name || !categoryId) {
       setError('Please fill in all fields');
+      setSubmitting(false);
       return;
     }
 
@@ -54,6 +58,7 @@ function AddNewAuthor({ onHide }) {
         } else {
           setError('Failed to add the author');
         }
+        setSubmitting(false);
         return;
       }
 
@@ -64,45 +69,79 @@ function AddNewAuthor({ onHide }) {
       setTimeout(() => {
         setName('');
         setCategoryId('');
-        onHide(); // Close the modal
+        // Pass success signal back to parent component
+        onHide(true); // Pass true to indicate successful addition
       }, 1500);
 
     } catch (error) {
       setError('Failed to add the author');
+      setSubmitting(false);
     }
   };
 
+  // Styles for form elements
+  const formStyles = {
+    input: {
+      borderRadius: '4px',
+      border: '1px solid #ced4da',
+      padding: '10px 12px',
+      fontSize: '16px',
+      transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
+    },
+    label: {
+      fontWeight: '500',
+      marginBottom: '8px',
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-4">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Loading departments...</p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {loading && <Spinner animation="border" />}
-
       {error && (
         <Alert variant="danger" onClose={() => setError(null)} dismissible>
           {error}
         </Alert>
       )}
-      {success && <Alert variant="success">Author added successfully!</Alert>}
+      
+      {success && (
+        <Alert variant="success">
+          <div className="d-flex align-items-center">
+            <i className="fas fa-check-circle me-2"></i>
+            <span>Author added successfully!</span>
+          </div>
+        </Alert>
+      )}
 
-      {!loading && !error && !success && (
+      {!success && (
         <Form onSubmit={handleSubmit}>
           <Form.Group controlId="authorName" className="mb-3">
-            <Form.Label>Author Name</Form.Label>
+            <Form.Label style={formStyles.label}>Author Name</Form.Label>
             <Form.Control
               type="text"
               placeholder="Enter author's name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              style={formStyles.input}
             />
           </Form.Group>
 
           <Form.Group controlId="category" className="mb-3">
-            <Form.Label>Department</Form.Label>
+            <Form.Label style={formStyles.label}>Department</Form.Label>
             <Form.Control
               as="select"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               required
+              style={formStyles.input}
             >
               <option value="">Select Department</option>
               {categories.map((category) => (
@@ -113,9 +152,30 @@ function AddNewAuthor({ onHide }) {
             </Form.Control>
           </Form.Group>
 
-          <div style={{ textAlign: 'center' }}>
-            <Button type="submit" variant="primary">
-              Add Author
+          <div className="d-flex justify-content-center mt-4">
+            <Button 
+              type="submit" 
+              variant="primary" 
+              disabled={submitting}
+              className="px-4 py-2"
+            >
+              {submitting ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                    className="me-2"
+                  />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <FaUserPlus className="me-2" /> Add Author
+                </>
+              )}
             </Button>
           </div>
         </Form>

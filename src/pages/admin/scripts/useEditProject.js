@@ -27,11 +27,16 @@ export const useEditProject = (projectId, navigate) => {
     const [researchTypes, setResearchTypes] = useState([]); // Initialize researchTypes state
 
     useEffect(() => {
-        fetchProject();
+        // Only fetch project data if projectId exists
+        if (projectId) {
+            fetchProject();
+        }
+        
+        // These calls don't depend on projectId and can be made regardless
         fetchCategories();
         fetchAuthors();
-        fetchKeywords(); // Fetch all keywords on load
-        fetchResearchTypes(); // Fetch all research types on load
+        fetchKeywords();
+        fetchResearchTypes();
     }, [projectId]);
 
     useEffect(() => {
@@ -49,18 +54,48 @@ export const useEditProject = (projectId, navigate) => {
     }, [formData.research_area_id]); // Dependency on research_area_id
 
     const fetchProject = async () => {
+        // Don't attempt to fetch if projectId is missing
+        if (!projectId) {
+            console.warn('Attempted to fetch project with null or undefined projectId');
+            return;
+        }
+        
         setLoading(true);
         try {
             const response = await fetch(`/api/projects/${projectId}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            // Check for response status before trying to parse JSON
+            if (!response.ok) {
+                // For 500 errors, don't try to parse JSON
+                if (response.status === 500) {
+                    console.error(`Server error (500) when fetching project ${projectId}`);
+                    setError('Server error when loading project details');
+                    return;
+                }
+                
+                // For other errors, try to parse JSON if possible
+                try {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                } catch (parseError) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            }
+            
             const data = await response.json();
+            
+            // Set form data with proper defaults
             setFormData({
                 ...data,
                 publication_date: data.publication_date ? data.publication_date.split('T')[0] : '',
+                category_id: data.category_id || '',
+                research_area_id: data.research_area_id || '',
+                topic_id: data.topic_id || '',
+                research_type_id: data.research_type_id || '',
             });
-            setSelectedAuthors(data.authors ? data.authors.map(author => author.author_id) : []);
-            setSelectedKeywords(data.keywords ? data.keywords.map(keyword => keyword.keyword_id) : []); // Set selected keywords
-            setSelectedDepartments(data.categories ? data.categories.map(category => category.category_id) : []); // Set selected keywords
+
+            // Set selected authors, keywords, and departments with proper defaults
+            // We'll let the component handle this through separate API calls now
         } catch (error) {
             console.error('Error fetching project:', error);
             setError('Failed to load project details');
@@ -222,110 +257,194 @@ const handleCategoryChange = (e) => {
 
  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Don't attempt to submit if projectId is missing
+    if (!projectId) {
+        console.error('Cannot update project: Missing project ID');
+        setError('Cannot update: Missing project ID');
+        return false;
+    }
+    
+    setLoading(true);
+    setError(null);
 
     try {
-        // Fetch existing authors, keywords, and categories
-        const existingAuthors = await fetch(`/api/project_authors/${projectId}`).then(res => res.json());
-        const existingAuthorIds = existingAuthors.map(a => a.author_id);
+        // Step 1: Update basic project information without relationships
+        const basicProjectData = {
+            title: formData.title,
+            publication_date: formData.publication_date,
+            study_url: formData.study_url,
+            abstract: formData.abstract,
+            description_type: formData.description_type || 'abstract',
+            // Convert string IDs to numbers where needed
+            category_id: formData.category_id ? parseInt(formData.category_id) : null,
+            research_area_id: formData.research_area_id ? parseInt(formData.research_area_id) : null,
+            topic_id: formData.topic_id ? parseInt(formData.topic_id) : null,
+            research_type_id: formData.research_type_id ? parseInt(formData.research_type_id) : null,
+        };
 
-        const existingKeywords = await fetch(`/api/project_keywords/${projectId}`).then(res => res.json());
-        const existingKeywordIds = existingKeywords.map(k => k.keyword_id);
+        // Remove any undefined or null values
+        Object.keys(basicProjectData).forEach((key) => {
+            if (basicProjectData[key] === undefined || basicProjectData[key] === null) {
+                delete basicProjectData[key];
+            }
+        });
 
-        const existingDepartments = await fetch(`/api/project_category/${projectId}`).then(res => res.json());
-        const existingDepartmentIds = existingDepartments.map(d => d.category_id);
+        console.log('Updating basic project info:', basicProjectData);
 
-        // Compute which authors, keywords, and categories need to be removed or added
-        const authorsToRemove = existingAuthorIds.filter(id => !selectedAuthors.includes(id));
-        const authorsToAdd = selectedAuthors.filter(id => !existingAuthorIds.includes(id));
+        // First update the basic project details
+        const response = await fetch(`/api/projects/${projectId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(basicProjectData),
+        });
 
-        const keywordsToRemove = existingKeywordIds.filter(id => !selectedKeywords.includes(id));
-        const keywordsToAdd = selectedKeywords.filter(id => !existingKeywordIds.includes(id));
-
-        const departmentsToRemove = existingDepartmentIds.filter(id => !selectedDepartments.includes(id));
-        const departmentsToAdd = selectedDepartments.filter(id => !existingDepartmentIds.includes(id));
-
-        // Only send requests for authors, keywords, and departments if there are changes
-        await Promise.all(authorsToRemove.map(author_id =>
-            fetch('/api/project_authors', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_id: projectId, author_id })
-            })
-        ));
-
-        await Promise.all(keywordsToRemove.map(keyword_id =>
-            fetch('/api/project_keywords', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_id: projectId, keyword_id })
-            })
-        ));
-
-        await Promise.all(departmentsToRemove.map(category_id =>
-            fetch('/api/project_category', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_id: projectId, category_id })
-            })
-        ));
-
-        // Step 4: Add new authors, keywords, and categories if needed
-        await Promise.all(authorsToAdd.map(author_id =>
-            fetch('/api/project_authors', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_id: projectId, author_id })
-            })
-        ));
-
-        await Promise.all(keywordsToAdd.map(keyword_id =>
-            fetch('/api/project_keywords', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_id: projectId, keyword_id })
-            })
-        ));
-
-        // Only add new categories that don't already exist
-        const departmentsToAddUnique = [];
-        for (let category_id of departmentsToAdd) {
-            // Check if the category already exists
-            const categoryExists = existingDepartmentIds.includes(category_id);
-            if (!categoryExists) {
-                departmentsToAddUnique.push(category_id);
+        // Check for various types of errors
+        if (!response.ok) {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                // If server sent JSON error
+                const errorData = await response.json();
+                console.error('Server error response (project update):', errorData);
+                throw new Error(errorData.message || `Failed to update project (Status: ${response.status})`);
+            } else {
+                // If server sent HTML or other non-JSON response
+                const textError = await response.text();
+                console.error('Server error response (non-JSON):', textError.substring(0, 200) + '...');
+                throw new Error(`Failed to update project (Status: ${response.status})`);
             }
         }
 
-        // Send requests for new departments
-        await Promise.all(departmentsToAddUnique.map(category_id =>
-            fetch('/api/project_category', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ project_id: projectId, category_id })
-            })
-        ));
+        // Step 2: Update project authors
+        // Fetch current authors to compare with selected authors
+        const currentAuthorsResponse = await fetch(`/api/project_authors/${projectId}`);
+        if (!currentAuthorsResponse.ok) {
+            console.error('Failed to fetch current authors');
+        } else {
+            const currentAuthors = await currentAuthorsResponse.json();
+            const currentAuthorIds = currentAuthors.map(author => author.author_id.toString());
+            
+            // Find authors to add (in selectedAuthors but not in currentAuthorIds)
+            const authorsToAdd = selectedAuthors.filter(id => !currentAuthorIds.includes(id.toString()));
+            
+            // Find authors to remove (in currentAuthorIds but not in selectedAuthors)
+            const authorsToRemove = currentAuthorIds.filter(id => !selectedAuthors.includes(id));
+            
+            console.log('Authors to add:', authorsToAdd);
+            console.log('Authors to remove:', authorsToRemove);
+            
+            // Add new authors
+            for (const authorId of authorsToAdd) {
+                try {
+                    const addResponse = await fetch('/api/project_authors', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            project_id: parseInt(projectId), 
+                            author_id: parseInt(authorId) 
+                        })
+                    });
+                    
+                    if (!addResponse.ok) {
+                        console.error(`Failed to add author ${authorId}`);
+                    }
+                } catch (error) {
+                    console.error(`Error adding author ${authorId}:`, error);
+                }
+            }
+            
+            // Remove authors
+            for (const authorId of authorsToRemove) {
+                try {
+                    const removeResponse = await fetch('/api/project_authors', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            project_id: parseInt(projectId), 
+                            author_id: parseInt(authorId) 
+                        })
+                    });
+                    
+                    if (!removeResponse.ok) {
+                        console.error(`Failed to remove author ${authorId}`);
+                    }
+                } catch (error) {
+                    console.error(`Error removing author ${authorId}:`, error);
+                }
+            }
+        }
+        
+        // Step 3: Update project keywords
+        // Fetch current keywords to compare with selected keywords
+        const currentKeywordsResponse = await fetch(`/api/project_keywords/${projectId}`);
+        if (!currentKeywordsResponse.ok) {
+            console.error('Failed to fetch current keywords');
+        } else {
+            const currentKeywords = await currentKeywordsResponse.json();
+            const currentKeywordIds = currentKeywords.map(keyword => keyword.keyword_id.toString());
+            
+            // Find keywords to add (in selectedKeywords but not in currentKeywordIds)
+            const keywordsToAdd = selectedKeywords.filter(id => !currentKeywordIds.includes(id.toString()));
+            
+            // Find keywords to remove (in currentKeywordIds but not in selectedKeywords)
+            const keywordsToRemove = currentKeywordIds.filter(id => !selectedKeywords.includes(id));
+            
+            console.log('Keywords to add:', keywordsToAdd);
+            console.log('Keywords to remove:', keywordsToRemove);
+            
+            // Add new keywords
+            for (const keywordId of keywordsToAdd) {
+                try {
+                    const addResponse = await fetch('/api/project_keywords', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            project_id: parseInt(projectId), 
+                            keyword_id: parseInt(keywordId) 
+                        })
+                    });
+                    
+                    if (!addResponse.ok) {
+                        console.error(`Failed to add keyword ${keywordId}`);
+                    }
+                } catch (error) {
+                    console.error(`Error adding keyword ${keywordId}:`, error);
+                }
+            }
+            
+            // Remove keywords
+            for (const keywordId of keywordsToRemove) {
+                try {
+                    const removeResponse = await fetch('/api/project_keywords', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            project_id: parseInt(projectId), 
+                            keyword_id: parseInt(keywordId) 
+                        })
+                    });
+                    
+                    if (!removeResponse.ok) {
+                        console.error(`Failed to remove keyword ${keywordId}`);
+                    }
+                } catch (error) {
+                    console.error(`Error removing keyword ${keywordId}:`, error);
+                }
+            }
+        }
 
-        // Step 5: Update project details with selected authors, keywords, and departments
-        const updatedData = {
-            ...formData,
-            authors: selectedAuthors,
-            keywords: selectedKeywords,
-            departments: selectedDepartments // Include updated departments
-        };
-
-        // Send PUT request to update project
-        const response = await fetch(`/api/projects/${projectId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedData),
-        });
-
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        navigate(`/DocumentOverview/${projectId}`);  // Navigate to the updated document overview page
-
+        // If we got here, update was successful
+        return true; // Return success status
+        
     } catch (error) {
         console.error('Error updating project:', error);
-        setError('Failed to update project');  // Set error state if something goes wrong
+        setError(error.message);
+        return false; // Return failure status
+    } finally {
+        setLoading(false);
     }
 };
 

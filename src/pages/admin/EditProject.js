@@ -4,15 +4,15 @@ import Spinner from 'react-bootstrap/Spinner';
 import { useEditProject } from './scripts/useEditProject';
 import Select from 'react-select';
 import Button from 'react-bootstrap/Button';
-import { FaArrowLeft } from 'react-icons/fa';
-import { Modal } from 'react-bootstrap';  // Import Modal from react-bootstrap
-import AddNewAuthor from './components/addNewAuthor';  // Adjust the path if necessary
+import { FaArrowLeft, FaSave, FaUserPlus } from 'react-icons/fa';
+import { Modal } from 'react-bootstrap';
+import AddNewAuthor from './components/addNewAuthor';
 
 function EditProject() {
     const { projectId } = useParams();
     const navigate = useNavigate();
-    const [showModal, setShowModal] = useState(false); // State to control modal visibility
-    const [successModal, setSuccessModal] = useState(false); // State for success modal
+    const [showModal, setShowModal] = useState(false);
+    const [successModal, setSuccessModal] = useState(false);
     const { 
         loading,
         error,
@@ -26,11 +26,11 @@ function EditProject() {
         setSelectedKeywords,
         selectedDepartments,
         setSelectedDepartments,
-        categories,  // Default empty array
-        researchAreas, // Default empty array
-        topics, // Default empty array
-        researchTypes, // Default empty array
-        departments = [], // Default empty array
+        categories,
+        researchAreas,
+        topics,
+        researchTypes,
+        departments = [],
         handleSubmit,
         handleCategoryChange,
         handleResearchAreaChange,
@@ -38,8 +38,6 @@ function EditProject() {
         handleResearchTypeChange,
       } = useEditProject(projectId, navigate);
       
-
-
     useEffect(() => {
         fetchDepartments();
         fetchProjectAuthors();
@@ -70,21 +68,16 @@ function EditProject() {
 
     const fetchDepartments = async () => {
         try {
-            const response = await fetch(`/api/project_category/${projectId}`);  // Correct endpoint
+            const response = await fetch(`/api/project_category/${projectId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-            
-            // Log data to ensure it's being fetched correctly
             console.log('Fetched departments:', data);
-            
-            // Set the selected departments state
-            setSelectedDepartments(data.map(department => department.category_id));  // Assuming category_id is the unique identifier
+            setSelectedDepartments(data.map(department => department.category_id));
         } catch (error) {
             console.error('Error fetching departments:', error);
         }
     };
     
-
     const handleAuthorChange = (selected) => {
         setSelectedAuthors(selected ? selected.map(author => author.value) : []);
     };
@@ -115,45 +108,77 @@ function EditProject() {
     }));
 
     const handleSuccessModalClose = () => {
-        setSuccessModal(false);  // Hide the modal first
+        setSuccessModal(false);
         setTimeout(() => {
-            navigate('/admin/TotalWorks');  // Then navigate after a slight delay
-        }, 300); // Adding a slight delay to ensure the modal closes before navigation
+            navigate('/admin/TotalWorks');
+        }, 300);
     };
     
-
     const handleFormSubmit = async (event) => {
         event.preventDefault();
-    
+        
+        // Create a copy of formData where empty strings are preserved (not converted to null)
+        const submissionData = { ...formData };
+        
         try {
-            const isSuccess = await handleSubmit(event); // Ensure handleSubmit returns true on success
-            console.log('Submission success:', isSuccess); // Add debugging log here
+            const isSuccess = await handleSubmit(event);
+            console.log('Submission success:', isSuccess);
             if (isSuccess) {
-                setSuccessModal(true); // Show success modal if the form submission is successful
+                setSuccessModal(true);
             }
         } catch (error) {
-            console.error('Error in form submission:', error); // Log any errors
+            console.error('Error in form submission:', error);
         }
     };
     
-
     if (loading) {
-        return <Spinner animation="border" variant="primary" />;
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
+                <Spinner animation="border" variant="primary" />
+            </div>
+        );
     }
 
     if (error) {
         return <p className="text-danger text-center mt-4">{error}</p>;
     }
 
+    const customStyles = {
+        control: (base) => ({
+            ...base,
+            borderColor: '#ced4da',
+            boxShadow: 'none',
+            '&:hover': {
+                borderColor: '#80bdff'
+            }
+        }),
+        multiValue: (base) => ({
+            ...base,
+            backgroundColor: '#e7f5ff'
+        }),
+        multiValueLabel: (base) => ({
+            ...base,
+            color: '#0d6efd'
+        }),
+        multiValueRemove: (base) => ({
+            ...base,
+            color: '#0d6efd',
+            ':hover': {
+                backgroundColor: '#0d6efd',
+                color: 'white',
+            }
+        })
+    };
+
     return (
         <div className="container mt-4" style={{ maxWidth: '800px', padding: '1rem' }}>
             <div className="table-with-back-button">
-                <Button variant="btn" onClick={() => navigate(-1)} className="back-button">
+                <Button variant="outline-secondary" onClick={() => navigate(-1)} className="back-button mb-3">
                     <FaArrowLeft className="me-2" /> Back
                 </Button>
-                <form onSubmit={handleFormSubmit} className="bg-light p-4 rounded shadow-sm">
+                <form onSubmit={handleFormSubmit} className="bg-white p-4 rounded shadow">
                     <h1 className="mb-4 text-center">Edit Project</h1>
-                    <div className="author-underline"></div>
+                    <div className="author-underline mb-4" style={{ borderBottom: '2px solid #0d6efd' }}></div>
 
                     {/* Title */}
                     <div className="mb-3">
@@ -163,7 +188,7 @@ function EditProject() {
                             className="form-control"
                             id="formTitle"
                             name="title"
-                            value={formData.title}
+                            value={formData.title || ''}
                             onChange={handleChange}
                         />
                     </div>
@@ -180,24 +205,19 @@ function EditProject() {
                                 onChange={handleAuthorChange}
                                 isClearable
                                 placeholder="Select authors..."
-                                styles={{
-                                    container: (provided) => ({
-                                        ...provided,
-                                        width: '95%' // Adjust width to 100% for a larger dropdown
-                                    })
-                                }}
+                                styles={customStyles}
                             />
                         </div>
 
-                        {/* Add New Author link */}
-                        <a
-                            href="#"
+                        {/* Add New Author button */}
+                        <Button
+                            variant="outline-primary"
                             onClick={toggleModal}
-                            className="ms-3 text-primary"
-                            style={{ textDecoration: 'none', marginTop: '25px', alignSelf: 'center' }}
+                            className="ms-3"
+                            style={{ marginTop: '25px', alignSelf: 'center' }}
                         >
-                            Add New Author
-                        </a>
+                            <FaUserPlus className="me-1" /> Add Author
+                        </Button>
                     </div>
 
                     {/* Keywords */}
@@ -211,6 +231,7 @@ function EditProject() {
                             onChange={handleKeywordChange}
                             isClearable
                             placeholder="Select keywords..."
+                            styles={customStyles}
                         />
                     </div>
 
@@ -225,9 +246,9 @@ function EditProject() {
                             onChange={handleDepartmentChange}
                             isClearable
                             placeholder="Select departments..."
+                            styles={customStyles}
                         />
                     </div>        
-
 
                     {/* Publication Date and Study URL */}
                     <div className="row mb-3">
@@ -238,7 +259,7 @@ function EditProject() {
                                 className="form-control"
                                 id="formPublicationDate"
                                 name="publication_date"
-                                value={formData.publication_date}
+                                value={formData.publication_date || ''}
                                 onChange={handleChange}
                             />
                         </div>
@@ -249,7 +270,7 @@ function EditProject() {
                                 className="form-control"
                                 id="formStudyUrl"
                                 name="study_url"
-                                value={formData.study_url}
+                                value={formData.study_url || ''}
                                 onChange={handleChange}
                             />
                         </div>
@@ -262,7 +283,7 @@ function EditProject() {
                             className="form-control"
                             id="formAbstract"
                             name="abstract"
-                            value={formData.abstract}
+                            value={formData.abstract || ''}
                             onChange={handleChange}
                             rows="4"
                         ></textarea>
@@ -275,7 +296,7 @@ function EditProject() {
                             className="form-select"
                             id="formResearchType"
                             name="research_type_id"
-                            value={formData.research_type_id}
+                            value={formData.research_type_id || ''}
                             onChange={handleResearchTypeChange}
                         >
                             <option value="">Select a research type</option>
@@ -287,94 +308,109 @@ function EditProject() {
                         </select>
                     </div>
 
- {/* Category */}
-<div className="mb-3">
-    <label htmlFor="formCategory" className="form-label">Category <span className="text-danger">*</span></label>
-    <select
-        className="form-select"
-        id="formCategory"
-        name="category_id"
-        value={formData.category_id}
-        onChange={handleCategoryChange}
-    >
-        <option value="">Select a category</option>
-        {categories.map(category => (
-            <option key={category.category_id} value={category.category_id}>
-                {category.name}
-            </option>
-        ))}
-    </select>
-</div>
+                    {/* Category */}
+                    <div className="mb-3">
+                        <label htmlFor="formCategory" className="form-label">Category</label>
+                        <select
+                            className="form-select"
+                            id="formCategory"
+                            name="category_id"
+                            value={formData.category_id || ''}
+                            onChange={handleCategoryChange}
+                        >
+                            <option value="">Select a category</option>
+                            {categories.map(category => (
+                                <option key={category.category_id} value={category.category_id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-{/* Research Area */}
-<div className="mb-3">
-    <label htmlFor="formResearchArea" className="form-label">Research Area <span className="text-danger">*</span></label>
-    <select
-        className="form-select"
-        id="formResearchArea"
-        name="research_area_id"
-        value={formData.research_area_id}
-        onChange={handleResearchAreaChange}
-    >
-        <option value="">Select a research area</option>
-        {researchAreas.map(area => (
-            <option key={area.research_area_id} value={area.research_area_id}>
-                {area.name}
-            </option>
-        ))}
-    </select>
-</div>
+                    {/* Research Area */}
+                    <div className="mb-3">
+                        <label htmlFor="formResearchArea" className="form-label">Research Area</label>
+                        <select
+                            className="form-select"
+                            id="formResearchArea"
+                            name="research_area_id"
+                            value={formData.research_area_id || ''}
+                            onChange={handleResearchAreaChange}
+                        >
+                            <option value="">Select a research area</option>
+                            {researchAreas.map(area => (
+                                <option key={area.research_area_id} value={area.research_area_id}>
+                                    {area.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-{/* Topic */}
-<div className="mb-3">
-    <label htmlFor="formTopic" className="form-label">Topic <span className="text-danger">*</span></label>
-    <select
-        className="form-select"
-        id="formTopic"
-        name="topic_id"
-        value={formData.topic_id}
-        onChange={handleChange}
-    >
-        <option value="">Select a topic</option>
-        {topics.map(topic => (
-            <option key={topic.topic_id} value={topic.topic_id}>
-                {topic.name}
-            </option>
-        ))}
-    </select>
-</div>
+                    {/* Topic */}
+                    <div className="mb-3">
+                        <label htmlFor="formTopic" className="form-label">Topic</label>
+                        <select
+                            className="form-select"
+                            id="formTopic"
+                            name="topic_id"
+                            value={formData.topic_id || ''}
+                            onChange={handleChange}
+                        >
+                            <option value="">Select a topic</option>
+                            {topics.map(topic => (
+                                <option key={topic.topic_id} value={topic.topic_id}>
+                                    {topic.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-
-                    <div className="d-flex justify-content-center mb-3">
-                        <button type="submit" className="btn btn-primary">Save Changes</button>
+                    <div className="d-flex justify-content-center mb-3 mt-4">
+                        <Button type="submit" variant="primary" size="lg">
+                            <FaSave className="me-2" /> Save Changes
+                        </Button>
                     </div>
                 </form>
             </div>
 
             {/* Modal for Add New Author */}
-                <Modal
-                    show={showModal}
-                    onHide={toggleModal}
-                    style={{ marginTop: '100px' }} // Adjust this value to move the modal down
-                    >
-                    <Modal.Header closeButton>
-                        <Modal.Title>Add New Author</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <AddNewAuthor onHide={toggleModal} />
-                    </Modal.Body>
-                    </Modal>
+            <Modal
+                show={showModal}
+                onHide={toggleModal}
+                centered
+                backdrop="static"
+                className="add-author-modal"
+            >
+                <Modal.Header closeButton className="bg-primary text-white">
+                    <Modal.Title>
+                        <FaUserPlus className="me-2" /> Add New Author
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="p-4">
+                    <AddNewAuthor onHide={toggleModal} />
+                </Modal.Body>
+            </Modal>
 
             {/* Success Modal */}
-            <Modal show={successModal} onHide={handleSuccessModalClose}>
-                <Modal.Header closeButton>
+            <Modal 
+                show={successModal} 
+                onHide={handleSuccessModalClose}
+                centered
+                className="success-modal"
+            >
+                <Modal.Header closeButton className="bg-success text-white">
                     <Modal.Title>Success</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    <p>Your project has been successfully updated!</p>
+                <Modal.Body className="p-4">
+                    <div className="text-center mb-3">
+                        <div className="success-icon mb-3" style={{ fontSize: '48px', color: '#28a745' }}>
+                            <i className="fas fa-check-circle"></i>
+                        </div>
+                        <p className="lead">Your project has been successfully updated!</p>
+                    </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={handleSuccessModalClose}>
+                    <Button variant="success" onClick={handleSuccessModalClose}>
                         OK
                     </Button>
                 </Modal.Footer>
