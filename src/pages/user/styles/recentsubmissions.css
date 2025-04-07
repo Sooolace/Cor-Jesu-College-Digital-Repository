@@ -10,7 +10,7 @@
 /* Container for Recent Submissions */
 .recent-submissions-container {
   padding: 20px;
-  min-width: 550px;
+  width: 100%;
   max-height: 550px;
   background-color: #fff;
   border-radius: 8px;
@@ -22,6 +22,9 @@
 /* Remove underline from links */
 .recent-submissions-container a {
   text-decoration: none;
+  color: #a33307;
+  word-break: break-word;
+  display: inline-block;
 }
 
 .recent-submissions-container a:hover {
@@ -134,4 +137,86 @@
   height: auto;
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+/* Loading and Error Messages */
+.loading-message, .no-results-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 1rem;
+}
+
+.no-results-message {
+  color: #555;
+  font-style: italic;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .recent-submissions-container {
+    max-height: 500px;
+  }
+  
+  .recent-submissions-container h3 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .recent-submissions-container {
+    padding: 15px;
+    max-height: 450px;
+  }
+  
+  .recent-submissions-container h3 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    white-space: normal;
+  }
+  
+  .results-table tr {
+    height: auto;
+  }
+  
+  .results-table th,
+  .results-table td {
+    padding: 8px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .recent-submissions-container {
+    padding: 12px;
+    max-height: 400px;
+  }
+  
+  .recent-submissions-container h3 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+  
+  .results-table th,
+  .results-table td {
+    padding: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .expand-icon {
+    font-size: 1rem;
+  }
+  
+  .details-content {
+    padding: 10px;
+  }
+  
+  .details-row p {
+    font-size: 0.85rem;
+  }
+  
+  .loading-message, .no-results-message {
+    padding: 15px;
+    font-size: 0.9rem;
+  }
 }

@@ -9,7 +9,7 @@ import AuthorFilter from '../../components/UniqueAuthorFilter';
 import KeywordFilter from '../../components/KeywordFilter';
 import YearRangeFilter from '../../components/YearRangeFilter';
 import './styles/filter.css';
-import { FaTag, FaFilter, FaTimes } from 'react-icons/fa';
+import { FaTag, FaFilter, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -113,6 +113,9 @@ function SearchPage() {
                     sessionStorage.getItem('searchTotalCount');
     return !hasCache;
   });
+
+  // Add new state for mobile filter toggle
+  const [showFilters, setShowFilters] = useState(true);
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
@@ -602,6 +605,11 @@ function SearchPage() {
     });
   };
 
+  // Add toggle function for mobile filters
+  const toggleFilters = useCallback(() => {
+    setShowFilters(!showFilters);
+  }, [showFilters]);
+
   return (
     <>
       <div className="breadcrumb-container">
@@ -610,20 +618,15 @@ function SearchPage() {
       <div className="search-page-container">
         <div className="centered-content">
           <div className="search-results-wrapper">
-            
             {/* Filters Container */}
-            <div className="filters-container" style={{ width: '380px' }}>
+            <div className={`filters-container ${!showFilters ? 'collapsed' : ''}`}>
               {/* Search Bar */}
               <div className="search-bar-wrapper">
                 {MemoizedSearchBar}
               </div>
 
-              {/* Clear All Filters Button - Repositioned below search bar */}
-              <div style={{ 
-                marginBottom: '15px',
-                display: 'flex',
-                justifyContent: 'flex-end'
-              }}>
+              {/* Clear All Filters Button */}
+              <div className="clear-filters-wrapper">
                 <button
                   onClick={handleClearFilters}
                   className="clear-all-filters-button"
@@ -696,18 +699,13 @@ function SearchPage() {
                   {filteredData.map((project) => (
                     <div key={project.project_id} className="research-card">
                       <Link to={`/DocumentOverview/${project.project_id}`} className="title-link" state={{ fromSearch: true }}>
-                        <h4 style={{ color: '#007bff' }}>{project.title}</h4>
+                        <h4>{project.title}</h4>
                       </Link>
                       {project.cover_image && (
                         <img
                           src={project.cover_image}
                           alt="Cover"
-                          style={{
-                            maxWidth: '80px',
-                            height: '120px',
-                            objectFit: 'cover',
-                            marginRight: '20px',
-                          }}
+                          className="research-card-image"
                         />
                       )}
                       {/* Display Authors */}
@@ -735,13 +733,13 @@ function SearchPage() {
                         )}
                       </p>
 
-                      {/* Add publication date in italic and adjust margins to make it closer to the author */}
-                      <p className="publication-date" style={{ marginTop: '-10px' }}>
+                      {/* Publication date */}
+                      <p className="publication-date">
                         {project.publication_date ? <i>{new Date(project.publication_date).toLocaleDateString()}</i> : <i>Publication date not available</i>}
                       </p>
 
                       {/* Abstract Container */}
-                      <div className="abstract-container" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 3, overflow: 'hidden' }}>
+                      <div className="abstract-container">
                         {project.abstract || 'No abstract available.'}
                       </div>
 
@@ -782,18 +780,21 @@ function SearchPage() {
                   />
                 </>
               ) : !loading && (
-                <div style={{ 
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '200px',
-                  fontSize: '1.2em',
-                  color: '#666'
-                }}>
+                <div className="no-results-message">
                   No results found.
                 </div>
               )}
             </div>
+
+            {/* Mobile Filter Toggle Button */}
+            <button 
+              className="filter-toggle-button"
+              onClick={toggleFilters}
+            >
+              <FaFilter />
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+              {showFilters ? <FaChevronUp /> : <FaChevronDown />}
+            </button>
           </div>
         </div>
       </div>

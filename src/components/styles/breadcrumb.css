@@ -40,6 +40,7 @@
   font-weight: 600;
   font-size: 16px;
   transition: color 0.2s ease;
+  white-space: nowrap;
 }
 
 .home-link svg {
@@ -64,6 +65,7 @@
   padding: 5px 10px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .back-button:hover {
@@ -76,6 +78,8 @@
   flex-grow: 1;
   display: flex;
   justify-content: flex-end;
+  margin-left: 20px;
+  overflow: hidden;
 }
 
 .breadcrumb-list {
@@ -86,18 +90,20 @@
   padding: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 5px;
 }
 
 .breadcrumb-item {
   display: flex;
   align-items: center;
-  margin: 0 2px;
+  margin: 0;
 }
 
 .breadcrumb-separator {
   color: #ccc;
   margin: 0 5px;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .breadcrumb-link {
@@ -108,6 +114,10 @@
   padding: 3px 5px;
   border-radius: 3px;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .breadcrumb-link:hover {
@@ -121,6 +131,10 @@
   font-weight: 600;
   font-size: 14px;
   padding: 3px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .breadcrumb-current {
@@ -128,6 +142,16 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 992px) {
+  .breadcrumb-wrapper {
+    width: 95%;
+  }
+  
+  .breadcrumb-link, .current-page {
+    max-width: 120px;
+  }
+}
+
 @media (max-width: 768px) {
   .breadcrumb-content {
     flex-direction: column;
@@ -144,31 +168,78 @@
     width: 100%;
     justify-content: flex-start;
     margin-top: 5px;
+    margin-left: 0;
   }
   
   .breadcrumb-list {
     justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .breadcrumb-link, .current-page {
+    max-width: 100px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
+  .breadcrumb-wrapper {
+    width: 100%;
+    padding: 0 10px;
+  }
+  
+  .breadcrumb-content {
+    padding: 0 5px;
+  }
+  
+  .breadcrumb-home {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .home-link {
+    font-size: 15px;
+  }
+  
+  .back-button {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+  
+  .breadcrumb-link, .current-page {
+    font-size: 13px;
+    max-width: 80px;
+  }
+  
+  .breadcrumb-separator {
+    margin: 0 3px;
+  }
+}
+
+@media (max-width: 375px) {
   .breadcrumb-home {
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
   }
   
+  .home-link {
+    font-size: 14px;
+  }
+  
   .back-button {
     margin-top: 5px;
-    padding: 2px 5px;
-    font-size: 13px;
+    padding: 3px 6px;
+    font-size: 12px;
   }
   
   .breadcrumb-link, .current-page {
-    font-size: 13px;
+    font-size: 12px;
+    max-width: 70px;
   }
   
   .breadcrumb-separator {
-    margin: 0 3px;
+    margin: 0 2px;
+    font-size: 10px;
   }
 }

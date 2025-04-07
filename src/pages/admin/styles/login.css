@@ -1,3 +1,203 @@
+/* Base styles */
+.vh-100 {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.bg-cover {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Card styles */
+.card {
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+/* Logo styles */
+.logo-container {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo-container img {
+  max-width: 180px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* Form styles */
+.form-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #a33307;
+  box-shadow: 0 0 0 0.2rem rgba(163, 51, 7, 0.25);
+  outline: none;
+}
+
+/* Button styles */
+.s-custom-btn {
+  border-color: #a33307;
+  background-color: #a33307;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.s-custom-btn:hover,
+.s-custom-btn:focus {
+  background-color: #802704;
+  color: white;
+  border-color: #a33307;
+  transform: translateY(-2px);
+}
+
+.g-custom-btn {
+  border-color: #a33307;
+  color: #a33307;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.g-custom-btn:hover,
+.g-custom-btn:focus {
+  background-color: #a33307;
+  color: white;
+  border-color: #a33307;
+  transform: translateY(-2px);
+}
+
+/* Remember me and forgot password */
+.form-check-label {
+  color: #666;
+}
+
+.text-decoration-none {
+  color: #a33307;
+  transition: color 0.3s ease;
+}
+
+.text-decoration-none:hover {
+  color: #802704;
+}
+
+/* Error message */
+.alert {
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Google sign-in section */
+.google-signin {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.google-signin p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .logo-container img {
+    max-width: 150px;
+  }
+
+  .form-control {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .s-custom-btn,
+  .g-custom-btn {
+    padding: 0.625rem 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .vh-100 {
+    padding: 15px;
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .logo-container img {
+    max-width: 120px;
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+  }
+
+  .form-control {
+    font-size: 0.9rem;
+  }
+
+  .s-custom-btn,
+  .g-custom-btn {
+    font-size: 0.9rem;
+  }
+
+  .google-signin {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .vh-100 {
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .logo-container img {
+    max-width: 100px;
+  }
+
+  .form-control {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .s-custom-btn,
+  .g-custom-btn {
+    padding: 0.5rem 1rem;
+  }
+}
+
 /* Custom button styling */
 .s-custom-btn {
     border-color: #a33307 !important;  /* Set border color */

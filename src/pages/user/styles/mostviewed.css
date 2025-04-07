@@ -1,19 +1,21 @@
-/* Container for Recent Submissions */
+/* Container for Most Viewed */
 .most-viewed-container {
   padding: 20px;
-  min-width: 550px;  /* Ensures the width is 48% to align with the other section */
+  width: 100%;
   max-height: 550px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   flex: 1; /* Allow the container to grow if needed */
   overflow-y: auto; /* Allows scrolling when content exceeds max-height */
-
 }
 
 /* Links styling */
 .most-viewed-container a {
   text-decoration: none;
+  color: #a33307;
+  word-break: break-word;
+  display: inline-block;
 }
 
 .most-viewed-container a:hover {
@@ -27,4 +29,94 @@
   color: #333;
   margin-bottom: 20px;
   font-weight: 400;
+}
+
+/* Loading and error messages */
+.loading-message, .error-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 1rem;
+}
+
+.error-message {
+  color: #d9534f;
+}
+
+/* Table styles */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+/* Expand button styling */
+.expand-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #a33307;
+  font-size: 1rem;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .most-viewed-container {
+    max-height: 500px;
+  }
+  
+  .most-viewed-container h3 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .most-viewed-container {
+    padding: 15px;
+    max-height: 450px;
+  }
+  
+  .most-viewed-container h3 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+  }
+  
+  .results-table td {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .most-viewed-container {
+    padding: 12px;
+    max-height: 400px;
+  }
+  
+  .most-viewed-container h3 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+  
+  .results-table td {
+    padding: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .expand-icon {
+    font-size: 0.9rem;
+  }
+  
+  .loading-message, .error-message {
+    padding: 15px;
+    font-size: 0.9rem;
+  }
 }

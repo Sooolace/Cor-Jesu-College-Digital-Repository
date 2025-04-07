@@ -177,17 +177,10 @@ function Login({ setIsAdmin }) {
   
   return (
     <GoogleOAuthProvider clientId="15930922340-0rjl4r2b1iib6pdbqmqoribadkoni71a.apps.googleusercontent.com">
-      <section
-        className="vh-100 d-flex align-items-center justify-content-center bg-cover"
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
+      <section className="vh-100 d-flex align-items-center justify-content-center bg-cover" style={{ backgroundImage: `url(${backgroundImage})` }}>
         <div className="container">
           <div className="row justify-content-center">
-            <div className="col-md-6 col-lg-5">
+            <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
               <div className="card shadow border-0">
                 <div className="card-body p-4">
                   {/* Go Back to Home Button */}
@@ -201,12 +194,11 @@ function Login({ setIsAdmin }) {
                   </div>
 
                   {/* Logo */}
-                  <div className="text-center mb-4">
+                  <div className="logo-container">
                     <img
                       src={logo}
                       alt="Logo"
-                      className="img-fluid mb-3"
-                      style={{ maxWidth: '180px' }}
+                      className="img-fluid"
                     />
                     <h4 className="mb-0 fw-bold">COR JESU COLLEGE: DIGITAL REPOSITORY</h4>
                     <p className="text-muted">Please sign in to continue</p>
@@ -265,7 +257,7 @@ function Login({ setIsAdmin }) {
                   </form>
 
                   {/* Google Sign-In Button */}
-                  <div className="text-center mt-4">
+                  <div className="google-signin">
                     <p className="small text-muted mb-0">Or sign in with</p>
                     <div className="d-flex justify-content-center mt-2">
                       <GoogleLogin

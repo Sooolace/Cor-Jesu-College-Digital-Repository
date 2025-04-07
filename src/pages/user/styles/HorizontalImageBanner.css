@@ -4,6 +4,7 @@
     display: flex;
     justify-content: center;
     margin: 10px 0; /* Adjust vertical spacing as needed */
+    overflow: hidden; /* Prevent any overflow issues */
   }
   
   .banner-image {
@@ -12,5 +13,23 @@
     height: 250px;
     object-fit: cover; /* Ensures the image maintains aspect ratio */
     border-radius: 5px; /* Optional: Adds a slight border radius */
+  }
+  
+  /* Responsive adjustments for tablets */
+  @media (max-width: 768px) {
+    .banner-image {
+      height: 200px;
+    }
+  }
+  
+  /* Responsive adjustments for mobile phones */
+  @media (max-width: 480px) {
+    .banner-image {
+      height: 150px;
+    }
+    
+    .horizontal-image-banner {
+      margin: 5px 0;
+    }
   }
   
