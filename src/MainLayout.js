@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import AdminNavbar from './pages/admin/components/AdminNavbar';
 import Navbar from './components/navbar';
+import Footer from './components/Footer';
 import Home from './pages/user/Home';
 import AdvancedSearch from './pages/user/AdvancedSearch';
 import SearchPage from './pages/user/SearchPage';
@@ -116,15 +117,15 @@ function MainLayout({ isAdmin, setIsAdmin }) {
     navigate('/');
   };
 
-  // Define routes that should not show the navbar
-  const noNavbarRoutes = ['/login', '/notfound']; // Include '/notfound' or '*'
+  // Define routes that should not show the navbar or footer
+  const noHeaderFooterRoutes = ['/login', '/notfound']; 
   
-  // Check if the current location is one of the routes to hide the navbar
-  const hideNavbar = noNavbarRoutes.includes(location.pathname) || location.pathname === '/notfound';
+  // Check if the current location is one of the routes to hide the navbar and footer
+  const hideHeaderFooter = noHeaderFooterRoutes.includes(location.pathname) || location.pathname === '/notfound';
 
   return (
     <>
-      {!hideNavbar && (isAdmin ? <AdminNavbar handleLogout={handleLogout} /> : <Navbar />)}
+      {!hideHeaderFooter && (isAdmin ? <AdminNavbar handleLogout={handleLogout} /> : <Navbar />)}
       <Routes>
         <Route path="/login" element={<Login setIsAdmin={setIsAdmin} />} />
         <Route path="/" element={<MemoizedHome />} />
@@ -165,6 +166,7 @@ function MainLayout({ isAdmin, setIsAdmin }) {
         )}
           <Route path="*" element={<NotFound />} />
       </Routes>
+      {!hideHeaderFooter && <Footer />}
     </>
   );
 }
