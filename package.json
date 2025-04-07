@@ -53,7 +53,9 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node server/server.js",
+    "dev": "concurrently \"npm run server\" \"npm start\""
   },
   "eslintConfig": {
     "extends": [
@@ -79,6 +81,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.7",
     "react-app-rewired": "^2.2.1",
