@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../pages/user/styles/HorizontalImageBanner.css'; // CSS file for styling
-import bannerImage from '../assets/lib-image.png'; // Import the image
+import bannerImage from '../assets/Homepage_banner.png'; // Import the image
 
 const HorizontalImageBanner = React.memo(() => {
   const [imageLoaded, setImageLoaded] = useState(false);

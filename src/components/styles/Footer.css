@@ -4,6 +4,9 @@
   padding: 40px 0 20px;
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
   margin-top: 50px;
+  position: relative;
+  transition: transform 0.3s ease-in-out, margin-top 0.3s ease-in-out;
+  will-change: transform, margin-top;
 }
 
 .footer-logo {
@@ -155,6 +158,74 @@
 .footer-policy-links li a:hover {
   opacity: 1;
   color: #FACC15;
+}
+
+/* Newsletter Section Styles */
+.newsletter-section {
+  margin-top: 35px;
+  margin-bottom: -20px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.newsletter-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.newsletter-description {
+  font-size: 14px;
+  margin-bottom: 15px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.subscription-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 13px;
+}
+
+.form-group input::placeholder {
+  color: #666;
+  font-size: 13px;
+}
+
+.subscribe-button {
+  background-color: #FACC15;
+  color: #000;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+}
+
+.subscribe-button:hover {
+  background-color: #e6b800;
+}
+
+.subscription-success {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
 }
 
 /* Mobile styles */

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/cjclogo.PNG';
-import backgroundImage from '../../assets/loginbg.png'; // Ensure this path is correct
+import backgroundImage from '../../assets/LOGINBG.jpg'; // Ensure this path is correct
 import '../admin/styles/login.css'; // Ensure this path is correct
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';

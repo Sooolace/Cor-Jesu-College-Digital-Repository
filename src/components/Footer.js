@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import logo from '../assets/CJCREPOLOGO.png';
@@ -6,6 +6,30 @@ import './styles/Footer.css';
 
 function Footer() {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, name }),
+      });
+
+      if (response.ok) {
+        setIsSubscribed(true);
+        setEmail('');
+        setName('');
+      }
+    } catch (error) {
+      console.error('Error subscribing:', error);
+    }
+  };
 
   return (
     <footer className="footer-container">
@@ -19,6 +43,40 @@ function Footer() {
               The official research repository of Cor Jesu College providing access to
               graduate theses and student dissertations.
             </p>
+            
+            {/* Newsletter Subscription Form */}
+            <div className="newsletter-section">
+              <h5 className="newsletter-title">Stay Updated</h5>
+              {isSubscribed ? (
+                <div className="subscription-success">
+                  Thank you for subscribing!
+                </div>
+              ) : (
+                <form onSubmit={handleSubscribe} className="subscription-form">
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="subscribe-button">
+                    Subscribe
+                  </button>
+                </form>
+              )}
+            </div>
           </Col>
           
           <Col lg={2} md={6} className="mb-4 mb-md-0">

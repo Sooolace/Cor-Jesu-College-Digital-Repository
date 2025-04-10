@@ -12,6 +12,7 @@
     max-width: 2000px; /* Set a max width if desired */
     height: 250px;
     object-fit: cover; /* Ensures the image maintains aspect ratio */
+    object-position: center 65%; /* Show more of the bottom part of the image */
     border-radius: 5px; /* Optional: Adds a slight border radius */
   }
   
