@@ -137,6 +137,9 @@ function AdminNavbar({ handleLogout }) {
                                 id="admin-nav-dropdown"
                                 className="custom-dropdown"
                             >
+                                 <NavDropdown.Item as={Link} to="/AllWorks" onClick={() => setExpanded(false)}>
+                                    All works
+                                </NavDropdown.Item>
                                 <NavDropdown.Item as={Link} to="/Authors" onClick={() => setExpanded(false)}>
                                     Authors
                                 </NavDropdown.Item>
@@ -145,9 +148,6 @@ function AdminNavbar({ handleLogout }) {
                                 </NavDropdown.Item>
                                 <NavDropdown.Item as={Link} to="/Departments" onClick={() => setExpanded(false)}>
                                     Departments
-                                </NavDropdown.Item>
-                                <NavDropdown.Item as={Link} to="/AllWorks" onClick={() => setExpanded(false)}>
-                                    Capstone & Thesis
                                 </NavDropdown.Item>
                                 <NavDropdown.Item as={Link} to="/resources" onClick={() => setExpanded(false)}>
                                     Resources

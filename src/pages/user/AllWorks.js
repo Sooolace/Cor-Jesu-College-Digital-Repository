@@ -145,7 +145,7 @@ function AllWorks() {
       </div>
       <div className="total-works-container container mt-4">
         <div className="text-center mb-4">
-          <h3 className="display-8">Studies</h3>
+          <h3 className="display-8">All works</h3>
         </div>
         <div className="author-underline"></div>
         <div className="d-flex justify-content-center mb-3">

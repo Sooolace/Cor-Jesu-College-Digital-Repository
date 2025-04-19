@@ -171,7 +171,7 @@ function TotalKeywords() {
                           padding: '2px',
                           marginRight: '10px'
                         }}
-                        onClick={() => navigate(`/KeywordOverview/${keyword.keyword_id}`)}
+                        onClick={() => navigate(`/KeywordOverview/${encodeURIComponent(keyword.keyword)}`)}
                       />
 
                       {/* Edit Icon with Green Background */}

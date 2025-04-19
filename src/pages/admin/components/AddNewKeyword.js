@@ -99,9 +99,13 @@ function AddNewKeyword({ onHide }) {
           <div className="d-flex justify-content-center mt-4">
             <Button 
               type="submit" 
-              variant="info" 
+              className="btn"
+              style={{
+                backgroundColor: '#a33307',
+                color: 'white',
+                borderColor: '#a33307'
+              }}
               disabled={loading}
-              className="px-4 py-2 text-white"
             >
               {loading ? (
                 <>

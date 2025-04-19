@@ -155,9 +155,13 @@ function AddNewAuthor({ onHide }) {
           <div className="d-flex justify-content-center mt-4">
             <Button 
               type="submit" 
-              variant="primary" 
               disabled={submitting}
               className="px-4 py-2"
+              style={{
+                backgroundColor: '#a33307',
+                borderColor: '#a33307',
+                color: 'white'
+              }}
             >
               {submitting ? (
                 <>

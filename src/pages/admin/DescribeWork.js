@@ -5,6 +5,10 @@ import './styles/upload.css';
 import { Uploadform } from './scripts/Uploadform';
 import StepTracker from './components/steptracker';
 import Select from 'react-select';
+import { FaUserPlus, FaTag } from 'react-icons/fa';
+import { Modal } from 'react-bootstrap';
+import AddNewAuthor from './components/addNewAuthor';
+import AddNewKeyword from './components/AddNewKeyword';
 
 function DescribeWork() {
   const navigate = useNavigate();
@@ -28,6 +32,25 @@ function DescribeWork() {
   const [allKeywords, setAllKeywords] = useState([]);
   const [selectedAuthors, setSelectedAuthors] = useState([]);
   const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [showAuthorModal, setShowAuthorModal] = useState(false);
+  const [showKeywordModal, setShowKeywordModal] = useState(false);
+  const [authorsRefresh, setAuthorsRefresh] = useState(0);
+  const [keywordsRefresh, setKeywordsRefresh] = useState(0);
+
+  // Fetch all authors and keywords
+  const fetchAuthorsAndKeywords = async () => {
+    try {
+      const authorsResponse = await fetch('/api/authors');
+      const authorsData = await authorsResponse.json();
+      setAllAuthors(authorsData);
+
+      const keywordsResponse = await fetch('/api/keywords');
+      const keywordsData = await keywordsResponse.json();
+      setAllKeywords(keywordsData);
+    } catch (error) {
+      console.error('Error fetching authors or keywords:', error);
+    }
+  };
 
   useEffect(() => {
     // Load saved form data from localStorage
@@ -43,21 +66,6 @@ function DescribeWork() {
       setSelectedAuthors(savedData.authors || []);
       setSelectedKeywords(savedData.keywords || []);
     }
-
-    // Fetch all authors and keywords
-    const fetchAuthorsAndKeywords = async () => {
-      try {
-        const authorsResponse = await fetch('/api/authors');
-        const authorsData = await authorsResponse.json();
-        setAllAuthors(authorsData);
-
-        const keywordsResponse = await fetch('/api/keywords');
-        const keywordsData = await keywordsResponse.json();
-        setAllKeywords(keywordsData);
-      } catch (error) {
-        console.error('Error fetching authors or keywords:', error);
-      }
-    };
 
     fetchAuthorsAndKeywords();
 
@@ -127,6 +135,25 @@ function DescribeWork() {
     }
   };
 
+  const handleShowAuthorModal = () => setShowAuthorModal(true);
+  const handleCloseAuthorModal = () => setShowAuthorModal(false);
+  const handleShowKeywordModal = () => setShowKeywordModal(true);
+  const handleCloseKeywordModal = () => setShowKeywordModal(false);
+
+  // Refresh authors list when new author is added
+  useEffect(() => {
+    if (authorsRefresh > 0) {
+      fetchAuthorsAndKeywords();
+    }
+  }, [authorsRefresh]);
+
+  // Refresh keywords list when new keyword is added
+  useEffect(() => {
+    if (keywordsRefresh > 0) {
+      fetchAuthorsAndKeywords();
+    }
+  }, [keywordsRefresh]);
+
   return (
     <div className="describe-work-container d-flex justify-content-center align-items-start gap-4 my-5">
       <StepTracker className="step-tracker" />
@@ -146,27 +173,56 @@ function DescribeWork() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
+                style={{ border: '1px solid #ced4da' }}
               />
             </div>
 
             {/* Multiple Authors */}
             <div className="form-group mb-3">
               <label className="form-label">Author(s) Name:</label>
-              <Select
-                isMulti
-                options={authorOptions}
-                value={authorOptions.filter(option => selectedAuthors.includes(option.value))}
-                onChange={handleAuthorSelectChange}
-                isClearable
-                placeholder="Select authors..."
-              />
+              <div className="d-flex gap-2">
+                <Select
+                  isMulti
+                  options={authorOptions}
+                  value={authorOptions.filter(option => selectedAuthors.includes(option.value))}
+                  onChange={handleAuthorSelectChange}
+                  isClearable
+                  placeholder="Select authors..."
+                  className="flex-grow-1"
+                  theme={(theme) => ({
+                    ...theme,
+                    colors: {
+                      ...theme.colors,
+                      primary: '#a33307',
+                      primary25: 'rgba(163, 51, 7, 0.1)',
+                      primary50: 'rgba(163, 51, 7, 0.2)',
+                      primary75: 'rgba(163, 51, 7, 0.3)',
+                    },
+                  })}
+                />
+                <button 
+                  type="button" 
+                  className="btn d-flex align-items-center gap-2"
+                  onClick={handleShowAuthorModal}
+                  style={{ 
+                    whiteSpace: 'nowrap', 
+                    padding: '8px 16px',
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px'
+                  }}
+                >
+                  <FaUserPlus /> Add
+                </button>
+              </div>
             </div>
 
             {/* Radio Buttons for Description Type */}
-            <div className="form-group mb-3">
+            <div className="form-group mb-3 description-type-container">
               <label className="form-label">Select Description Type:</label>
-              <div>
-                <div className="form-check form-check-inline">
+              <div className="description-type-options">
+                <div className="description-type-option">
                   <input
                     type="radio"
                     id="abstractOption"
@@ -178,24 +234,24 @@ function DescribeWork() {
                   />
                   <label className="form-check-label" htmlFor="abstractOption">Abstract</label>
                 </div>
-                <div className="form-check form-check-inline">
+                <div className="description-type-option">
                   <input
                     type="radio"
                     id="descriptionOption"
                     name="descriptionType"
-                    value="Project Description"
+                    value="description"
                     checked={descriptionType === 'description'}
                     onChange={(e) => setDescriptionType(e.target.value)}
                     className="form-check-input"
                   />
                   <label className="form-check-label" htmlFor="descriptionOption">Project Description</label>
                 </div>
-                <div className="form-check form-check-inline">
+                <div className="description-type-option">
                   <input
                     type="radio"
                     id="summaryOption"
                     name="descriptionType"
-                    value="Executive Summary"
+                    value="summary"
                     checked={descriptionType === 'summary'}
                     onChange={(e) => setDescriptionType(e.target.value)}
                     className="form-check-input"
@@ -209,70 +265,109 @@ function DescribeWork() {
             <div className="form-group mb-3">
               <label htmlFor="abstract" className="form-label">
                 {descriptionType === 'abstract' && 'Abstract'}
-                {descriptionType === 'Project Description' && 'Project Description'}
-                {descriptionType === 'Executive Summary' && 'Executive Summary'}
+                {descriptionType === 'description' && 'Project Description'}
+                {descriptionType === 'summary' && 'Executive Summary'}
               </label>
               <textarea
                 id="abstract"
                 className="form-control"
                 rows="4"
-                placeholder={`Enter your ${descriptionType.replace('_', ' ')}`}
+                placeholder={`Enter your ${
+                  descriptionType === 'abstract' ? 'Abstract' :
+                  descriptionType === 'description' ? 'Project Description' :
+                  'Executive Summary'
+                }`}
                 value={abstract}
                 onChange={(e) => setAbstract(e.target.value)}
                 required
               ></textarea>
             </div>
 
-            {/* Publication Date: Month, Day, Year Fields */}
+            {/* Publication Date */}
             <div className="form-group mb-3">
               <label className="form-label">Publication Date:</label>
-              <div className="d-flex gap-2">
-                <input
-                  type="number"
-                  name="pub_month"
-                  className="form-control"
-                  placeholder="Month"
-                  min="1"
-                  max="12"
-                  value={pubMonth}
-                  onChange={(e) => setPubMonth(e.target.value)}
-                  required
-                />
-                <input
-                  type="number"
-                  name="pub_day"
-                  className="form-control"
-                  placeholder="Day"
-                  min="1"
-                  max="31"
-                  value={pubDay}
-                  onChange={(e) => setPubDay(e.target.value)}
-                  required
-                />
-                <input
-                  type="number"
-                  name="pub_year"
-                  className="form-control"
-                  placeholder="Year"
-                  min="1900"
-                  value={pubYear}
-                  onChange={(e) => setPubYear(e.target.value)}
-                  required
-                />
-              </div>
+              <input
+                type="date"
+                className="form-control"
+                value={pubYear && pubMonth && pubDay ? `${pubYear}-${pubMonth.padStart(2, '0')}-${pubDay.padStart(2, '0')}` : ''}
+                onChange={(e) => {
+                  const date = e.target.value;
+                  if (date) {
+                    const [year, month, day] = date.split('-');
+                    setPubYear(year);
+                    setPubMonth(month);
+                    setPubDay(day);
+                  } else {
+                    setPubYear('');
+                    setPubMonth('');
+                    setPubDay('');
+                  }
+                }}
+                required
+                style={{ 
+                  border: '1px solid #ced4da',
+                  padding: '12px 16px',
+                  borderRadius: '6px',
+                  fontSize: '16px',
+                  height: '48px',
+                  width: '100%',
+                  maxWidth: '300px',
+                  cursor: 'pointer',
+                  backgroundColor: '#fff',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                  transition: 'all 0.2s ease-in-out'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#a33307';
+                  e.target.style.boxShadow = '0 0 0 0.2rem rgba(163, 51, 7, 0.25)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#ced4da';
+                  e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                }}
+              />
+              <small className="text-muted d-block mt-2">Select the publication date</small>
             </div>
 
             {/* Keywords */}
             <div className="form-group mb-3">
               <label className="form-label">Keywords:</label>
-              <Select
-                isMulti
-                options={keywordOptions}
-                value={keywordOptions.filter(option => selectedKeywords.includes(option.value))}
-                onChange={handleKeywordChange}
-                isClearable
-                placeholder="Select keywords..."
-              />
+              <div className="d-flex gap-2">
+                <Select
+                  isMulti
+                  options={keywordOptions}
+                  value={keywordOptions.filter(option => selectedKeywords.includes(option.value))}
+                  onChange={handleKeywordChange}
+                  isClearable
+                  placeholder="Select keywords..."
+                  className="flex-grow-1"
+                  theme={(theme) => ({
+                    ...theme,
+                    colors: {
+                      ...theme.colors,
+                      primary: '#a33307',
+                      primary25: 'rgba(163, 51, 7, 0.1)',
+                      primary50: 'rgba(163, 51, 7, 0.2)',
+                      primary75: 'rgba(163, 51, 7, 0.3)',
+                    },
+                  })}
+                />
+                <button 
+                  type="button" 
+                  className="btn d-flex align-items-center gap-2"
+                  onClick={handleShowKeywordModal}
+                  style={{ 
+                    whiteSpace: 'nowrap', 
+                    padding: '8px 16px',
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px'
+                  }}
+                >
+                  <FaTag /> Add
+                </button>
+              </div>
             </div>
 
             {/* Button Container */}
@@ -291,6 +386,48 @@ function DescribeWork() {
                 Next: Upload Files
               </button>
             </div>
+
+            {/* Add New Author Modal */}
+            <Modal
+              show={showAuthorModal}
+              onHide={handleCloseAuthorModal}
+              centered
+              backdrop="static"
+              className="add-author-modal"
+            >
+              <Modal.Header closeButton style={{ backgroundColor: '#a33307', color: 'white' }}>
+                <Modal.Title>
+                  <FaUserPlus className="me-2" /> Add New Author
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body className="p-4">
+                <AddNewAuthor onHide={() => {
+                  handleCloseAuthorModal();
+                  setAuthorsRefresh(prev => prev + 1);
+                }} />
+              </Modal.Body>
+            </Modal>
+
+            {/* Add New Keyword Modal */}
+            <Modal
+              show={showKeywordModal}
+              onHide={handleCloseKeywordModal}
+              centered
+              backdrop="static"
+              className="add-keyword-modal"
+            >
+              <Modal.Header closeButton style={{ backgroundColor: '#a33307', color: 'white' }}>
+                <Modal.Title>
+                  <FaTag className="me-2" /> Add New Keyword
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body className="p-4">
+                <AddNewKeyword onHide={() => {
+                  handleCloseKeywordModal();
+                  setKeywordsRefresh(prev => prev + 1);
+                }} />
+              </Modal.Body>
+            </Modal>
           </form>
         </section>
       </div>

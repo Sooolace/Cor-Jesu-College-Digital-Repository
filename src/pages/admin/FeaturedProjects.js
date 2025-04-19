@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { CiViewList } from "react-icons/ci";
+import { FaEye } from "react-icons/fa";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import Breadcrumb from '../../components/BreadCrumb';
 import PaginationComponent from '../../components/PaginationComponent';
@@ -133,52 +133,53 @@ function FeaturedProjects() {
         {error && <p className="text-danger text-center">{error}</p>}
 
         {currentProjects.length > 0 && (
-          <Table striped bordered hover className="mt-3">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Authors</th>
-                <th>Date Published</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentProjects.map((project) => (
-                <tr key={project.project_id}>
-                  <td>{project.title}</td>
-                  <td>{project.authors}</td>
-                  <td>{new Date(project.publication_date).toLocaleDateString()}</td>
-                  <td>
-                    <span
-                      onClick={() => navigate(`/DocumentOverview/${project.project_id}`)}
-                      style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}
-                    >
-                      <CiViewList size={35} title="View" style={{ color: 'blue' }} />
-                    </span>
-
-                    <span
-                      onClick={() => toggleFeature(project.project_id, project.is_featured)}
-                      style={{ cursor: 'pointer', padding: '5px' }}
-                    >
-                      {project.is_featured ? (
-                        <FaStar size={25} title="Unfeature" style={{ color: 'gold' }} />
-                      ) : (
-                        <FaRegStar size={25} title="Feature" style={{ color: 'gray' }} />
-                      )}
-                    </span>
-                  </td>
+          <div className="table-responsive">
+            <Table striped bordered hover className="mt-3" style={{ fontSize: '0.95rem' }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '40%' }}>Title</th>
+                  <th style={{ width: '30%' }}>Authors</th>
+                  <th style={{ width: '15%' }}>Date Published</th>
+                  <th style={{ width: '15%' }}>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {currentProjects.map((project) => (
+                  <tr key={project.project_id}>
+                    <td>{project.title}</td>
+                    <td>{project.authors}</td>
+                    <td>{new Date(project.publication_date).toLocaleDateString()}</td>
+                    <td>
+                      <span
+                        onClick={() => navigate(`/DocumentOverview/${project.project_id}`)}
+                        style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}
+                      >
+                        <FaEye size={20} title="View" style={{ color: '#0d6efd' }} />
+                      </span>
+
+                      <span
+                        onClick={() => toggleFeature(project.project_id, project.is_featured)}
+                        style={{ cursor: 'pointer', padding: '5px' }}
+                      >
+                        {project.is_featured ? (
+                          <FaStar size={20} title="Unfeature" style={{ color: 'gold' }} />
+                        ) : (
+                          <FaRegStar size={20} title="Feature" style={{ color: 'gray' }} />
+                        )}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
         )}
-<PaginationComponent
-  currentPage={currentPage}
-  totalPages={totalPages}
-  handlePageChange={newPage => setCurrentPage(newPage)}
-/>
 
-
+        <PaginationComponent
+          currentPage={currentPage}
+          totalPages={totalPages}
+          handlePageChange={newPage => setCurrentPage(newPage)}
+        />
 
         {/* Success Modal */}
         <Modal show={showSuccessModal} onHide={() => setShowSuccessModal(false)}>

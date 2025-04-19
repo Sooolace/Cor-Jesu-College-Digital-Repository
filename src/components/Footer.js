@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import logo from '../assets/CJCREPOLOGO.png';
@@ -9,6 +9,17 @@ function Footer() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in by looking for token in localStorage
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role');
+    
+    setIsLoggedIn(!!token);
+    setIsAdmin(userRole === 'admin');
+  }, []);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -30,6 +41,21 @@ function Footer() {
       console.error('Error subscribing:', error);
     }
   };
+
+  // Determine where the "Sign In" link should point
+  const getAuthLink = () => {
+    if (isLoggedIn) {
+      if (isAdmin) {
+        return { to: "/admindashboard", text: "Dashboard" };
+      } else {
+        return { to: "/", text: "My Account" };
+      }
+    } else {
+      return { to: "/login", text: "Sign In" };
+    }
+  };
+
+  const authLink = getAuthLink();
 
   return (
     <footer className="footer-container">
@@ -85,7 +111,7 @@ function Footer() {
               <li><Link to="/">Home</Link></li>
               <li><Link to="/search">Search</Link></li>
               <li><Link to="/help">Help</Link></li>
-              <li><Link to="/login">Sign In</Link></li>
+              <li><Link to={authLink.to}>{authLink.text}</Link></li>
             </ul>
           </Col>
           
