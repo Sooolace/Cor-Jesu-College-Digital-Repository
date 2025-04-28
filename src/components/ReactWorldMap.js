@@ -26,8 +26,16 @@ const INITIAL_POSITION = [0, 20];
 const MAP_SCALE = 150;
 
 const ReactWorldMap = () => {
-  const [publications, setPublications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [publications, setPublications] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('worldMapPublications');
+      return cached ? JSON.parse(cached) : [];
+    } catch (error) {
+      console.error('Error parsing cached publications:', error);
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => !sessionStorage.getItem('worldMapPublications'));
   const [selectedLocation, setSelectedLocation] = useState(null);
   const mapRef = useRef(null);
   const isDragging = useRef(false);
@@ -36,29 +44,36 @@ const ReactWorldMap = () => {
 
   useEffect(() => {
     const fetchPublicationLocations = async () => {
+      // If we have cached data, don't fetch again
+      if (publications.length > 0) {
+        return;
+      }
+
       try {
         setLoading(true);
         // For now, we'll use the dummy data instead of making an API call
         // When your backend is ready, uncomment the API call below
         // const response = await axios.get('/api/publications/locations');
-        // setPublications(response.data);
+        // const data = response.data;
         
         // Using dummy data
-        setPublications(dummyPublications);
+        const data = dummyPublications;
         
-        // Simulate loading to show the spinner briefly
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
+        // Ensure data is an array
+        const processedData = Array.isArray(data) ? data : [];
+        setPublications(processedData);
+        sessionStorage.setItem('worldMapPublications', JSON.stringify(processedData));
       } catch (error) {
         console.error('Error in world map component:', error);
         setPublications(dummyPublications);
+        sessionStorage.setItem('worldMapPublications', JSON.stringify(dummyPublications));
+      } finally {
         setLoading(false);
       }
     };
 
     fetchPublicationLocations();
-  }, []);
+  }, [publications.length]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -174,6 +189,9 @@ const ReactWorldMap = () => {
     return minSize + (maxSize - minSize) * scale / 3;
   };
 
+  // Ensure publications is always an array
+  const safePublications = Array.isArray(publications) ? publications : [];
+
   return (
     <Container className="world-map-container">
       <h2 className="section-title">Global Research Reader</h2>
@@ -222,7 +240,7 @@ const ReactWorldMap = () => {
                     }
                   </Geographies>
                   
-                  {publications.map((pub) => (
+                  {safePublications.map((pub) => (
                     <Marker
                       key={pub.id}
                       coordinates={[pub.location.lng, pub.location.lat]}

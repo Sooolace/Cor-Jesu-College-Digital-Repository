@@ -223,13 +223,13 @@ const handleunarchive = async (projectId) => {
                   <span onClick={() => goToDocumentOverview(project.project_id)}
                     style={{ display: 'inline-block', cursor: 'pointer', padding: '5px' }}>
                 <CiViewList size={35} title="View" style={{ color: 'blue' }} />
-              </span>
+                </span>
 
                     <span
                       onClick={() => handleUnarchiveClick(project.project_id)}
                       style={{ cursor: 'pointer', color: '#a33307', padding: '5px' }}
                     >
-                      <TbArchiveOff size={35} title="View" style={{ color: 'red' }}  />
+                      <TbArchiveOff size={35} title="Unarchive" style={{ color: 'red' }}  />
                     </span>
                   </td>
                 </tr>

@@ -5,18 +5,30 @@ import '../pages/user/styles/mostviewed.css';
 import PaginationComponent from '../components/PaginationComponent';
 
 const MostViewed = ({ searchQuery }) => {
-  const [mostViewedDocs, setMostViewedDocs] = useState([]);
+  const [mostViewedDocs, setMostViewedDocs] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('mostViewedDocs');
+      return cached ? JSON.parse(cached) : [];
+    } catch (error) {
+      console.error('Error parsing cached data:', error);
+      return [];
+    }
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !sessionStorage.getItem('mostViewedDocs'));
   const [error, setError] = useState(null);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [activeViews, setActiveViews] = useState({});
-  const [lastUpdated, setLastUpdated] = useState(Date.now());
   const itemsPerPage = 5;
 
   // Fetch most viewed documents from your API
   useEffect(() => {
     const fetchMostViewed = async () => {
+      // If we have cached data, don't fetch again
+      if (mostViewedDocs.length > 0) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         const response = await fetch('/api/projects/mostviewed');
@@ -24,39 +36,21 @@ const MostViewed = ({ searchQuery }) => {
           throw new Error('Failed to fetch most viewed documents');
         }
         const data = await response.json();
-        setMostViewedDocs(data);
-        
-        // Store in sessionStorage with timestamp
-        const cacheData = {
-          data: data,
-          timestamp: Date.now()
-        };
-        sessionStorage.setItem('mostViewedDocs', JSON.stringify(cacheData));
+        // Ensure data is an array
+        const processedData = Array.isArray(data) ? data : [];
+        setMostViewedDocs(processedData);
+        sessionStorage.setItem('mostViewedDocs', JSON.stringify(processedData));
       } catch (error) {
         console.error('Error fetching most viewed documents:', error);
         setError('Failed to fetch most viewed documents');
-        
-        // Try to use cached data if available
-        const cached = sessionStorage.getItem('mostViewedDocs');
-        if (cached) {
-          const cachedData = JSON.parse(cached);
-          setMostViewedDocs(cachedData.data);
-        }
+        setMostViewedDocs([]); // Ensure we have an empty array on error
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMostViewed();
-  }, [lastUpdated]);
-
-  // Function to refresh the data
-  const refreshData = () => {
-    // Clear session storage cache
-    sessionStorage.removeItem('mostViewedDocs');
-    // Update the lastUpdated timestamp to trigger a re-fetch
-    setLastUpdated(Date.now());
-  };
+  }, [mostViewedDocs.length]);
 
   // Function to start tracking view
   const startViewTracking = async (projectId) => {
@@ -131,8 +125,8 @@ const MostViewed = ({ searchQuery }) => {
 
         console.log(`Completed view for project ID: ${projectId} with duration: ${duration}s`);
         
-        // Refresh the data after a successful view count
-        setTimeout(() => refreshData(), 1000);
+        // Clear session storage to force a refresh on next load
+        sessionStorage.removeItem('mostViewedDocs');
       } else {
         console.log(`View for project ID: ${projectId} not counted - duration was only ${duration}s (< 10s)`);
       }
@@ -182,21 +176,16 @@ const MostViewed = ({ searchQuery }) => {
     };
   }, [activeViews]);
 
+  // Ensure mostViewedDocs is always an array
+  const safeMostViewedDocs = Array.isArray(mostViewedDocs) ? mostViewedDocs : [];
+
   // Pagination Logic - limit to 10 items max (2 pages)
-  const totalItems = Math.min(mostViewedDocs.length, 10);
+  const totalItems = Math.min(safeMostViewedDocs.length, 10);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   
   // Slice only up to 10 projects max
-  const limitedDocs = mostViewedDocs.slice(0, 10);
+  const limitedDocs = safeMostViewedDocs.slice(0, 10);
   const displayedDocs = limitedDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  const handlePagination = (direction) => {
-    if (direction === 'next' && currentPage < totalPages) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    } else if (direction === 'prev' && currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
-    }
-  };
 
   // Toggle dropdown for additional document details
   const toggleDetails = (index) => {
@@ -217,7 +206,7 @@ const MostViewed = ({ searchQuery }) => {
         <p className="error-message">{error}</p>
       ) : (
         <>
-          {mostViewedDocs.length > 0 ? (
+          {safeMostViewedDocs.length > 0 ? (
             <>
               <div className="table-container">
                 <table className="results-table">
