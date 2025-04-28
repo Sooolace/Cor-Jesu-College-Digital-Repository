@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 import './styles/documentoverview.css';
 import Breadcrumb from '../../components/BreadCrumb';
 import cjclogo from '../../../src/assets/cjclogo.PNG'; 
+import Modal from 'react-bootstrap/Modal'; // Add Modal import
 
 function DocumentOverview() {
   const { projectId } = useParams();
@@ -31,6 +32,7 @@ function DocumentOverview() {
   const [viewInfo, setViewInfo] = useState(null);
   const [viewStatus, setViewStatus] = useState('pending');
   const [viewCompleted, setViewCompleted] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false); // Add state for login modal
 
   // Function to track views in the background
   const trackPageView = async () => {
@@ -277,9 +279,8 @@ function DocumentOverview() {
       // Store the current project ID in sessionStorage so we can bookmark it after login
       sessionStorage.setItem('pendingBookmarkProjectId', projectId);
       
-      // Show a more specific message or redirect to login
-      alert('Please log in to bookmark this project');
-      redirectToLogin();
+      // Show login modal instead of alert
+      setShowLoginModal(true);
       return;
     }
     
@@ -561,6 +562,45 @@ function DocumentOverview() {
           </div>
         </div>
       </div>
+
+      {/* Add Login Modal */}
+      <Modal 
+        show={showLoginModal} 
+        onHide={() => setShowLoginModal(false)}
+        centered
+        className="login-modal"
+      >
+        <Modal.Header closeButton style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
+          <Modal.Title style={{ color: '#333', fontWeight: '600' }}>
+            <FaLock style={{ marginRight: '10px', color: '#a33307' }} />
+            Login Required
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ padding: '20px' }}>
+          <p style={{ fontSize: '16px', color: '#555', marginBottom: '20px' }}>
+            Please log in to bookmark this project. You'll be able to access your bookmarked items after logging in.
+          </p>
+          <div className="d-flex justify-content-end">
+            <Button 
+              variant="secondary" 
+              onClick={() => setShowLoginModal(false)}
+              style={{ marginRight: '10px', backgroundColor: '#6c757d', border: 'none' }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="danger"
+              onClick={() => {
+                setShowLoginModal(false);
+                redirectToLogin();
+              }}
+              style={{ backgroundColor: '#a33307', border: 'none', color: '#fff' }}
+            >
+              Login Now
+            </Button>
+          </div>
+        </Modal.Body>
+      </Modal>
     </>
   );
 }
