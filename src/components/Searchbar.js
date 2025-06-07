@@ -47,7 +47,6 @@ function SearchBar({ query, onChange, selectedOption, onOptionChange, onSearch, 
           <option value="author">Author</option>
           <option value="keywords">Keywords</option>
           <option value="abstract">Abstract</option>
-          <option value="category">Category</option>
         </select>
 
         {/* Input field with onKeyPress event */}

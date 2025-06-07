@@ -128,11 +128,8 @@ function DescribeWork() {
     navigate('/admin/DescribeWork/upload-files', { state: { projectData } });
   };
 
-  // Handle Cancel logic to redirect to /admindashboard
   const handleCancel = () => {
-    if (window.confirm('You have not completed uploading yet, are you sure you want to discontinue?')) {
       navigate('/admindashboard'); // Redirect to /admindashboard
-    }
   };
 
   const handleShowAuthorModal = () => setShowAuthorModal(true);
@@ -173,7 +170,7 @@ function DescribeWork() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                style={{ border: '1px solid #ced4da' }}
+                style={{ border: '1px solid #ced4da', height: '40px' }}
               />
             </div>
 
@@ -383,7 +380,7 @@ function DescribeWork() {
 
               {/* Submit button */}
               <button type="submit" className="btn-primary">
-                Next: Upload Files
+                Next: Upload File
               </button>
             </div>
 

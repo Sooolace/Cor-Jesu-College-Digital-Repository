@@ -165,7 +165,7 @@ function NavigationBar() {
                                 className="custom-dropdown"
                             >
                                 <NavDropdown.Item onClick={() => handleNavigation('/AllWorks')}>
-                                    Theses & Dissertations
+                                    All works
                                 </NavDropdown.Item>
                                 <NavDropdown.Item onClick={() => handleNavigation('/Authors')}>
                                     Authors

@@ -438,36 +438,60 @@ function DocumentOverview() {
               </p>
             </div>
             
-            {/* Downloadable File - Only shown if logged in */}
+            {/* Downloadable File or Study URL Link */}
             <div className="project-detail-item downloadable-file-section">
-              <p className="detail-title"><strong>Downloadable File:</strong></p>
-              <p className="detail-content">
-                {isLoggedIn ? (
-                  project.file_path ? (
+              {project.file_path ? (
+                <>
+                  <p className="detail-title"><strong>Downloadable File:</strong></p>
+                  <p className="detail-content">
+                    {isLoggedIn ? (
+                      <div className="download-button-container">
+                        <a 
+                          href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
+                          download
+                          className="download-link"
+                        >
+                          <FaDownload /> 
+                          <span className="download-filename">{project.file_path.split('/').pop()}</span>
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="login-prompt">
+                        <FaLock /> <span>Please <a onClick={(e) => {
+                          e.preventDefault();
+                          redirectToLogin();
+                        }} className="login-link" style={{cursor: 'pointer'}}>login</a> to access downloadable files</span>
+                      </div>
+                    )}
+                  </p>
+                </>
+              ) : project.study_url ? (
+                <>
+                  <p className="detail-title"><strong>Link to Full Text:</strong></p>
+                  <p className="detail-content">
                     <div className="download-button-container">
                       <a 
-                        href={`http://localhost:5000/downloads/${encodeURIComponent(project.file_path.split('/').pop())}`} 
-                        download
+                        href={project.study_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="download-link"
                       >
                         <FaDownload /> 
-                        <span className="download-filename">{project.file_path.split('/').pop()}</span>
+                        <span className="download-filename">View Full Text</span>
                       </a>
                     </div>
-                  ) : (
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="detail-title"><strong>Downloadable File:</strong></p>
+                  <p className="detail-content">
                     <div className="no-document-message">
                       No Document Available
                     </div>
-                  )
-                ) : (
-                  <div className="login-prompt">
-                    <FaLock /> <span>Please <a onClick={(e) => {
-                      e.preventDefault();
-                      redirectToLogin();
-                    }} className="login-link" style={{cursor: 'pointer'}}>login</a> to access downloadable files</span>
-                  </div>
-                )}
-              </p>
+                  </p>
+                </>
+              )}
             </div>
             
             <div className="buttons-container">
