@@ -29,6 +29,11 @@ module.exports = {
     'jsx-a11y/no-noninteractive-element-interactions': 'warn',
     'jsx-a11y/mouse-events-have-key-events': 'warn',
     'jsx-a11y/label-has-associated-control': 'warn',
+    'jsx-a11y/anchor-is-valid': ['warn', {
+      components: ['Link'],
+      specialLink: ['to'],
+      aspects: ['noHref', 'invalidHref', 'preferButton']
+    }],
     'no-unused-vars': 'warn'
   },
   settings: {
