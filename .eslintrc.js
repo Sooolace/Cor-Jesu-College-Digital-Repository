@@ -1,7 +1,6 @@
 module.exports = {
   env: {
     browser: true,
-    es2021: true,
     node: true,
   },
   extends: [
@@ -14,18 +13,23 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 12,
+    ecmaVersion: 2021,
     sourceType: 'module',
   },
   plugins: ['react', 'react-hooks', 'jsx-a11y'],
   rules: {
-    'no-unused-vars': 'warn',
-    'react-hooks/exhaustive-deps': 'warn',
-    'react/prop-types': 'off',
     'react/react-in-jsx-scope': 'off',
-    'jsx-a11y/anchor-is-valid': 'warn',
+    'react/prop-types': 'off',
     'react/no-unescaped-entities': 'off',
-    'react/display-name': 'off'
+    'react/display-name': 'off',
+    'react-hooks/rules-of-hooks': 'warn',
+    'react-hooks/exhaustive-deps': 'warn',
+    'jsx-a11y/click-events-have-key-events': 'warn',
+    'jsx-a11y/no-static-element-interactions': 'warn',
+    'jsx-a11y/no-noninteractive-element-interactions': 'warn',
+    'jsx-a11y/mouse-events-have-key-events': 'warn',
+    'jsx-a11y/label-has-associated-control': 'warn',
+    'no-unused-vars': 'warn'
   },
   settings: {
     react: {
