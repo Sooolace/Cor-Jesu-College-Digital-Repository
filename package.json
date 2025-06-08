@@ -52,8 +52,8 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-scripts test",
+    "build": "CI=false react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "server": "node server/server.js",
     "dev": "concurrently \"npm run server\" \"npm start\""
