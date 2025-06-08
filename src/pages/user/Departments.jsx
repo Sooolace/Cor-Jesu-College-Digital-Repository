@@ -8,6 +8,21 @@ function Departments() {
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Function to convert department name to URL-friendly format
+    const getDepartmentSlug = (name) => {
+        // Extract acronym from name if it exists in parentheses
+        const acronymMatch = name.match(/\(([^)]+)\)/);
+        if (acronymMatch) {
+            return acronymMatch[1].toLowerCase();
+        }
+        
+        // If no acronym, convert full name to URL-friendly format
+        return name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with hyphens
+            .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    };
+
     useEffect(() => {
         const fetchDepartments = async () => {
             try {
@@ -57,9 +72,10 @@ function Departments() {
                     ) : (
                         departments.map((department) => {
                             console.log(`Department ${department.category_id}:`, department);
+                            const departmentSlug = getDepartmentSlug(department.name);
                             return (
                                 <div className="departments-grid-item" key={department.category_id}>
-                                    <a href={`/departments/${department.category_id}`} className="department-link">
+                                    <a href={`/departments/${departmentSlug}`} className="department-link">
                                         <div className="department-image-container">
                                             {department.image_url ? (
                                                 <img 

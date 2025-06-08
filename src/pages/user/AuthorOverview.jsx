@@ -57,11 +57,13 @@ function AuthorOverview() {
         const worksData = await worksResponse.json();
   
         // Define formattedWorks within this function
-        const formattedWorks = worksData.map((work) => ({
-          ...work,
-          description: work.abstract,
-          year: new Date(work.publication_date).getFullYear(),
-        }));
+        const formattedWorks = worksData
+          .filter(work => work.is_archived === false) // Only include archived works
+          .map((work) => ({
+            ...work,
+            description: work.abstract,
+            year: new Date(work.publication_date).getFullYear(),
+          }));
   
         // Use formattedWorks here
         setWorks(formattedWorks);

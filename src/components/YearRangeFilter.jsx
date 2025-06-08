@@ -173,7 +173,7 @@ const YearRangeFilter = ({ minYear = 1900, maxYear = new Date().getFullYear(), o
           <span>{values[1]}</span>
         </div>
       </div>
-      
+
       <button 
         className="apply-button" 
         onClick={handleApplyFilters}

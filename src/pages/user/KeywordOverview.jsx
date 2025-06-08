@@ -38,7 +38,12 @@ function KeywordOverview() {
         }
         const projectsData = await projectsResponse.json();
 
-        const formattedProjects = projectsData.map((project) => ({
+        // Filter out projects where is_archived is false
+        const activeProjects = projectsData.filter(project => 
+          project.is_archived === false
+        );
+
+        const formattedProjects = activeProjects.map((project) => ({
           ...project,
           description: project.abstract,
           year: new Date(project.created_at).getFullYear(),
@@ -115,7 +120,7 @@ function KeywordOverview() {
                     </div>
                   ))
               ) : (
-                <p className="text-center">No projects found for this keyword.</p>
+                <p className="text-center">No active projects found for this keyword.</p>
               )}
             </div>
             <PaginationComponent

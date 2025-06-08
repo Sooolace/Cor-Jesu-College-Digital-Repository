@@ -19,35 +19,64 @@ function DepartmentProjects() {
   const [projectsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
-  const [departmentNameMapping, setDepartmentNameMapping] = useState({});
+  const [departmentInfo, setDepartmentInfo] = useState(null);
 
+  // First, fetch department info to get the ID
   useEffect(() => {
-    const fetchDepartments = async () => {
+    const fetchDepartmentInfo = async () => {
       try {
         const response = await fetch('/api/categories');
         if (!response.ok) {
           throw new Error('Failed to fetch departments');
         }
-        const data = await response.json();
-        const mapping = data.reduce((acc, department) => {
-          acc[department.category_id] = department.name;
-          return acc;
-        }, {});
-        setDepartmentNameMapping(mapping);
+        const departments = await response.json();
+        
+        console.log('Current departmentName from URL:', departmentName);
+        console.log('All departments:', departments);
+        
+        // Find the department that matches our slug
+        const department = departments.find(dept => {
+          // Extract acronym from name if it exists in parentheses
+          const acronymMatch = dept.name.match(/\(([^)]+)\)/);
+          const deptSlug = acronymMatch ? 
+            acronymMatch[1].toLowerCase() : 
+            dept.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          
+          console.log('Comparing:', {
+            departmentName: dept.name,
+            deptSlug: deptSlug,
+            urlSlug: departmentName,
+            matches: deptSlug === departmentName
+          });
+          
+          return deptSlug === departmentName;
+        });
+
+        if (department) {
+          console.log('Found matching department:', department);
+          setDepartmentInfo(department);
+        } else {
+          console.log('No matching department found');
+          setError('Department not found');
+          setLoading(false);
+        }
       } catch (error) {
-        console.error('Error fetching departments:', error);
+        console.error('Error fetching department info:', error);
+        setError('Failed to load department information');
+        setLoading(false);
       }
     };
 
-    fetchDepartments();
-  }, []);
+    fetchDepartmentInfo();
+  }, [departmentName]);
 
-  const fullDepartmentName = departmentNameMapping[departmentName] || 'Unknown Department';
-
+  // Then fetch projects using the department ID
   useEffect(() => {
     const fetchProjects = async () => {
+      if (!departmentInfo) return;
+
       try {
-        const response = await fetch(`/api/projects/departments/${departmentName}`);
+        const response = await fetch(`/api/projects/departments/${departmentInfo.category_id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
@@ -70,7 +99,7 @@ function DepartmentProjects() {
     };
 
     fetchProjects();
-  }, [departmentName]);
+  }, [departmentInfo]);
 
   const handleYearCheckboxChange = (year) => {
     setFilterYears((prevYears) =>
@@ -150,7 +179,7 @@ function DepartmentProjects() {
           items={[
             { label: 'Home', link: '/' },
             { label: 'Departments', link: '/Departments' },
-            { label: fullDepartmentName, link: `/Departments/${departmentName}` },
+            { label: departmentInfo?.name || 'Loading...', link: `/Departments/${departmentName}` },
           ]}
         />
       </div>
@@ -282,7 +311,7 @@ function DepartmentProjects() {
 
           {/* Main Content */}
           <div className="col-md-9 content-container">
-            <h4>{fullDepartmentName}</h4>
+            <h4>{departmentInfo?.name || 'Loading...'}</h4>
             <div className="author-underline mb-4"></div>
 
             {currentProjects.length === 0 ? (

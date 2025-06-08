@@ -153,16 +153,18 @@ function SearchPage() {
       let endpoint;
       let params;
 
+      // Always include year range in params
+      const yearRange = {
+        startDate: years[0] || selectedYears[0],
+        endDate: years[1] || selectedYears[1]
+      };
+
       // Check if this is an advanced search
       if (location.state?.advancedSearch) {
         endpoint = '/api/search/advanced';
         
         // Prepare advanced search parameters
         const searchFields = location.state.advancedSearchInputs || [];
-        const dateRange = {
-          startDate: years[0],
-          endDate: years[1]
-        };
         
         // Serialize search fields to avoid complex nested objects in query params
         const serializedSearchFields = JSON.stringify(searchFields);
@@ -171,7 +173,7 @@ function SearchPage() {
           page,
           itemsPerPage,
           searchFields: serializedSearchFields,
-          dateRange: JSON.stringify(dateRange)
+          dateRange: JSON.stringify(yearRange)
         };
         
         // Add filter IDs if any
@@ -190,7 +192,7 @@ function SearchPage() {
           category: '/api/search/allprojs',
         };
 
-        // If query is empty and no filters are applied, show all projects
+        // If query is empty and no filters are applied, show all projects within year range
         if (!query.trim() && 
             categoryIds.length === 0 && 
             researchAreaIds.length === 0 && 
@@ -201,7 +203,9 @@ function SearchPage() {
           endpoint = '/api/search/allprojs';
           params = {
             page,
-            itemsPerPage
+            itemsPerPage,
+            fromYear: yearRange.startDate,
+            toYear: yearRange.endDate
           };
         } else {
           endpoint = query && option in endpointMap ? endpointMap[option] : '/api/search/allprojs';
@@ -214,7 +218,8 @@ function SearchPage() {
             ...(topicIds.length > 0 && { topics: topicIds }),
             ...(authorIds.length > 0 && { authors: authorIds }),
             ...(keywordIds.length > 0 && { keywords: keywordIds }),
-            ...(years.length === 2 && { fromYear: years[0], toYear: years[1] }),
+            fromYear: yearRange.startDate,
+            toYear: yearRange.endDate,
             ...(advancedSearchInputs.length > 0 && { advancedSearchInputs }),
           };
         }
