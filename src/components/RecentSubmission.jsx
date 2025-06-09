@@ -7,8 +7,13 @@ import PaginationComponent from '../components/PaginationComponent';
 
 const RecentSubmissions = ({ searchQuery }) => {
   const [submissions, setSubmissions] = useState(() => {
-    const cached = sessionStorage.getItem('recentSubmissions');
-    return cached ? JSON.parse(cached) : [];
+    try {
+      const cached = sessionStorage.getItem('recentSubmissions');
+      return cached ? JSON.parse(cached) : [];
+    } catch (error) {
+      console.error('Error parsing cached data:', error);
+      return [];
+    }
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(() => !sessionStorage.getItem('recentSubmissions'));
@@ -23,10 +28,11 @@ const RecentSubmissions = ({ searchQuery }) => {
         return;
       }
 
+      setIsLoading(true);
       try {
         const response = await fetch('/api/projects/projects/recent');
         if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
+          throw new Error('Failed to fetch recent submissions');
         }
         const data = await response.json();
         
@@ -36,7 +42,9 @@ const RecentSubmissions = ({ searchQuery }) => {
         setSubmissions(sortedData);
         sessionStorage.setItem('recentSubmissions', JSON.stringify(sortedData));
       } catch (error) {
+        console.error('Error fetching recent submissions:', error);
         setError('Failed to fetch recent submissions');
+        setSubmissions([]); // Ensure we have an empty array on error
       } finally {
         setIsLoading(false);
       }
@@ -45,9 +53,12 @@ const RecentSubmissions = ({ searchQuery }) => {
     fetchSubmissions();
   }, [submissions.length]);
 
+  // Ensure submissions is always an array
+  const safeSubmissions = Array.isArray(submissions) ? submissions : [];
+
   // Pagination Logic
-  const totalPages = Math.ceil(submissions.length / itemsPerPage);
-  const displayedSubmissions = submissions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(safeSubmissions.length / itemsPerPage);
+  const displayedSubmissions = safeSubmissions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handlePagination = (direction) => {
     if (direction === 'next' && currentPage < totalPages) {
@@ -72,9 +83,11 @@ const RecentSubmissions = ({ searchQuery }) => {
 
       {isLoading ? (
         <p className="loading-message">Loading...</p>
+      ) : error ? (
+        <p className="error-message">{error}</p>
       ) : (
         <>
-          {submissions.length > 0 ? (
+          {safeSubmissions.length > 0 ? (
             <>
               <div className="table-container">
                 <table className="results-table">
@@ -135,7 +148,7 @@ const RecentSubmissions = ({ searchQuery }) => {
               />
             </>
           ) : (
-            <p className="no-results-message">No recent submissions found.</p>
+            <p className="error-message">Failed to fetch recent submissions</p>
           )}
         </>
       )}
