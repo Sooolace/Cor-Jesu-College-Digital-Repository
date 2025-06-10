@@ -108,12 +108,12 @@ function DocumentOverview() {
       try {
         setLoading(true);
 
-        const projectResponse = await fetch(`/api/projects/${projectId}`);
+        const projectResponse = await fetch(`http://localhost:5000/api/projects/${projectId}`);
         if (!projectResponse.ok) throw new Error('Failed to fetch project data');
         const projectData = await projectResponse.json();
         setProject(projectData);
 
-        const keywordsResponse = await fetch(`/api/project_keywords/${projectId}`);
+        const keywordsResponse = await fetch(`http://localhost:5000/api/project_keywords/${projectId}`);
         if (!keywordsResponse.ok) throw new Error('Failed to fetch keywords');
         const keywordsData = await keywordsResponse.json();
         setKeywords(keywordsData);
@@ -147,11 +147,11 @@ function DocumentOverview() {
           setResearchType(researchTypeData);
         }
 
-        const departmentRes = await fetch(`/api/departments/${projectData.department_id}`);
-        if (departmentRes.ok) {
-          const departmentData = await departmentRes.json();
-          setDepartment(departmentData);
-        }
+        // const departmentRes = await fetch(`/api/departments/${projectData.department_id}`);
+        // if (departmentRes.ok) {
+        //   const departmentData = await departmentRes.json();
+        //   setDepartment(departmentData);
+        // }
         
         // Track the page view after data is loaded
         trackPageView();
@@ -567,7 +567,7 @@ function DocumentOverview() {
 
               {/* Category */}
               <div className="project-detail-item">
-                <p className="detail-title"><strong>Department:</strong></p>
+                <p className="detail-title"><strong>Category:</strong></p>
                 <p className="detail-content">{category ? category.name : 'N/A'}</p>
               </div>
 

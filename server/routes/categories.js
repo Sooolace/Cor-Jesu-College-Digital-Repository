@@ -30,6 +30,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET a category by ID
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+      const result = await pool.query('SELECT * FROM categories WHERE category_id = $1', [id]);
+      if (result.rows.length === 0) {
+          return res.status(404).json({ error: 'Category not found' });
+      }
+      res.status(200).json(result.rows[0]);
+  } catch (error) {
+      console.error('Error executing query', error.stack);
+      res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // POST - Add a new category
 router.post('/', upload.single('image'), async (req, res) => {
   try {
@@ -97,6 +112,29 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting department:', error);
     res.status(500).json({ message: 'Error deleting department' });
+  }
+});
+
+// Debug route to check table structure
+router.get('/debug/table-info', async (req, res) => {
+  try {
+    // Get table structure
+    const tableInfo = await pool.query(`
+      SELECT column_name, data_type, character_maximum_length
+      FROM information_schema.columns
+      WHERE table_name = 'categories'
+    `);
+    
+    // Get sample data
+    const sampleData = await pool.query('SELECT * FROM categories LIMIT 5');
+    
+    res.json({
+      tableStructure: tableInfo.rows,
+      sampleData: sampleData.rows
+    });
+  } catch (error) {
+    console.error('Error getting table info:', error);
+    res.status(500).json({ error: 'Error getting table info', details: error.message });
   }
 });
 
