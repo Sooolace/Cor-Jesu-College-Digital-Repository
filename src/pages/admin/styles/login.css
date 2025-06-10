@@ -1,3 +1,109 @@
+/* Login page specific styles */
+.login-page {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.login-page .vh-100 {
+  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.login-page .bg-cover {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Card styling */
+.login-page .card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  margin: 0;
+}
+
+/* Logo container */
+.login-page .logo-container {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-page .logo-container img {
+  max-width: 150px;
+  margin-bottom: 1rem;
+}
+
+/* Form styling */
+.login-page .form-control {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+/* Button styling */
+.login-page .s-custom-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Google sign-in section */
+.login-page .google-signin {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+/* Alert styling */
+.login-page .alert {
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-height: 800px) {
+  .login-page .card {
+    margin: 1rem 0;
+  }
+  
+  .login-page .logo-container img {
+    max-width: 120px;
+  }
+}
+
+/* Remove scrollbars only for login page */
+.login-page ::-webkit-scrollbar {
+  display: none;
+}
+
+/* Login page specific hover effects */
+.login-page .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-page .form-control:focus {
+  border-color: #a33307;
+  box-shadow: 0 0 0 0.2rem rgba(163, 51, 7, 0.25);
+}
+
+.login-page .s-custom-btn:hover,
+.login-page .s-custom-btn:focus {
+  background-color: #802704;
+  border-color: #802704;
+  color: white;
+}
+
 /* Base styles */
 .vh-100 {
   min-height: 100vh;
@@ -11,12 +117,6 @@
 }
 
 /* Card styles */
-.card {
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
 .card:hover {
   transform: translateY(-5px);
 }
@@ -44,13 +144,6 @@
   margin-bottom: 0.5rem;
 }
 
-.form-control {
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  transition: all 0.3s ease;
-}
-
 .form-control:focus {
   border-color: #a33307;
   box-shadow: 0 0 0 0.2rem rgba(163, 51, 7, 0.25);
@@ -58,16 +151,6 @@
 }
 
 /* Button styles */
-.s-custom-btn {
-  border-color: #a33307;
-  background-color: #a33307;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
 .s-custom-btn:hover,
 .s-custom-btn:focus {
   background-color: #802704;
@@ -105,23 +188,6 @@
 
 .text-decoration-none:hover {
   color: #802704;
-}
-
-/* Error message */
-.alert {
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-/* Google sign-in section */
-.google-signin {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.google-signin p {
-  color: #666;
-  margin-bottom: 1rem;
 }
 
 /* Responsive styles */

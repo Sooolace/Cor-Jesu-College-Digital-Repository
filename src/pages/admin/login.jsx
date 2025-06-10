@@ -177,7 +177,16 @@ function Login({ setIsAdmin }) {
   
   return (
     <GoogleOAuthProvider clientId="15930922340-0rjl4r2b1iib6pdbqmqoribadkoni71a.apps.googleusercontent.com">
-      <section className="vh-100 d-flex align-items-center justify-content-center bg-cover" style={{ backgroundImage: `url(${backgroundImage})` }}>
+      <section className="login-page vh-100 d-flex align-items-center justify-content-center bg-cover" 
+        style={{ 
+          backgroundImage: `url(${backgroundImage})`,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflow: 'hidden'
+        }}>
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
