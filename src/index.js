@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId="15930922340-0rjl4r2b1iib6pdbqmqoribadkoni71a.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <App /> {/* Render the App component which now handles both user and admin */}
     </GoogleOAuthProvider>
   </React.StrictMode>
