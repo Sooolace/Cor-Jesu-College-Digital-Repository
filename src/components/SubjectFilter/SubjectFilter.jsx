@@ -34,11 +34,18 @@ const SubjectFilter = (props) => {
     // Fetch all categories
     axios.get('/api/categories')
       .then(response => {
-        setCategories(response.data || []);
+        if (Array.isArray(response.data)) {
+          setCategories(response.data);
+        } else {
+          console.error('Invalid response format from categories API');
+          setCategories([]);
+        }
         setIsLoading(false);
       })
       .catch(error => {
+        console.error('Error fetching categories:', error);
         setError("Failed to load categories");
+        setCategories([]);
         setIsLoading(false);
       });
   }, []);

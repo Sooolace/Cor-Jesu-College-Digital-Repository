@@ -15,15 +15,22 @@ const UniqueAuthorFilter = ({ selectedAuthors = [], setSelectedAuthors, onApply 
     axios
       .get('/api/authors')
       .then((response) => {
-        const sortedAuthors = response.data.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-        setAuthors(sortedAuthors);
-        setSearchResults(sortedAuthors); // Show all authors initially
+        if (Array.isArray(response.data)) {
+          const sortedAuthors = response.data.sort((a, b) =>
+            a.name.localeCompare(b.name)
+          );
+          setAuthors(sortedAuthors);
+          setSearchResults(sortedAuthors); // Show all authors initially
+        } else {
+          console.error('Invalid response format from authors API');
+          setAuthors([]);
+          setSearchResults([]);
+        }
       })
       .catch((error) => {
         console.error('Error fetching authors:', error);
-        // Consider adding user feedback here, like a message or alert
+        setAuthors([]);
+        setSearchResults([]);
       });
   }, []);
 

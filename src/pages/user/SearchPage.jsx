@@ -21,13 +21,15 @@ function SearchPage() {
     query: locationState.query || '',
     option: locationState.option || 'allfields',
     page: locationState.page || 1,
-    authors: locationState.authors || [],
-    categories: locationState.categories || [],
-    researchAreas: locationState.researchAreas || [],
-    topics: locationState.topics || [],
-    keywords: locationState.keywords || [],
-    years: locationState.yearRange || locationState.years || [1900, new Date().getFullYear()],
-    advancedSearchInputs: locationState.advancedSearchInputs || [],
+    authors: Array.isArray(locationState.authors) ? locationState.authors : [],
+    categories: Array.isArray(locationState.categories) ? locationState.categories : [],
+    researchAreas: Array.isArray(locationState.researchAreas) ? locationState.researchAreas : [],
+    topics: Array.isArray(locationState.topics) ? locationState.topics : [],
+    keywords: Array.isArray(locationState.keywords) ? locationState.keywords : [],
+    years: Array.isArray(locationState.yearRange) ? locationState.yearRange : 
+           Array.isArray(locationState.years) ? locationState.years : 
+           [1900, new Date().getFullYear()],
+    advancedSearchInputs: Array.isArray(locationState.advancedSearchInputs) ? locationState.advancedSearchInputs : [],
   };
 
   const [inputValue, setInputValue] = useState(initialState.query);
@@ -38,7 +40,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('searchResults');
       return cached ? JSON.parse(cached) : [];
     } catch (error) {
-      // Error parsing cached search results
+      console.error('Error parsing cached search results:', error);
       return [];
     }
   });
@@ -47,7 +49,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('searchTotalCount');
       return cached ? parseInt(cached) : 0;
     } catch (error) {
-      // Error parsing cached total count
+      console.error('Error parsing cached total count:', error);
       return 0;
     }
   });
@@ -58,7 +60,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedAuthors');
       return cached ? JSON.parse(cached) : initialState.authors;
     } catch (error) {
-      // Error parsing cached authors
+      console.error('Error parsing cached authors:', error);
       return initialState.authors;
     }
   });
@@ -67,7 +69,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedCategories');
       return cached ? JSON.parse(cached) : initialState.categories;
     } catch (error) {
-      // Error parsing cached categories
+      console.error('Error parsing cached categories:', error);
       return initialState.categories;
     }
   });
@@ -76,7 +78,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedResearchAreas');
       return cached ? JSON.parse(cached) : initialState.researchAreas;
     } catch (error) {
-      // Error parsing cached research areas
+      console.error('Error parsing cached research areas:', error);
       return initialState.researchAreas;
     }
   });
@@ -85,7 +87,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedTopics');
       return cached ? JSON.parse(cached) : initialState.topics;
     } catch (error) {
-      // Error parsing cached topics
+      console.error('Error parsing cached topics:', error);
       return initialState.topics;
     }
   });
@@ -94,7 +96,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedKeywords');
       return cached ? JSON.parse(cached) : initialState.keywords;
     } catch (error) {
-      // Error parsing cached keywords
+      console.error('Error parsing cached keywords:', error);
       return initialState.keywords;
     }
   });
@@ -103,7 +105,7 @@ function SearchPage() {
       const cached = sessionStorage.getItem('selectedYears');
       return cached ? JSON.parse(cached) : initialState.years;
     } catch (error) {
-      // Error parsing cached years
+      console.error('Error parsing cached years:', error);
       return initialState.years;
     }
   });

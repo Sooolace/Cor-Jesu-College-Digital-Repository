@@ -16,14 +16,22 @@ const KeywordFilter = ({ selectedKeywords = [], setSelectedKeywords, onApply }) 
     axios
       .get('/api/keywords')
       .then((response) => {
-        const sortedKeywords = response.data.sort((a, b) =>
-          a.keyword.localeCompare(b.keyword)
-        );
-        setKeywords(sortedKeywords);
-        setSearchResults(sortedKeywords); // Show all keywords initially
+        if (Array.isArray(response.data)) {
+          const sortedKeywords = response.data.sort((a, b) =>
+            a.keyword.localeCompare(b.keyword)
+          );
+          setKeywords(sortedKeywords);
+          setSearchResults(sortedKeywords); // Show all keywords initially
+        } else {
+          console.error('Invalid response format from keywords API');
+          setKeywords([]);
+          setSearchResults([]);
+        }
       })
       .catch((error) => {
         console.error('Error fetching keywords:', error);
+        setKeywords([]);
+        setSearchResults([]);
       });
   }, []);
 
