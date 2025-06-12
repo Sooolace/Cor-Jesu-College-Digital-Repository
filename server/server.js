@@ -49,16 +49,10 @@ app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
 
 app.get("/downloads/:filename", (req, res) => {
     const decodedFilename = decodeURIComponent(req.params.filename);
-
-    // Fix the file path (Remove 'server' from the path)
     const filePath = path.join(__dirname, "..", "downloads", decodedFilename);
-
-    console.log("Decoded Filename:", decodedFilename);
-    console.log("Full Path:", filePath);
 
     res.download(filePath, (err) => {
         if (err) {
-            console.error("Error downloading file:", err);
             res.status(500).send("File not found or server error.");
         }
     });
@@ -147,35 +141,24 @@ app.post('/api/auth/google', async (req, res) => {
     const { token } = req.body;
     
     if (!token) {
-      console.error('No token provided in request');
       return res.status(400).json({ message: 'No token provided' });
     }
-    
-    console.log('Received Google token, attempting to verify...');
     
     // Verify Google token
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
-      // Don't strictly verify audience during development
-      // audience: process.env.GOOGLE_CLIENT_ID
     }).catch(error => {
-      console.error('Token verification failed:', error.message);
       throw new Error(`Token verification failed: ${error.message}`);
     });
     
     if (!ticket) {
-      console.error('Failed to verify token but no error was thrown');
       return res.status(401).json({ message: 'Token verification failed' });
     }
     
-    console.log('Token successfully verified');
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
     
-    console.log(`User authenticated: ${email}`);
-    
     // Determine role based on email pattern
-    // You can customize this logic based on your requirements
     let role = 'user'; // Default role is user
     
     // Example: Set specific emails as admin or check for specific domain
@@ -184,8 +167,6 @@ app.post('/api/auth/google', async (req, res) => {
       role = 'admin';
     }
     
-    console.log(`Assigned role: ${role} for user ${email}`);
-    
     // Check if the user exists in your database
     const userQuery = 'SELECT * FROM admin WHERE email = $1';
     const userResult = await pool.query(userQuery, [email]);
@@ -193,17 +174,12 @@ app.post('/api/auth/google', async (req, res) => {
     let userId;
     
     if (userResult.rows.length === 0) {
-      console.log(`User ${email} not found in database, creating new account with role: ${role}`);
       // User doesn't exist, create them with determined role
       const insertQuery = 'INSERT INTO admin (username, email, role, picture_url) VALUES ($1, $2, $3, $4) RETURNING id';
       const insertResult = await pool.query(insertQuery, [name, email, role, picture]);
       userId = insertResult.rows[0].id;
-      console.log(`New user created with ID: ${userId} and role: ${role}`);
     } else {
-      // User exists, maintain their existing role unless updating is desired
       userId = userResult.rows[0].id;
-      role = userResult.rows[0].role || role; // Keep existing role if present
-      console.log(`Existing user found with ID: ${userId} and role: ${role}`);
     }
     
     // Generate JWT token with role included
@@ -212,8 +188,6 @@ app.post('/api/auth/google', async (req, res) => {
       process.env.JWT_SECRET || 'your_default_secret',
       { expiresIn: '1h' }
     );
-    
-    console.log(`Authentication successful, returning token with role: ${role}`);
     
     return res.json({
       token: jwtToken,

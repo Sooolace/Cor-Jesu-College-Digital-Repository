@@ -35,13 +35,8 @@ async function logActivity(req, res, next) {
       const lastActivityTimestamp = new Date(lastActivity.timestamp).getTime();
       const currentTimestamp = new Date().getTime();
       
-      console.log('Last Activity Timestamp:', lastActivityTimestamp);
-      console.log('Current Timestamp:', currentTimestamp);
-      console.log('Time Difference:', currentTimestamp - lastActivityTimestamp);
-
       // If the last activity was logged too recently, skip logging
       if (currentTimestamp - lastActivityTimestamp < LOG_THRESHOLD) {
-        console.log('Skipping log due to recent activity.');
         return next();  // Skip logging, proceed to next middleware
       }
     }
@@ -57,8 +52,8 @@ async function logActivity(req, res, next) {
     req.activityLogged = true;  // Mark that activity has been logged
     next();  // Proceed to the next middleware
   } catch (err) {
-    console.error('Error logging activity:', err);
-    next();  // Proceed even if logging fails
+    // Silently handle errors and continue
+    next();
   }
 }
 

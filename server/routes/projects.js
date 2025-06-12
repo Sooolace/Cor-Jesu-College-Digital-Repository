@@ -344,7 +344,6 @@ router.get('/', async (req, res) => {
 router.get('/projects/recent', async (req, res) => {
     const cachedProjects = cache.get('allProjectsCache');
     if (cachedProjects) {
-        console.log('Serving from cache');
         return res.status(200).json(cachedProjects);
     }
 
@@ -430,13 +429,7 @@ GROUP BY
         `;
         const result = await pool.query(query);
 
-        console.log('Fetched archived projects with authors:', result.rows);
-
-        if (result.rows.length > 0) {
-            res.status(200).json(result.rows);
-        } else {
-            res.status(404).json({ message: 'No archived projects found' });
-        }
+        res.json(result.rows);
     } catch (error) {
         console.error('Internal server error while fetching archived projects:', error.message);
         res.status(500).json({ error: 'Failed to fetch archived projects' });
@@ -631,7 +624,6 @@ router.post('/:project_id/authors', async (req, res) => {
 router.get('/', async (req, res) => {
     const cachedProjects = cache.get('allProjectsCache');
     if (cachedProjects) {
-        console.log('Serving from cache');
         return res.status(200).json(cachedProjects);
     }
 
@@ -765,8 +757,6 @@ router.get('/projects/featured-proj', async (req, res) => {
             ORDER BY p.is_featured DESC, p.publication_date DESC;
         `;
 
-        console.log('Executing query to retrieve featured projects');
-
         const result = await pool.query(searchQuery);
 
         res.status(200).json(result.rows);
@@ -793,8 +783,6 @@ router.get('/projects/active-featured', async (req, res) => {
         GROUP BY p.project_id 
         ORDER BY p.publication_date DESC;
       `;
-
-        console.log('Executing query to retrieve featured projects');
 
         const result = await pool.query(searchQuery);
 

@@ -11,6 +11,7 @@ import { TbArchiveOff } from "react-icons/tb";
 import { FaUnlink } from "react-icons/fa";
 import Breadcrumb from '../../components/BreadCrumb';
 import PaginationComponent from '../../components/PaginationComponent';
+import axios from 'axios';
 
 function ArchivedProjects() {
   const navigate = useNavigate();
@@ -36,24 +37,11 @@ function ArchivedProjects() {
   const fetchArchivedProjects = async () => {
     setLoading(true);
     try {
-        const response = await fetch('/api/projects/archived-projects');
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Ensure data is in the correct format
-        if (Array.isArray(data)) {
-            console.log('Fetched archived projects:', data); // Debugging purposes
-            setProjects(data);
-            setFilteredProjects(data);
-        } else {
-            console.error('Unexpected response format:', data);
-            setError('Invalid response format from the server');
-        }
+        const response = await axios.get('/api/projects/archived');
+        setProjects(response.data);
+        setFilteredProjects(response.data);
     } catch (error) {
-        console.error('Error fetching archived projects:', error.message);
+        console.error('Error fetching archived projects:', error);
         setError('Failed to load archived projects. Please try again later.');
     } finally {
         setLoading(false);
