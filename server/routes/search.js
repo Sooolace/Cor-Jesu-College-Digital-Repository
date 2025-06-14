@@ -3,6 +3,8 @@ const pool = require('../db'); // Database connection
 const router = express.Router();
 const logActivity = require('../middlewares/logActivity'); // Import log activity middleware
 
+// Apply logActivity middleware to all search routes
+router.use(logActivity);
 
 // GET - Fetch all projects without any search conditions, with total count and pagination
 router.get('/allprojs', async (req, res, next) => {

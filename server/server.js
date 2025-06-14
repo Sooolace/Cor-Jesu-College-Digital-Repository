@@ -21,6 +21,8 @@ const uploadRouter = require('./routes/upload'); // Import the upload route
 const usersRouter = require('./routes/users'); // Import the users route
 const bookmarksRouter = require('./routes/bookmark'); // Import the bookmarks route (note the singular filename)
 const { OAuth2Client } = require('google-auth-library');
+const logActivity = require('./middlewares/logActivity');
+const verifyToken = require('./middlewares/auth');
 
 require('dotenv').config();
 
@@ -42,6 +44,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Apply authentication middleware first
+app.use(verifyToken);
+
+// Then apply activity logging middleware
+app.use(logActivity);
+
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // **Ensure downloads folder is served correctly**
@@ -58,19 +66,19 @@ app.get("/downloads/:filename", (req, res) => {
     });
 });
 // Public Routes
-app.use('/api/projects', projectsRouter);
 app.use('/api/authors', authorsRouter);
-app.use('/api/project_authors', projectAuthorsRouter);
+app.use('/api/projects', projectsRouter);
+app.use('/api/project-authors', projectAuthorsRouter);
 app.use('/api/categories', categoriesRouter);
-app.use('/api/researchAreas', researchAreasRouter);
+app.use('/api/research-areas', researchAreasRouter);
 app.use('/api/topics', topicsRouter);
-app.use('/api/researchTypes', researchTypesRouter);
+app.use('/api/research-types', researchTypesRouter);
 app.use('/api/keywords', keywordsRouter);
-app.use('/api/project_keywords', projectKeywordsRouter);
-app.use('/api/activitylog', activityLogRouter);
-app.use('/api/project_category', projectsCategoryRouter);
+app.use('/api/project-keywords', projectKeywordsRouter);
 app.use('/api/featured-documents', featuredDocumentsRouter);
 app.use('/api/search', searchRouter);
+app.use('/api/project-category', projectsCategoryRouter);
+app.use('/api/activitylog', activityLogRouter);
 app.use('/api', uploadRouter);
 app.use('/api/users', usersRouter); // Add the users routes
 app.use('/api/bookmarks', bookmarksRouter); // Add the bookmarks routes

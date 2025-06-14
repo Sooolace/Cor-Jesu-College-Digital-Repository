@@ -5,7 +5,21 @@ const pool = require('../db'); // Import your database connection
 // Route to fetch activity logs
 router.get('/activity-log', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM activity_log ORDER BY timestamp DESC');
+        const result = await pool.query(`
+            SELECT 
+                id,
+                user_id,
+                action,
+                additional_info,
+                country,
+                city,
+                latitude,
+                longitude,
+                ip_hash,
+                timestamp
+            FROM activity_log 
+            ORDER BY timestamp DESC
+        `);
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Error fetching activity log:', err.message);
@@ -21,12 +35,12 @@ router.post('/remove-duplicates', async (req, res) => {
     WITH CTE AS (
         SELECT 
             ROW_NUMBER() OVER (
-                PARTITION BY user_id, additional_info, ip_address  -- Change 'activity' to 'additional_info'
+                PARTITION BY user_id, action, additional_info, ip_hash
                 ORDER BY timestamp DESC
             ) AS row_num,
             id, 
             timestamp,
-            ip_address
+            ip_hash
         FROM activity_log
     )
     DELETE FROM activity_log
@@ -35,7 +49,7 @@ router.post('/remove-duplicates', async (req, res) => {
         FROM CTE
         WHERE row_num > 1
           AND ABS(EXTRACT(EPOCH FROM (timestamp - (SELECT timestamp FROM activity_log WHERE id = CTE.id))) * 1000) < ${thresholdInMillis}
-          AND ip_address = (SELECT ip_address FROM activity_log WHERE id = CTE.id)
+          AND ip_hash = (SELECT ip_hash FROM activity_log WHERE id = CTE.id)
     );
     `;
 
@@ -47,9 +61,6 @@ router.post('/remove-duplicates', async (req, res) => {
         res.status(500).send('Error removing duplicates');
     }
 });
-
-
-
 
 // Route to truncate the activity_log table
 router.post('/truncate', async (req, res) => {

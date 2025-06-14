@@ -6,6 +6,19 @@ import '../admin/styles/login.css'; // Ensure this path is correct
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
+// Set up axios interceptor to include token in all requests
+axios.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 function Login({ setIsAdmin }) {
   const [username, setUsername] = useState('');
