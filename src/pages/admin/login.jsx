@@ -133,16 +133,16 @@ function Login({ setIsAdmin }) {
       localStorage.setItem('username', user.name);
       localStorage.setItem('email', user.email);
       localStorage.setItem('picture', user.picture);
-      localStorage.setItem('role', user.role); // Use actual role from server
-      localStorage.setItem('user_id', user.id.toString()); // Make sure to store user ID
-      localStorage.setItem('isAdmin', user.role === 'admin' ? 'true' : 'false'); // Set isAdmin based on role
+      localStorage.setItem('role', user.role);
+      localStorage.setItem('user_id', user.id.toString());
+      localStorage.setItem('isAdmin', user.role === 'admin' ? 'true' : 'false');
       
       console.log('Local storage set with user data:', {
         id: localStorage.getItem('user_id'),
         role: localStorage.getItem('role'),
         isAdmin: localStorage.getItem('isAdmin'),
         token: localStorage.getItem('token') ? 'Set' : 'Not set'
-      });
+      }); 
       
       // Set isAdmin state based on the role
       const isUserAdmin = user.role === 'admin';

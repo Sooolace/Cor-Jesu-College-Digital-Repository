@@ -171,34 +171,37 @@ app.post('/api/auth/google', async (req, res) => {
     const userQuery = 'SELECT * FROM admin WHERE email = $1';
     const userResult = await pool.query(userQuery, [email]);
     
-    let userId;
-    
-    if (userResult.rows.length === 0) {
-      // User doesn't exist, create them with determined role
-      const insertQuery = 'INSERT INTO admin (username, email, role, picture_url) VALUES ($1, $2, $3, $4) RETURNING id';
-      const insertResult = await pool.query(insertQuery, [name, email, role, picture]);
-      userId = insertResult.rows[0].id;
-    } else {
-      userId = userResult.rows[0].id;
-    }
-    
-    // Generate JWT token with role included
-    const jwtToken = jwt.sign(
-      { userId, email, name, role },
-      process.env.JWT_SECRET || 'your_default_secret',
-      { expiresIn: '1h' }
-    );
-    
-    return res.json({
-      token: jwtToken,
-      user: {
-        id: userId,
-        name,
-        email,
-        picture,
-        role  // Include actual role in the response
-      }
-    });
+let userId;
+let userRole;
+
+if (userResult.rows.length === 0) {
+  // User doesn't exist, create them with determined role
+  const insertQuery = 'INSERT INTO admin (username, email, role, picture_url) VALUES ($1, $2, $3, $4) RETURNING id';
+  const insertResult = await pool.query(insertQuery, [name, email, role, picture]);
+  userId = insertResult.rows[0].id;
+  userRole = role; // newly created, use the determined role
+} else {
+  userId = userResult.rows[0].id;
+  userRole = userResult.rows[0].role;
+}
+
+// Generate JWT token with role included
+const jwtToken = jwt.sign(
+  { userId, email, name, role: userRole },
+  process.env.JWT_SECRET || 'your_default_secret',
+  { expiresIn: '1h' }
+);
+
+return res.json({
+  token: jwtToken,
+  user: {
+    id: userId,
+    name,
+    email,
+    picture,
+    role: userRole
+  }
+});
     
   } catch (error) {
     console.error('Google authentication error details:', error);
